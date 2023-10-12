@@ -24,8 +24,8 @@ public class BigTrajectory extends LinearOpMode {
                 .splineTo(new Vector2d(-11.42, -58.41), Math.toRadians(270.00))
                 .lineToConstantHeading(new Vector2d(-11.80, 34.07))
                 .splineTo(new Vector2d(-62.37, 12.36), Math.toRadians(180.00))
-                .waitSeconds(2)
-                .lineToConstantHeading(new Vector2d(-62.37, -40.29))
+                .waitSeconds(1)
+                .lineToConstantHeading(new Vector2d(-64.07, -40.29))
                 .build();
 
         drive.setPoseEstimate(path.start());
