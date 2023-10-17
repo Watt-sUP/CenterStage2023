@@ -21,6 +21,6 @@ public class TeleOp extends CommandOpMode {
         driveSystem.setDefaultCommand(driveCommand);
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
                 .whenPressed(() -> driveSystem.setPowerLimit(0.5))
-                .whenReleased(() -> driveSystem.setPowerLimit(driveSystem.defaultPowerLimit));
+                .whenReleased(() -> driveSystem.setPowerLimit(1.0));
     }
 }

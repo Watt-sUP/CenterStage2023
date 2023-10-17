@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 public class DriveSubsystem extends SubsystemBase {
 
     private double powerLimit = 1.0;
-    public double defaultPowerLimit = 1.0;
     private final MecanumDrive drive;
 
     public DriveSubsystem(Motor leftFront, Motor rightFront, Motor leftBack, Motor rightBack) {
@@ -34,7 +33,7 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     public void setPowerLimit(double limit) {
-        powerLimit = MathUtils.clamp(limit, -defaultPowerLimit, defaultPowerLimit);
+        powerLimit = MathUtils.clamp(limit, -1.0, -1.0);
         drive.setRange(-limit, limit);
     }
 }
