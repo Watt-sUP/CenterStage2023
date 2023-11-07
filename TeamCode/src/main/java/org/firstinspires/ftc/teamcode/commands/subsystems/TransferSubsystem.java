@@ -1,13 +1,16 @@
 package org.firstinspires.ftc.teamcode.commands.subsystems;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 
 import javax.annotation.Nullable;
 
+@Config
 public class TransferSubsystem extends SubsystemBase {
     ServoEx liftLeft, liftRight, clawSpin;
-    public Double LOWER_POS = 0.75;
+    public static Double LOWER_LEFT = 0.91, LOWER_RIGHT = 0.94;
+    public static Double UP_LEFT = 0.0, UP_RIGHT = 0.05;
 
     public TransferSubsystem(ServoEx liftL, ServoEx liftR, @Nullable ServoEx clawR) {
         liftLeft = liftL;
@@ -15,15 +18,16 @@ public class TransferSubsystem extends SubsystemBase {
         clawSpin = clawR;
 
         liftR.setInverted(true);
+        lowerLift();
     }
 
     public void lowerLift() {
-        liftLeft.setPosition(LOWER_POS);
-        liftRight.setPosition(LOWER_POS);
+        liftLeft.setPosition(LOWER_LEFT);
+        liftRight.setPosition(LOWER_RIGHT);
     }
 
     public void raiseLift() {
-        liftLeft.setPosition(0);
-        liftRight.setPosition(0);
+        liftLeft.setPosition(UP_LEFT);
+        liftRight.setPosition(UP_RIGHT);
     }
 }
