@@ -10,6 +10,21 @@ public class ClimbSubsystem extends SubsystemBase {
 
     DcMotor left, right;
 
+    private State state = State.LOWERED;
+
+    public void toggle() {
+        switch (state) {
+            case LOWERED:
+                setToTicks(3750);
+                state = State.RAISED;
+                break;
+            case RAISED:
+                setToTicks(0);
+                state = State.LOWERED;
+                break;
+        }
+    }
+
     public ClimbSubsystem(DcMotor left, @Nullable DcMotor right) {
         this.left = left;
         this.right = right;
@@ -33,6 +48,11 @@ public class ClimbSubsystem extends SubsystemBase {
             right.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             right.setPower(1);
         }
+    }
+
+    private enum State {
+        RAISED,
+        LOWERED
     }
 
     public Integer getTicks() {

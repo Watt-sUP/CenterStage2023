@@ -12,11 +12,10 @@ public class CollectorSubsystem extends SubsystemBase {
     ServoEx liftLeft, liftRight;
     ServoEx clawSpin, claw;
 
-    // TODO: Raise the lift exclusively if the claw is closed
-    public static Double LOWER_LIFT = 0.91, UP_LIFT = 0.12;
+    // TODO: Raise the lift exclusively if the claw is closed (Done, must be tested)
+    public static Double LOWER_LIFT = 0.91, RAISE_LIFT = 0.12;
     private final Double TRANSFER_POS = 0.01, COLLECT_POS = 1.0 / 9.0;
 
-    // TODO: When the lift is raised, make the opening position of the claw 0.2
     public static Double CLOSED_POS = 0., OPENED_POS = .55;
 
     private enum RotationState {
@@ -24,15 +23,12 @@ public class CollectorSubsystem extends SubsystemBase {
         TRANSFER
     }
 
-    private enum ClampState {
-        CLOSED,
-        OPENED
-    }
+    public ClampState clamping;
+    private LiftState location = LiftState.LOWERED;
 
     private final InterpLUT rightLiftPositions = new InterpLUT();
 
     private RotationState rotation = RotationState.COLLECT;
-    private ClampState clamping = ClampState.OPENED;
 
     public CollectorSubsystem(ServoEx liftL, ServoEx liftR, @Nullable ServoEx clamp, @Nullable ServoEx clawR) {
         liftLeft = liftL;
@@ -45,23 +41,77 @@ public class CollectorSubsystem extends SubsystemBase {
         rightLiftPositions.createLUT();
 
         liftR.setInverted(true);
-        lowerLift();
-
-        if (clawSpin != null)
-            clawSpin.setPosition(COLLECT_POS);
-
-        if (claw != null)
-            claw.setPosition(OPENED_POS);
+        clamping = (this.claw.getPosition() < 0.2 ? ClampState.CLOSED : ClampState.OPENED);
+        setLiftLocation(LiftState.IDLE);
     }
 
     public void lowerLift() {
         liftLeft.setPosition(LOWER_LIFT);
         liftRight.setPosition(rightLiftPositions.get(LOWER_LIFT));
+        location = LiftState.LOWERED;
     }
 
     public void raiseLift() {
-        liftLeft.setPosition(UP_LIFT);
-        liftRight.setPosition(rightLiftPositions.get(UP_LIFT));
+        liftLeft.setPosition(RAISE_LIFT);
+        liftRight.setPosition(rightLiftPositions.get(RAISE_LIFT));
+        location = LiftState.RAISED;
+    }
+
+    public void setLiftLocation(LiftState target) {
+
+        if (target == location)
+            return;
+
+        if (claw.getPosition() > 0.2)
+            toggle();
+
+        switch (target) {
+            case RAISED:
+                if (rotation != RotationState.TRANSFER)
+                    rotate();
+
+                liftLeft.setPosition(RAISE_LIFT);
+                liftRight.setPosition(rightLiftPositions.get(RAISE_LIFT));
+                location = LiftState.RAISED;
+                break;
+
+            case IDLE:
+                // TODO: Replace placeholder positions
+                liftLeft.setPosition(0.5);
+                liftRight.setPosition(rightLiftPositions.get(0.5));
+
+                if (rotation != RotationState.COLLECT)
+                    rotate();
+
+                location = LiftState.IDLE;
+                break;
+
+            case LOWERED:
+                liftLeft.setPosition(LOWER_LIFT);
+                liftRight.setPosition(rightLiftPositions.get(LOWER_LIFT));
+
+                if (rotation != RotationState.COLLECT)
+                    rotate();
+
+                location = LiftState.LOWERED;
+                break;
+        }
+    }
+
+    public void toggle() {
+        if (claw == null)
+            return;
+
+        switch (clamping) {
+            case OPENED:
+                claw.setPosition(CLOSED_POS);
+                clamping = ClampState.CLOSED;
+                break;
+            case CLOSED:
+                claw.setPosition(location != LiftState.RAISED ? OPENED_POS : 0.2);
+                clamping = ClampState.OPENED;
+                break;
+        }
     }
 
     public void rotate() {
@@ -80,19 +130,14 @@ public class CollectorSubsystem extends SubsystemBase {
         }
     }
 
-    public void toggle() {
-        if (claw == null)
-            return;
+    public enum LiftState {
+        LOWERED,
+        RAISED,
+        IDLE
+    }
 
-        switch (clamping) {
-            case OPENED:
-                claw.setPosition(CLOSED_POS);
-                clamping = ClampState.CLOSED;
-                break;
-            case CLOSED:
-                claw.setPosition(OPENED_POS);
-                clamping = ClampState.OPENED;
-                break;
-        }
+    public enum ClampState {
+        CLOSED,
+        OPENED
     }
 }
