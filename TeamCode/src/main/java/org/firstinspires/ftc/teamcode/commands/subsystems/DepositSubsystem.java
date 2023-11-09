@@ -1,14 +1,17 @@
 package org.firstinspires.ftc.teamcode.commands.subsystems;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 
 import javax.annotation.Nullable;
 
+// TODO: Merge with SlidesSubsystem.java
+@Config
 public class DepositSubsystem extends SubsystemBase {
     ServoEx left, right;
-    // Right: down 0.02, up 0.55
-    // Left: down 0, up 0.56
+    public static Double LOW_LEFT = 0.04, LOW_RIGHT = 0.06;
+    public static Double HIGH_LEFT = 0.56, HIGH_RIGHT = 0.55;
 
     public DepositSubsystem(ServoEx left, ServoEx right, @Nullable ServoEx stopper) {
         this.left = left;
@@ -19,12 +22,12 @@ public class DepositSubsystem extends SubsystemBase {
     }
 
     public void raise() {
-        left.setPosition(0.56);
-        right.setPosition(0.55);
+        left.setPosition(HIGH_LEFT);
+        right.setPosition(HIGH_RIGHT);
     }
 
     public void lower() {
-        left.setPosition(0);
-        right.setPosition(0.02);
+        left.setPosition(LOW_LEFT);
+        right.setPosition(LOW_RIGHT);
     }
 }
