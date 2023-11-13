@@ -12,19 +12,29 @@ public class CollectorSubsystem extends SubsystemBase {
     ServoEx liftLeft, liftRight;
     ServoEx clawSpin, claw;
 
-    // TODO: Raise the lift exclusively if the claw is closed (Done, must be tested)
-    public static Double LOWER_LIFT = 0.91, RAISE_LIFT = 0.12;
+    public static Double LOWER_LIFT = 0.9, RAISE_LIFT = 0.09;
     private final Double TRANSFER_POS = 0.01, COLLECT_POS = 1.0 / 9.0;
 
-    public static Double CLOSED_POS = 0., OPENED_POS = .55;
+    private final Double CLOSED_POS = 0., OPENED_POS = .55;
 
     private enum RotationState {
         COLLECT,
         TRANSFER
     }
 
+    public enum LiftState {
+        LOWERED,
+        RAISED,
+        IDLE
+    }
+
+    public enum ClampState {
+        CLOSED,
+        OPENED
+    }
+
     public ClampState clamping;
-    private LiftState location = LiftState.LOWERED;
+    private LiftState location = LiftState.IDLE;
 
     private final InterpLUT rightLiftPositions = new InterpLUT();
 
@@ -42,19 +52,7 @@ public class CollectorSubsystem extends SubsystemBase {
 
         liftR.setInverted(true);
         clamping = (this.claw.getPosition() < 0.2 ? ClampState.CLOSED : ClampState.OPENED);
-        setLiftLocation(LiftState.IDLE);
-    }
-
-    public void lowerLift() {
-        liftLeft.setPosition(LOWER_LIFT);
-        liftRight.setPosition(rightLiftPositions.get(LOWER_LIFT));
-        location = LiftState.LOWERED;
-    }
-
-    public void raiseLift() {
-        liftLeft.setPosition(RAISE_LIFT);
-        liftRight.setPosition(rightLiftPositions.get(RAISE_LIFT));
-        location = LiftState.RAISED;
+        setLiftLocation(LiftState.LOWERED);
     }
 
     public void setLiftLocation(LiftState target) {
@@ -128,16 +126,5 @@ public class CollectorSubsystem extends SubsystemBase {
                 rotation = RotationState.COLLECT;
                 break;
         }
-    }
-
-    public enum LiftState {
-        LOWERED,
-        RAISED,
-        IDLE
-    }
-
-    public enum ClampState {
-        CLOSED,
-        OPENED
     }
 }

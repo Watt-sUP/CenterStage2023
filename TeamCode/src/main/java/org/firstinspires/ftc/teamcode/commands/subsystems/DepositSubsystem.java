@@ -10,17 +10,26 @@ import javax.annotation.Nullable;
 
 @Config
 public class DepositSubsystem extends SubsystemBase {
-    private final ServoEx leftLift, rightLift;
+    private final ServoEx leftLift, rightLift, stopper;
     private final DcMotor slides;
     public static Double LOW_LEFT = 0.04, LOW_RIGHT = 0.06;
-    public static Double HIGH_LEFT = 0.56, HIGH_RIGHT = 0.55;
+    public static Double HIGH_LEFT = 0.58, HIGH_RIGHT = 0.57;
 
-    public DepositSubsystem(ServoEx leftLift, ServoEx rightLift, @Nullable ServoEx stopper, DcMotor slides) {
+    private enum Blocker {
+        TWO_PIXELS,
+        ONE_PIXEL,
+        FREE
+    }
+    private Blocker blockerState = Blocker.FREE;
+
+    public DepositSubsystem(ServoEx leftLift, ServoEx rightLift, ServoEx stopper, DcMotor slides) {
         this.leftLift = leftLift;
         this.rightLift = rightLift;
+        this.stopper = stopper;
         this.slides = slides;
 
         this.leftLift.setInverted(true);
+        this.stopper.turnToAngle(0);
         lowerSpike();
 
         this.slides.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -44,6 +53,23 @@ public class DepositSubsystem extends SubsystemBase {
     public void raiseSpike() {
         leftLift.setPosition(HIGH_LEFT);
         rightLift.setPosition(HIGH_RIGHT);
+    }
+
+    public void toggleBlocker() {
+        switch (blockerState) {
+            case FREE:
+                stopper.turnToAngle(50);
+                blockerState = Blocker.TWO_PIXELS;
+                break;
+            case ONE_PIXEL:
+                stopper.turnToAngle(0);
+                blockerState = Blocker.FREE;
+                break;
+            case TWO_PIXELS:
+                stopper.turnToAngle(30);
+                blockerState = Blocker.ONE_PIXEL;
+                break;
+        }
     }
 
     public void lowerSpike() {

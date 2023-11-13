@@ -45,7 +45,8 @@ public class TeleOp extends CommandOpMode {
         DepositSubsystem depositSystem = new DepositSubsystem(
                 new SimpleServo(hardwareMap, "depo_left", 0, 300),
                 new SimpleServo(hardwareMap, "depo_right", 0, 300),
-                null, hardwareMap.dcMotor.get("gli_sus")
+                new SimpleServo(hardwareMap, "stopper", 0, 1800),
+                hardwareMap.dcMotor.get("gli_sus")
         );
         ClimbSubsystem climbSystem = new ClimbSubsystem(
                 hardwareMap.dcMotor.get("pull_up"),
@@ -84,6 +85,8 @@ public class TeleOp extends CommandOpMode {
                 .toggleWhenPressed(depositSystem::raiseSpike, depositSystem::lowerSpike);
         driver2.getGamepadButton(GamepadKeys.Button.A)
                 .whenPressed(collectorSystem::toggle);
+        driver2.getGamepadButton(GamepadKeys.Button.B)
+                .whenPressed(depositSystem::toggleBlocker);
 
         schedule(new RunCommand(() -> {
             telemetry.addData("Slides Ticks", depositSystem.getSlidesTicks());
