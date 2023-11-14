@@ -2,7 +2,11 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.CommandOpMode;
+import com.arcrobotics.ftclib.command.ConditionalCommand;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.RunCommand;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
@@ -17,13 +21,8 @@ import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 @Config
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp
 public class TeleOp extends CommandOpMode {
-    public static Integer SLIDES_TICKS = 1300;
 
     /* TODO:
-     * To avoid a complicated sequence, when grabbing a pixel automatize the following steps:
-     *   1. Close the claw
-     *   2. Raise the lift and rotate the claw simultaneously (Done, must test)
-     *
      * When coming back:
      *   1. Make sure the clamping is smaller than 0.2, otherwise close the claw
      *   2. Rotate the claw back and move it to an idle location
@@ -45,7 +44,7 @@ public class TeleOp extends CommandOpMode {
         DepositSubsystem depositSystem = new DepositSubsystem(
                 new SimpleServo(hardwareMap, "depo_left", 0, 300),
                 new SimpleServo(hardwareMap, "depo_right", 0, 300),
-                new SimpleServo(hardwareMap, "stopper", 0, 1800),
+                new SimpleServo(hardwareMap, "stopper", 0, 300),
                 hardwareMap.dcMotor.get("gli_sus")
         );
         ClimbSubsystem climbSystem = new ClimbSubsystem(
@@ -54,37 +53,61 @@ public class TeleOp extends CommandOpMode {
         );
         DriveSubsystem driveSystem = new DriveSubsystem(hardwareMap, "leftFront", "rightFront",
                 "leftBack", "rightBack");
-        register(driveSystem, collectorSystem, odometrySystem, depositSystem, climbSystem);
+        register(driveSystem, depositSystem);
 
         GamepadEx driver1 = new GamepadEx(gamepad1);
         GamepadEx driver2 = new GamepadEx(gamepad2);
         DriveCommand driveCommand = new DriveCommand(driveSystem, driver1::getLeftY, driver1::getLeftX, driver1::getRightX);
 
+        // Raise odometry to avoid sliding
         odometrySystem.raise();
+
         driveSystem.setDefaultCommand(driveCommand);
-        driver1.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
+        driver1.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
                 .whenPressed(() -> driveSystem.setPowerLimit(0.5))
+                .whenReleased(() -> driveSystem.setPowerLimit(1.0));
+        driver1.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
+                .whenPressed(() -> driveSystem.setPowerLimit(0.2))
                 .whenReleased(() -> driveSystem.setPowerLimit(1.0));
         driver1.getGamepadButton(GamepadKeys.Button.B)
                 .whenPressed(climbSystem::toggle);
 
         // Either raise the lift, or lower it
         driver2.getGamepadButton(GamepadKeys.Button.X)
-                .toggleWhenPressed(
-                        () -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED),
-                        () -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.LOWERED)
-                );
+                .whenPressed(new ConditionalCommand(
+                        new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.LOWERED)),
+                        new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED)),
+                        () -> collectorSystem.location == CollectorSubsystem.LiftState.RAISED
+                ));
 
         // Slides commands
-        // TODO: Find slides positions for each line on the backdrop
         driver2.getGamepadButton(GamepadKeys.Button.DPAD_UP)
-                .whenPressed(() -> depositSystem.setSlidesTicks(SLIDES_TICKS));
+                .whenPressed(depositSystem::raiseSlidesPosition);
         driver2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
-                .whenPressed(() -> depositSystem.setSlidesTicks(0));
+                .whenPressed(depositSystem::lowerSlidesPosition);
+        driver2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
+                .whenPressed(() -> depositSystem.setSlidesPosition(4));
+        driver2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
+                .whenPressed(() -> depositSystem.setSlidesPosition(0));
+        driver2.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
+                .whenPressed(() -> depositSystem.adjustSlidesTicks(-125));
+        driver2.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
+                .whenPressed(() -> depositSystem.adjustSlidesTicks(125));
+
+
         driver2.getGamepadButton(GamepadKeys.Button.Y)
-                .toggleWhenPressed(depositSystem::raiseSpike, depositSystem::lowerSpike);
+                .whenPressed(depositSystem::toggleSpike);
         driver2.getGamepadButton(GamepadKeys.Button.A)
-                .whenPressed(collectorSystem::toggle);
+                .whenPressed(new ConditionalCommand(
+                        new SequentialCommandGroup(
+                                new InstantCommand(collectorSystem::toggleClamp),
+                                new WaitCommand(200),
+                                new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
+                        ),
+                        new InstantCommand(collectorSystem::toggleClamp),
+                        () -> collectorSystem.clamping == CollectorSubsystem.ClampState.OPENED && collectorSystem.location == CollectorSubsystem.LiftState.LOWERED
+                ));
+
         driver2.getGamepadButton(GamepadKeys.Button.B)
                 .whenPressed(depositSystem::toggleBlocker);
 

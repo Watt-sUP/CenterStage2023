@@ -12,8 +12,8 @@ public class CollectorSubsystem extends SubsystemBase {
     ServoEx liftLeft, liftRight;
     ServoEx clawSpin, claw;
 
-    public static Double LOWER_LIFT = 0.9, RAISE_LIFT = 0.09;
-    private final Double TRANSFER_POS = 0.01, COLLECT_POS = 1.0 / 9.0;
+    public static Double LOWER_LIFT = 0.92, RAISE_LIFT = 0.09;
+    private final Double TRANSFER_POS = 1.0 / 180.0, COLLECT_POS = 1.0 / 9.0;
 
     private final Double CLOSED_POS = 0., OPENED_POS = .55;
 
@@ -34,11 +34,11 @@ public class CollectorSubsystem extends SubsystemBase {
     }
 
     public ClampState clamping;
-    private LiftState location = LiftState.IDLE;
+    public LiftState location = LiftState.IDLE;
 
     private final InterpLUT rightLiftPositions = new InterpLUT();
 
-    private RotationState rotation = RotationState.COLLECT;
+    private RotationState rotation;
 
     public CollectorSubsystem(ServoEx liftL, ServoEx liftR, @Nullable ServoEx clamp, @Nullable ServoEx clawR) {
         liftLeft = liftL;
@@ -47,12 +47,13 @@ public class CollectorSubsystem extends SubsystemBase {
         claw = clamp;
 
         rightLiftPositions.add(-1e-6, 0.05);
-        rightLiftPositions.add(0.91 + 1e-6, 0.94);
+        rightLiftPositions.add(0.93 + 1e-6, 0.96);
         rightLiftPositions.createLUT();
 
         liftR.setInverted(true);
         clamping = (this.claw.getPosition() < 0.2 ? ClampState.CLOSED : ClampState.OPENED);
-        setLiftLocation(LiftState.LOWERED);
+        rotation = (this.clawSpin.getPosition() < 0.01 ? RotationState.TRANSFER : RotationState.COLLECT);
+        this.setLiftLocation(LiftState.LOWERED);
     }
 
     public void setLiftLocation(LiftState target) {
@@ -61,15 +62,16 @@ public class CollectorSubsystem extends SubsystemBase {
             return;
 
         if (claw.getPosition() > 0.2)
-            toggle();
+            this.toggleClamp();
 
         switch (target) {
             case RAISED:
                 if (rotation != RotationState.TRANSFER)
-                    rotate();
+                    this.rotateClaw();
 
                 liftLeft.setPosition(RAISE_LIFT);
                 liftRight.setPosition(rightLiftPositions.get(RAISE_LIFT));
+
                 location = LiftState.RAISED;
                 break;
 
@@ -79,7 +81,7 @@ public class CollectorSubsystem extends SubsystemBase {
                 liftRight.setPosition(rightLiftPositions.get(0.5));
 
                 if (rotation != RotationState.COLLECT)
-                    rotate();
+                    this.rotateClaw();
 
                 location = LiftState.IDLE;
                 break;
@@ -89,14 +91,14 @@ public class CollectorSubsystem extends SubsystemBase {
                 liftRight.setPosition(rightLiftPositions.get(LOWER_LIFT));
 
                 if (rotation != RotationState.COLLECT)
-                    rotate();
+                    this.rotateClaw();
 
                 location = LiftState.LOWERED;
                 break;
         }
     }
 
-    public void toggle() {
+    public void toggleClamp() {
         if (claw == null)
             return;
 
@@ -112,7 +114,7 @@ public class CollectorSubsystem extends SubsystemBase {
         }
     }
 
-    public void rotate() {
+    public void rotateClaw() {
         if (clawSpin == null)
             return;
 

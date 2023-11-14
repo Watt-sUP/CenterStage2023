@@ -15,11 +15,11 @@ public class ClimbSubsystem extends SubsystemBase {
     public void toggle() {
         switch (state) {
             case LOWERED:
-                setToTicks(3750);
+                this.setToTicks(3750);
                 state = State.RAISED;
                 break;
             case RAISED:
-                setToTicks(0);
+                this.setToTicks(0);
                 state = State.LOWERED;
                 break;
         }
@@ -60,6 +60,6 @@ public class ClimbSubsystem extends SubsystemBase {
     }
 
     public boolean isBusy() {
-        return (right != null ? left.isBusy() || right.isBusy() : left.isBusy());
+        return right != null ? left.isBusy() || right.isBusy() : left.isBusy();
     }
 }
