@@ -12,8 +12,8 @@ public class CollectorSubsystem extends SubsystemBase {
     ServoEx liftLeft, liftRight;
     ServoEx clawSpin, claw;
 
-    public static Double LOWER_LIFT = 0.92, RAISE_LIFT = 0.09;
-    private final Double TRANSFER_POS = 1.0 / 180.0, COLLECT_POS = 1.0 / 9.0;
+    public static Double LOWER_LIFT = 0.92, RAISE_LIFT = 0.09, STACK_LIFT = 0.8;
+    private final Double TRANSFER_POS = 0., COLLECT_POS = 210.;
 
     private final Double CLOSED_POS = 0., OPENED_POS = .55;
 
@@ -21,12 +21,7 @@ public class CollectorSubsystem extends SubsystemBase {
         COLLECT,
         TRANSFER
     }
-
-    public enum LiftState {
-        LOWERED,
-        RAISED,
-        IDLE
-    }
+    public LiftState location = LiftState.STACK;
 
     public enum ClampState {
         CLOSED,
@@ -34,7 +29,47 @@ public class CollectorSubsystem extends SubsystemBase {
     }
 
     public ClampState clamping;
-    public LiftState location = LiftState.IDLE;
+
+    public void setLiftLocation(LiftState target) {
+
+        if (target == location)
+            return;
+
+        if (claw.getPosition() > 0.2)
+            this.toggleClamp();
+
+        switch (target) {
+            case RAISED:
+                if (rotation != RotationState.TRANSFER)
+                    this.rotateClaw();
+
+                liftLeft.setPosition(RAISE_LIFT);
+                liftRight.setPosition(rightLiftPositions.get(RAISE_LIFT));
+
+                location = LiftState.RAISED;
+                break;
+
+            case STACK:
+                liftLeft.setPosition(STACK_LIFT);
+                liftRight.setPosition(rightLiftPositions.get(STACK_LIFT));
+
+                if (rotation != RotationState.COLLECT)
+                    this.rotateClaw();
+
+                location = LiftState.STACK;
+                break;
+
+            case LOWERED:
+                liftLeft.setPosition(LOWER_LIFT);
+                liftRight.setPosition(rightLiftPositions.get(LOWER_LIFT));
+
+                if (rotation != RotationState.COLLECT)
+                    this.rotateClaw();
+
+                location = LiftState.LOWERED;
+                break;
+        }
+    }
 
     private final InterpLUT rightLiftPositions = new InterpLUT();
 
@@ -56,44 +91,37 @@ public class CollectorSubsystem extends SubsystemBase {
         this.setLiftLocation(LiftState.LOWERED);
     }
 
-    public void setLiftLocation(LiftState target) {
+    public void toggleLiftLocation() {
+        switch (location) {
+            case LOWERED:
+                this.setLiftLocation(LiftState.RAISED);
+                break;
+            case RAISED:
+                this.setLiftLocation(LiftState.STACK);
+                break;
+            case STACK:
+                this.setLiftLocation(LiftState.LOWERED);
+                if (claw.getPosition() < .5) {
+                    if (clamping == ClampState.CLOSED)
+                        this.toggleClamp();
+                    else claw.setPosition(OPENED_POS);
+                }
+                break;
+        }
+    }
 
-        if (target == location)
+    public void rotateClaw() {
+        if (clawSpin == null)
             return;
 
-        if (claw.getPosition() > 0.2)
-            this.toggleClamp();
-
-        switch (target) {
-            case RAISED:
-                if (rotation != RotationState.TRANSFER)
-                    this.rotateClaw();
-
-                liftLeft.setPosition(RAISE_LIFT);
-                liftRight.setPosition(rightLiftPositions.get(RAISE_LIFT));
-
-                location = LiftState.RAISED;
+        switch (rotation) {
+            case COLLECT:
+                clawSpin.turnToAngle(TRANSFER_POS);
+                rotation = RotationState.TRANSFER;
                 break;
-
-            case IDLE:
-                // TODO: Replace placeholder positions
-                liftLeft.setPosition(0.5);
-                liftRight.setPosition(rightLiftPositions.get(0.5));
-
-                if (rotation != RotationState.COLLECT)
-                    this.rotateClaw();
-
-                location = LiftState.IDLE;
-                break;
-
-            case LOWERED:
-                liftLeft.setPosition(LOWER_LIFT);
-                liftRight.setPosition(rightLiftPositions.get(LOWER_LIFT));
-
-                if (rotation != RotationState.COLLECT)
-                    this.rotateClaw();
-
-                location = LiftState.LOWERED;
+            case TRANSFER:
+                clawSpin.turnToAngle(COLLECT_POS);
+                rotation = RotationState.COLLECT;
                 break;
         }
     }
@@ -114,19 +142,9 @@ public class CollectorSubsystem extends SubsystemBase {
         }
     }
 
-    public void rotateClaw() {
-        if (clawSpin == null)
-            return;
-
-        switch (rotation) {
-            case COLLECT:
-                clawSpin.setPosition(TRANSFER_POS);
-                rotation = RotationState.TRANSFER;
-                break;
-            case TRANSFER:
-                clawSpin.setPosition(COLLECT_POS);
-                rotation = RotationState.COLLECT;
-                break;
-        }
+    public enum LiftState {
+        LOWERED,
+        RAISED,
+        STACK
     }
 }

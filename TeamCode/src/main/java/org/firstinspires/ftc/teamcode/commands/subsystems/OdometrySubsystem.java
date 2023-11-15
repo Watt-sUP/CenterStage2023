@@ -7,6 +7,7 @@ import com.arcrobotics.ftclib.hardware.ServoEx;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.annotation.Nullable;
 
@@ -16,7 +17,7 @@ public class OdometrySubsystem extends SubsystemBase {
     Map<String, Pair<Double, Double>> positions = new HashMap<String, Pair<Double, Double>>() {{
         put("left", new Pair<>(0.35, 0.8));
         put("right", new Pair<>(0.3, 0.75));
-        put("front", new Pair<>(0., 0.));
+        put("front", new Pair<>(0.05, 200.0 / 1800.0));
     }};
 
     public OdometrySubsystem(@Nullable ServoEx left, @Nullable ServoEx right, @Nullable ServoEx front) {
@@ -29,7 +30,7 @@ public class OdometrySubsystem extends SubsystemBase {
         for (String name : odometry.keySet()) {
             ServoEx servo = odometry.get(name);
             if (servo != null)
-                servo.setPosition(positions.get(name).second);
+                servo.setPosition(Objects.requireNonNull(positions.get(name)).second);
         }
     }
 
@@ -37,7 +38,7 @@ public class OdometrySubsystem extends SubsystemBase {
         for (String name : odometry.keySet()) {
             ServoEx servo = odometry.get(name);
             if (servo != null)
-                servo.setPosition(positions.get(name).first);
+                servo.setPosition(Objects.requireNonNull(positions.get(name)).first);
         }
     }
 }

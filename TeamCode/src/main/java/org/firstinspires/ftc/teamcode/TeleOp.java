@@ -22,18 +22,11 @@ import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp
 public class TeleOp extends CommandOpMode {
 
-    /* TODO:
-     * When coming back:
-     *   1. Make sure the clamping is smaller than 0.2, otherwise close the claw
-     *   2. Rotate the claw back and move it to an idle location
-     *   3. Once that's done, open the claw
-     *   (Made an alternative, first 2 steps are automatic, last one must be done manually)
-     */
     public void initialize() {
         OdometrySubsystem odometrySystem = new OdometrySubsystem(
                 new SimpleServo(hardwareMap, "odo_left", 0, 300),
-                new SimpleServo(hardwareMap, "odo_right", 0, 300),
-                null
+                new SimpleServo(hardwareMap, "odo_right", 0, 300), null
+                // new SimpleServo(hardwareMap, "odo_back", 0, 1800)
         );
         CollectorSubsystem collectorSystem = new CollectorSubsystem(
                 new SimpleServo(hardwareMap, "v4b_left", 0, 180),
@@ -53,7 +46,7 @@ public class TeleOp extends CommandOpMode {
         );
         DriveSubsystem driveSystem = new DriveSubsystem(hardwareMap, "leftFront", "rightFront",
                 "leftBack", "rightBack");
-        register(driveSystem, depositSystem);
+        register(driveSystem, depositSystem, collectorSystem);
 
         GamepadEx driver1 = new GamepadEx(gamepad1);
         GamepadEx driver2 = new GamepadEx(gamepad2);
@@ -74,11 +67,7 @@ public class TeleOp extends CommandOpMode {
 
         // Either raise the lift, or lower it
         driver2.getGamepadButton(GamepadKeys.Button.X)
-                .whenPressed(new ConditionalCommand(
-                        new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.LOWERED)),
-                        new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED)),
-                        () -> collectorSystem.location == CollectorSubsystem.LiftState.RAISED
-                ));
+                .whenPressed(collectorSystem::toggleLiftLocation);
 
         // Slides commands
         driver2.getGamepadButton(GamepadKeys.Button.DPAD_UP)
@@ -90,9 +79,9 @@ public class TeleOp extends CommandOpMode {
         driver2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
                 .whenPressed(() -> depositSystem.setSlidesPosition(0));
         driver2.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-                .whenPressed(() -> depositSystem.adjustSlidesTicks(-125));
+                .whenPressed(() -> depositSystem.adjustSlidesTicks(-75));
         driver2.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
-                .whenPressed(() -> depositSystem.adjustSlidesTicks(125));
+                .whenPressed(() -> depositSystem.adjustSlidesTicks(75));
 
 
         driver2.getGamepadButton(GamepadKeys.Button.Y)
@@ -105,13 +94,14 @@ public class TeleOp extends CommandOpMode {
                                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
                         ),
                         new InstantCommand(collectorSystem::toggleClamp),
-                        () -> collectorSystem.clamping == CollectorSubsystem.ClampState.OPENED && collectorSystem.location == CollectorSubsystem.LiftState.LOWERED
+                        () -> collectorSystem.clamping == CollectorSubsystem.ClampState.OPENED && collectorSystem.location != CollectorSubsystem.LiftState.RAISED
                 ));
 
         driver2.getGamepadButton(GamepadKeys.Button.B)
                 .whenPressed(depositSystem::toggleBlocker);
 
         schedule(new RunCommand(() -> {
+            telemetry.addData("Power Limit", driveSystem.getPowerLimit());
             telemetry.addData("Slides Ticks", depositSystem.getSlidesTicks());
             telemetry.addData("Climber Ticks", climbSystem.getTicks());
             telemetry.update();
