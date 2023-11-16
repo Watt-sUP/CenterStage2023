@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.util.Angle;
+import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.MovingStatistics;
@@ -12,6 +13,8 @@ import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
+import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
+import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.StandardTrackingWheelLocalizer;
 
@@ -44,6 +47,18 @@ public class TrackingWheelForwardOffsetTuner extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
+        OdometrySubsystem odometrySystem = new OdometrySubsystem(
+                new SimpleServo(hardwareMap, "odo_left", 0, 300),
+                new SimpleServo(hardwareMap, "odo_right", 0, 300),
+                new SimpleServo(hardwareMap, "odo_back", 0, 1800)
+        );
+        odometrySystem.lower();
+        CollectorSubsystem collectorSystem = new CollectorSubsystem(
+                new SimpleServo(hardwareMap, "v4b_left", 0, 180),
+                new SimpleServo(hardwareMap, "v4b_right", 0, 180),
+                new SimpleServo(hardwareMap, "claw", 0, 300),
+                new SimpleServo(hardwareMap, "claw_r", 0, 180)
+        );
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 

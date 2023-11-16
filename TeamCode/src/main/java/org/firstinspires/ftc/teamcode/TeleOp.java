@@ -12,10 +12,10 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 
 import org.firstinspires.ftc.teamcode.commands.DriveCommand;
-import org.firstinspires.ftc.teamcode.commands.subsystems.ClimbSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DriveSubsystem;
+import org.firstinspires.ftc.teamcode.commands.subsystems.EndgameSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 
 @Config
@@ -25,14 +25,14 @@ public class TeleOp extends CommandOpMode {
     public void initialize() {
         OdometrySubsystem odometrySystem = new OdometrySubsystem(
                 new SimpleServo(hardwareMap, "odo_left", 0, 300),
-                new SimpleServo(hardwareMap, "odo_right", 0, 300), null
-                // new SimpleServo(hardwareMap, "odo_back", 0, 1800)
+                new SimpleServo(hardwareMap, "odo_right", 0, 300),
+                new SimpleServo(hardwareMap, "odo_back", 0, 1800)
         );
         CollectorSubsystem collectorSystem = new CollectorSubsystem(
                 new SimpleServo(hardwareMap, "v4b_left", 0, 180),
                 new SimpleServo(hardwareMap, "v4b_right", 0, 180),
                 new SimpleServo(hardwareMap, "claw", 0, 300),
-                new SimpleServo(hardwareMap, "claw_r", 0, 1800)
+                new SimpleServo(hardwareMap, "claw_r", 0, 180)
         );
         DepositSubsystem depositSystem = new DepositSubsystem(
                 new SimpleServo(hardwareMap, "depo_left", 0, 300),
@@ -40,9 +40,10 @@ public class TeleOp extends CommandOpMode {
                 new SimpleServo(hardwareMap, "stopper", 0, 300),
                 hardwareMap.dcMotor.get("gli_sus")
         );
-        ClimbSubsystem climbSystem = new ClimbSubsystem(
-                hardwareMap.dcMotor.get("pull_up"),
-                null
+        EndgameSubsystem endgameSystem = new EndgameSubsystem(
+                hardwareMap.dcMotor.get("pullup_left"),
+                hardwareMap.dcMotor.get("pullup_right"),
+                new SimpleServo(hardwareMap, "drone", -900, 900)
         );
         DriveSubsystem driveSystem = new DriveSubsystem(hardwareMap, "leftFront", "rightFront",
                 "leftBack", "rightBack");
@@ -63,7 +64,9 @@ public class TeleOp extends CommandOpMode {
                 .whenPressed(() -> driveSystem.setPowerLimit(0.2))
                 .whenReleased(() -> driveSystem.setPowerLimit(1.0));
         driver1.getGamepadButton(GamepadKeys.Button.B)
-                .whenPressed(climbSystem::toggle);
+                .whenPressed(endgameSystem::toggleClimb);
+        driver1.getGamepadButton(GamepadKeys.Button.Y)
+                .whenPressed(endgameSystem::launchPlane);
 
         // Either raise the lift, or lower it
         driver2.getGamepadButton(GamepadKeys.Button.X)
@@ -103,7 +106,7 @@ public class TeleOp extends CommandOpMode {
         schedule(new RunCommand(() -> {
             telemetry.addData("Power Limit", driveSystem.getPowerLimit());
             telemetry.addData("Slides Ticks", depositSystem.getSlidesTicks());
-            telemetry.addData("Climber Ticks", climbSystem.getTicks());
+            telemetry.addData("Climber Ticks", endgameSystem.getClimbTicks());
             telemetry.update();
         }));
     }

@@ -5,6 +5,8 @@ import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.util.InterpLUT;
 
+import java.util.Objects;
+
 import javax.annotation.Nullable;
 
 @Config
@@ -13,7 +15,7 @@ public class CollectorSubsystem extends SubsystemBase {
     ServoEx clawSpin, claw;
 
     public static Double LOWER_LIFT = 0.92, RAISE_LIFT = 0.09, STACK_LIFT = 0.8;
-    private final Double TRANSFER_POS = 0., COLLECT_POS = 210.;
+    private final Double TRANSFER_POS = 0., COLLECT_POS = 180.;
 
     private final Double CLOSED_POS = 0., OPENED_POS = .55;
 
@@ -21,6 +23,7 @@ public class CollectorSubsystem extends SubsystemBase {
         COLLECT,
         TRANSFER
     }
+
     public LiftState location = LiftState.STACK;
 
     public enum ClampState {
@@ -86,9 +89,10 @@ public class CollectorSubsystem extends SubsystemBase {
         rightLiftPositions.createLUT();
 
         liftR.setInverted(true);
+        Objects.requireNonNull(clawR).setInverted(true);
         clamping = (this.claw.getPosition() < 0.2 ? ClampState.CLOSED : ClampState.OPENED);
         rotation = (this.clawSpin.getPosition() < 0.01 ? RotationState.TRANSFER : RotationState.COLLECT);
-        this.setLiftLocation(LiftState.LOWERED);
+        this.setLiftLocation(LiftState.RAISED);
     }
 
     public void toggleLiftLocation() {
