@@ -38,7 +38,7 @@ public class DepositSubsystem extends SubsystemBase {
         this.slides = slides;
 
         this.leftLift.setInverted(true);
-        this.stopper.turnToAngle(102);
+        this.stopper.turnToAngle(140);
         this.toggleSpike();
 
         this.slides.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -119,15 +119,15 @@ public class DepositSubsystem extends SubsystemBase {
     public void toggleBlocker() {
         switch (blockerState) {
             case FREE:
-                stopper.turnToAngle(150);
+                stopper.turnToAngle(160);
                 blockerState = Blocker.TWO_PIXELS;
                 break;
             case ONE_PIXEL:
-                stopper.turnToAngle(102);
+                stopper.turnToAngle(140);
                 blockerState = Blocker.FREE;
                 break;
             case TWO_PIXELS:
-                stopper.turnToAngle(125);
+                stopper.turnToAngle(156);
                 blockerState = Blocker.ONE_PIXEL;
                 break;
         }
