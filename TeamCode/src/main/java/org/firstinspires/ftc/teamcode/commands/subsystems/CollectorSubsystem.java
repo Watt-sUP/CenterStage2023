@@ -89,8 +89,9 @@ public class CollectorSubsystem extends SubsystemBase {
         rightLiftPositions.createLUT();
 
         liftR.setInverted(true);
+        claw.setPosition(CLOSED_POS);
         Objects.requireNonNull(clawR).setInverted(true);
-        clamping = (this.claw.getPosition() < 0.2 ? ClampState.CLOSED : ClampState.OPENED);
+        clamping = ClampState.CLOSED;
         rotation = (this.clawSpin.getPosition() < 0.01 ? RotationState.TRANSFER : RotationState.COLLECT);
         this.setLiftLocation(LiftState.RAISED);
     }

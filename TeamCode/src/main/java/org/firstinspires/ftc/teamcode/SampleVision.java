@@ -23,7 +23,7 @@ public class SampleVision extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        TeamPropProcessor processor = new TeamPropProcessor(TARGET_COLOR, MIN_AREA, LEFT, RIGHT, SHOW_MASK);
+        TeamPropProcessor processor = new TeamPropProcessor(TARGET_COLOR, MIN_AREA, Double.MAX_VALUE, LEFT, RIGHT, SHOW_MASK);
         VisionPortal visionPortal = new VisionPortal.Builder()
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .setCameraResolution(new Size(640, 480))

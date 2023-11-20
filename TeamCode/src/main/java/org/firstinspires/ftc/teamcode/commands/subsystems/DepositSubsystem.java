@@ -119,7 +119,7 @@ public class DepositSubsystem extends SubsystemBase {
     public void toggleBlocker() {
         switch (blockerState) {
             case FREE:
-                stopper.turnToAngle(160);
+                stopper.turnToAngle(165);
                 blockerState = Blocker.TWO_PIXELS;
                 break;
             case ONE_PIXEL:
@@ -127,7 +127,7 @@ public class DepositSubsystem extends SubsystemBase {
                 blockerState = Blocker.FREE;
                 break;
             case TWO_PIXELS:
-                stopper.turnToAngle(156);
+                stopper.turnToAngle(155);
                 blockerState = Blocker.ONE_PIXEL;
                 break;
         }

@@ -40,17 +40,18 @@ public class TeamPropProcessor implements VisionProcessor, CameraStreamSource {
     private final Paint linePaint;
     private final boolean showMask;
     private final PropColor propColor;
-    private Double left = 200.;
-    private Double right = 400.;
-    private Double minArea = 4000.;
+    private Double left;
+    private Double right;
+    private Double minArea, maxArea = 13000.;
     private Double largestContourX, largestContourY, largestContourArea;
     private MatOfPoint largestContour;
     private Location currentLocation = Location.NOT_FOUND;
 
     public TeamPropProcessor(@NonNull PropColor propColor, Double minArea, Double left, Double right) {
-        this(propColor, minArea, left, right, false);
+        this(propColor, minArea, 13000., left, right, false);
     }
-    public TeamPropProcessor(@NonNull PropColor propColor, Double minArea, Double left, Double right, boolean showMask) {
+
+    public TeamPropProcessor(@NonNull PropColor propColor, Double minArea, Double maxValue, Double left, Double right, boolean showMask) {
         this.propColor = propColor;
         this.left = left;
         this.right = right;
@@ -111,9 +112,14 @@ public class TeamPropProcessor implements VisionProcessor, CameraStreamSource {
 
         for (MatOfPoint contour : contours) {
             double area = Imgproc.contourArea(contour);
-            if (area > largestContourArea && area > minArea) {
-                largestContourArea = area;
-                largestContour = contour;
+            if (area > largestContourArea && area > minArea && area < maxArea) {
+                Moments moment = Imgproc.moments(contour);
+                double contourY = (moment.m01 / moment.m00);
+
+                if (200 < contourY && contourY < 300) {
+                    largestContourArea = area;
+                    largestContour = contour;
+                }
             }
         }
 
@@ -129,7 +135,7 @@ public class TeamPropProcessor implements VisionProcessor, CameraStreamSource {
             else if (largestContourX > right)
                 currentLocation = Location.RIGHT;
             else currentLocation = Location.MIDDLE;
-        }
+        } else currentLocation = Location.NOT_FOUND;
 
         Bitmap b = (!showMask ? Bitmap.createBitmap(frame.width(), frame.height(), Bitmap.Config.RGB_565) : Bitmap.createBitmap(hsv.width(), hsv.height(), Bitmap.Config.RGB_565));
         Utils.matToBitmap((showMask ? hsv : frame), b);
