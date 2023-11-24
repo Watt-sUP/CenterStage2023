@@ -68,7 +68,6 @@ public class TeleOp extends CommandOpMode {
         driver1.getGamepadButton(GamepadKeys.Button.Y)
                 .whenPressed(endgameSystem::launchPlane);
 
-        // Either raise the lift, or lower it
         driver2.getGamepadButton(GamepadKeys.Button.X)
                 .whenPressed(collectorSystem::toggleLiftLocation);
 
@@ -99,7 +98,6 @@ public class TeleOp extends CommandOpMode {
                         new InstantCommand(collectorSystem::toggleClamp),
                         () -> collectorSystem.clamping == CollectorSubsystem.ClampState.OPENED && collectorSystem.location != CollectorSubsystem.LiftState.RAISED
                 ));
-
         driver2.getGamepadButton(GamepadKeys.Button.B)
                 .whenPressed(depositSystem::toggleBlocker);
 
