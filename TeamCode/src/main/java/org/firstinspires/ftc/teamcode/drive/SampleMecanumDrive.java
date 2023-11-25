@@ -38,6 +38,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuilder;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceRunner;
@@ -52,8 +53,8 @@ import java.util.List;
  */
 @Config
 public class SampleMecanumDrive extends MecanumDrive {
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(15, 0, 0);
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(7, 0, 2);
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(0, 0, 0);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(0, 0, 0);
 
     public static double LATERAL_MULTIPLIER = 1.36387451;
 
@@ -80,7 +81,7 @@ public class SampleMecanumDrive extends MecanumDrive {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
 
         follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
-                new Pose2d(0.5, 0.5, Math.toRadians(5.0)), 0.5);
+                new Pose2d(0.5, 0.5, Math.toRadians(2.5)), 0.5);
 
         LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap);
 
@@ -149,6 +150,15 @@ public class SampleMecanumDrive extends MecanumDrive {
         );
     }
 
+    public TrajectorySequenceBuilder trajectorySequenceBuilder(Pose2d startPose, double speedLimit) {
+        return new TrajectorySequenceBuilder(
+                startPose,
+                getVelocityConstraint(speedLimit, MAX_ANG_VEL, TRACK_WIDTH),
+                getAccelerationConstraint(speedLimit),
+                MAX_ANG_VEL, MAX_ANG_ACCEL
+        );
+    }
+
     public void turnAsync(double angle) {
         trajectorySequenceRunner.followTrajectorySequenceAsync(
                 trajectorySequenceBuilder(getPoseEstimate())
@@ -157,8 +167,74 @@ public class SampleMecanumDrive extends MecanumDrive {
         );
     }
 
+    /**
+     * Asynchronous shortcut, made to avoid single-line adjustment trajectories.
+     *
+     * @param targetPose Pose2d object representing the target destination
+     */
+    public void lineToPoseAsync(Pose2d targetPose) {
+        trajectorySequenceRunner.followTrajectorySequenceAsync(
+                trajectorySequenceBuilder(getPoseEstimate())
+                        .lineToLinearHeading(targetPose)
+                        .build()
+        );
+    }
+
+    /**
+     * Asynchronous shortcut, great for relative adjustments on the fly.
+     *
+     * @param offset Pose2d object dictating the target adjustment
+     */
+    public void adjustPoseAsync(Pose2d offset) {
+        trajectorySequenceRunner.followTrajectorySequenceAsync(
+                trajectorySequenceBuilder(getPoseEstimate())
+                        .lineToLinearHeading(getPoseEstimate().plus(offset))
+                        .build()
+        );
+    }
+
+    /**
+     * Synchronous shortcut for turning.
+     *
+     * @param angle Angle to turn (counter-clockwise)
+     * @param unit  The angle of the unit. Options include degrees and radians
+     */
+    public void turn(double angle, AngleUnit unit) {
+        if (unit == AngleUnit.RADIANS) {
+            turnAsync(angle);
+            waitForIdle();
+        } else if (unit == AngleUnit.DEGREES) {
+            turnAsync(Math.toRadians(angle));
+            waitForIdle();
+        }
+    }
+
+    /**
+     * Shortcut for turning. Angle measurement defaults to degrees.
+     *
+     * @param angle Angle to turn (counter-clockwise)
+     */
     public void turn(double angle) {
-        turnAsync(angle);
+        turn(angle, AngleUnit.DEGREES);
+    }
+
+    /**
+     * Synchronous shortcut, made to avoid single-line adjustment trajectories.
+     *
+     * @param targetPose Pose2d object representing the target destination
+     */
+    public void lineToPose(Pose2d targetPose) {
+        lineToPoseAsync(targetPose);
+        waitForIdle();
+    }
+
+    /**
+     * Synchronous shortcut, great for relative adjustments on the fly.
+     *
+     * @param offset Pose2d object dictating the target adjustment
+     */
+    public void adjustPose(Pose2d offset) {
+        adjustPoseAsync(offset);
         waitForIdle();
     }
 

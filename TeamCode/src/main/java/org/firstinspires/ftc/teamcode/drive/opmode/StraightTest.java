@@ -11,7 +11,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
-import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
@@ -41,11 +40,7 @@ public class StraightTest extends LinearOpMode {
         );
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
-        TrajectorySequence trajectory = drive.trajectorySequenceBuilder(new Pose2d())
-                .setConstraints(
-                        SampleMecanumDrive.getVelocityConstraint(SPEED, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL)
-                )
+        TrajectorySequence trajectory = drive.trajectorySequenceBuilder(new Pose2d(), SPEED)
                 .forward(DISTANCE)
                 .resetConstraints()
                 .build();

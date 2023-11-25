@@ -60,8 +60,7 @@ import java.util.Locale;
 
 @TeleOp(name = "Utility: Camera Frame Capture", group = "Utility")
 //@Disabled
-public class UtilityCameraFrameCapture extends LinearOpMode
-{
+public class UtilityCameraFrameCapture extends LinearOpMode {
     /*
      * EDIT THESE PARAMETERS AS NEEDED
      */
@@ -76,31 +75,25 @@ public class UtilityCameraFrameCapture extends LinearOpMode
     long capReqTime;
 
     @Override
-    public void runOpMode()
-    {
+    public void runOpMode() {
         VisionPortal portal;
 
-        if (USING_WEBCAM)
-        {
+        if (USING_WEBCAM) {
             portal = new VisionPortal.Builder()
                     .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                     .setCameraResolution(new Size(RESOLUTION_WIDTH, RESOLUTION_HEIGHT))
                     .build();
-        }
-        else
-        {
+        } else {
             portal = new VisionPortal.Builder()
                     .setCamera(INTERNAL_CAM_DIR)
                     .setCameraResolution(new Size(RESOLUTION_WIDTH, RESOLUTION_HEIGHT))
                     .build();
         }
 
-        while (!isStopRequested())
-        {
+        while (!isStopRequested()) {
             boolean x = gamepad1.x;
 
-            if (x && !lastX)
-            {
+            if (x && !lastX) {
                 portal.saveNextFrameRaw(String.format(Locale.US, "CameraFrameCapture-%06d", frameCount++));
                 capReqTime = System.currentTimeMillis();
             }
@@ -112,13 +105,11 @@ public class UtilityCameraFrameCapture extends LinearOpMode
             telemetry.addLine(" > Press X (or Square) to capture a frame");
             telemetry.addData(" > Camera Status", portal.getCameraState());
 
-            if (capReqTime != 0)
-            {
+            if (capReqTime != 0) {
                 telemetry.addLine("\nCaptured Frame!");
             }
 
-            if (capReqTime != 0 && System.currentTimeMillis() - capReqTime > 1000)
-            {
+            if (capReqTime != 0 && System.currentTimeMillis() - capReqTime > 1000) {
                 capReqTime = 0;
             }
 

@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @Config
-@TeleOp
+@TeleOp(group = "Utility")
 public class ServoTuner extends LinearOpMode {
 
     public static String SERVO_NAME = "test";
