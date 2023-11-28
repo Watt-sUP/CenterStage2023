@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
@@ -18,7 +17,7 @@ import org.firstinspires.ftc.teamcode.commands.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.EndgameSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 
-@Config
+//@Config
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp
 public class TeleOp extends CommandOpMode {
 
@@ -31,13 +30,13 @@ public class TeleOp extends CommandOpMode {
         CollectorSubsystem collectorSystem = new CollectorSubsystem(
                 new SimpleServo(hardwareMap, "v4b_left", 0, 180),
                 new SimpleServo(hardwareMap, "v4b_right", 0, 180),
-                new SimpleServo(hardwareMap, "claw", 0, 300),
-                new SimpleServo(hardwareMap, "claw_r", 0, 180)
+                new SimpleServo(hardwareMap, "claw", 0, 300)
         );
         DepositSubsystem depositSystem = new DepositSubsystem(
                 new SimpleServo(hardwareMap, "depo_left", 0, 300),
                 new SimpleServo(hardwareMap, "depo_right", 0, 300),
-                new SimpleServo(hardwareMap, "stopper", 0, 300),
+                new SimpleServo(hardwareMap, "stopper_top", 0, 300),
+                new SimpleServo(hardwareMap, "stopper_bottom", 0, 1800),
                 hardwareMap.dcMotor.get("gli_sus")
         );
         EndgameSubsystem endgameSystem = new EndgameSubsystem(
@@ -92,19 +91,19 @@ public class TeleOp extends CommandOpMode {
                 .whenPressed(new ConditionalCommand(
                         new SequentialCommandGroup(
                                 new InstantCommand(collectorSystem::toggleClamp),
-                                new WaitCommand(200),
+                                new WaitCommand(225),
                                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
                         ),
                         new InstantCommand(collectorSystem::toggleClamp),
                         () -> collectorSystem.clamping == CollectorSubsystem.ClampState.OPENED && collectorSystem.location != CollectorSubsystem.LiftState.RAISED
                 ));
         driver2.getGamepadButton(GamepadKeys.Button.B)
-                .whenPressed(depositSystem::toggleBlocker);
+                .whenPressed(depositSystem::toggleBlockers);
 
         schedule(new RunCommand(() -> {
             telemetry.addData("Power Limit", driveSystem.getPowerLimit());
             telemetry.addData("Slides Ticks", depositSystem.getSlidesTicks());
-            telemetry.addData("Climber Ticks", endgameSystem.getClimbTicks());
+            telemetry.addData("Blocker State", depositSystem.getBlockerState());
             telemetry.update();
         }));
     }

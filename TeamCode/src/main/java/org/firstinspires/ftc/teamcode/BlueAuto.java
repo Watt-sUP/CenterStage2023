@@ -54,8 +54,7 @@ public class BlueAuto extends CommandOpMode {
         CollectorSubsystem collectorSystem = new CollectorSubsystem(
                 new SimpleServo(hardwareMap, "v4b_left", 0, 180),
                 new SimpleServo(hardwareMap, "v4b_right", 0, 180),
-                new SimpleServo(hardwareMap, "claw", 0, 300),
-                new SimpleServo(hardwareMap, "claw_r", 0, 180)
+                new SimpleServo(hardwareMap, "claw", 0, 300)
         );
 
         TrajectorySequence lines = drive.trajectorySequenceBuilder(new Pose2d(-63.88, 12.74, Math.toRadians(0.00)))

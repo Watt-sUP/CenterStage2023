@@ -41,8 +41,7 @@ public class FollowerPIDTuner extends LinearOpMode {
         CollectorSubsystem collectorSystem = new CollectorSubsystem(
                 new SimpleServo(hardwareMap, "v4b_left", 0, 180),
                 new SimpleServo(hardwareMap, "v4b_right", 0, 180),
-                new SimpleServo(hardwareMap, "claw", 0, 300),
-                new SimpleServo(hardwareMap, "claw_r", 0, 180)
+                new SimpleServo(hardwareMap, "claw", 0, 300)
         );
 
         Pose2d startPose = new Pose2d(-DISTANCE / 2, -DISTANCE / 2, 0);

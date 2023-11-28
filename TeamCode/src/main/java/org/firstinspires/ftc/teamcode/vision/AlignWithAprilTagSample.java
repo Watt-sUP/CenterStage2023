@@ -72,9 +72,10 @@ public class AlignWithAprilTagSample extends LinearOpMode {
             for (AprilTagDetection detection : detections)
                 if (detection.metadata != null && detection.id == TARGET_ID) {
                     Pose positionData = getAprilTagPose(detection);
-                    telemetry.addData("Forward Offset (CM)", positionData.f);
-                    telemetry.addData("Strafe Offset (CM)", positionData.s);
+                    telemetry.addData("Forward Offset (Inch)", positionData.f);
+                    telemetry.addData("Strafe Offset (Inch)", positionData.s);
                     telemetry.addData("Turn Offset (Degrees)", positionData.r);
+                    telemetry.addData("Bearing", detection.ftcPose.bearing);
 
                     telemetry.update();
                 }
@@ -121,6 +122,7 @@ public class AlignWithAprilTagSample extends LinearOpMode {
                                 telemetry.addData("Forward Offset", tagPosition.f);
                                 telemetry.addData("Strafe Offset", tagPosition.s);
                                 telemetry.addData("Turn Offset", tagPosition.r);
+                                telemetry.addData("Bearing", detection.ftcPose.bearing);
 
                                 // Bearing is positive to the left and Y increases as you stray further away,
                                 // leaving X to be reversed
@@ -170,7 +172,7 @@ public class AlignWithAprilTagSample extends LinearOpMode {
         return new Pose(
                 detection.ftcPose.y,
                 detection.ftcPose.x,
-                detection.ftcPose.bearing
+                detection.ftcPose.yaw
         );
     }
 

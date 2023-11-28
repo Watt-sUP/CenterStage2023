@@ -12,9 +12,9 @@ import java.util.List;
 
 @Config
 public class DepositSubsystem extends SubsystemBase {
-    private final ServoEx leftLift, rightLift, stopper;
+    public static Double LOW_LEFT = 0.0, LOW_RIGHT = 0.0;
     private final DcMotor slides;
-    public static Double LOW_LEFT = 0.04, LOW_RIGHT = 0.06;
+    private final ServoEx leftLift, rightLift, stopper_top, stopper_bottom;
     public static Double HIGH_LEFT = 0.59, HIGH_RIGHT = 0.58;
 
     private enum Blocker {
@@ -22,6 +22,7 @@ public class DepositSubsystem extends SubsystemBase {
         ONE_PIXEL,
         FREE
     }
+
     private enum Spike {
         RAISED,
         LOWERED
@@ -31,14 +32,18 @@ public class DepositSubsystem extends SubsystemBase {
     private Blocker blockerState = Blocker.FREE;
     private boolean raisingSlides = false;
 
-    public DepositSubsystem(ServoEx leftLift, ServoEx rightLift, ServoEx stopper, DcMotor slides) {
+    public DepositSubsystem(ServoEx leftLift, ServoEx rightLift, ServoEx stopper_top, ServoEx stopper_bottom, DcMotor slides) {
         this.leftLift = leftLift;
         this.rightLift = rightLift;
-        this.stopper = stopper;
+        this.stopper_top = stopper_top;
+        this.stopper_bottom = stopper_bottom;
         this.slides = slides;
 
         this.leftLift.setInverted(true);
-        this.stopper.turnToAngle(140);
+        this.stopper_bottom.setInverted(true);
+
+        this.stopper_top.turnToAngle(0);
+        this.stopper_bottom.turnToAngle(45);
         this.toggleSpike();
 
         this.slides.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -50,7 +55,7 @@ public class DepositSubsystem extends SubsystemBase {
         if (slides.getCurrentPosition() > 100 && raisingSlides)
         {
             while (blockerState != Blocker.TWO_PIXELS)
-                this.toggleBlocker();
+                this.toggleBlockers();
 
             if (spikeState == Spike.LOWERED)
                 this.toggleSpike();
@@ -72,7 +77,6 @@ public class DepositSubsystem extends SubsystemBase {
     }
 
     public void setSlidesPosition(int position) {
-
         position = MathUtils.clamp(position, 0, 4);
         List<Integer> positions = Arrays.asList(0, 400, 700, 1000, 1300);
 
@@ -116,20 +120,25 @@ public class DepositSubsystem extends SubsystemBase {
         }
     }
 
-    public void toggleBlocker() {
+    public void toggleBlockers() {
         switch (blockerState) {
             case FREE:
-                stopper.turnToAngle(165);
+                stopper_bottom.turnToAngle(90);
+                stopper_top.turnToAngle(135);
                 blockerState = Blocker.TWO_PIXELS;
                 break;
             case ONE_PIXEL:
-                stopper.turnToAngle(140);
+                stopper_bottom.turnToAngle(45);
                 blockerState = Blocker.FREE;
                 break;
             case TWO_PIXELS:
-                stopper.turnToAngle(155);
+                stopper_top.turnToAngle(0);
                 blockerState = Blocker.ONE_PIXEL;
                 break;
         }
+    }
+
+    public String getBlockerState() {
+        return blockerState.toString();
     }
 }

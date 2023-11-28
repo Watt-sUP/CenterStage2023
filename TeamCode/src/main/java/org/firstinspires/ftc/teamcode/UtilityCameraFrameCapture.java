@@ -31,18 +31,25 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.robotcontroller.external.samples;
+package org.firstinspires.ftc.teamcode;
 
+import android.util.Pair;
 import android.util.Size;
 
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.vision.VisionPortal;
 
 import java.util.Locale;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /*
  * This OpMode helps calibrate a webcam or RC phone camera, useful for AprilTag pose estimation
@@ -58,16 +65,15 @@ import java.util.Locale;
  * In OnBot Java, use "Add File" to add this OpMode from the list of Samples.
  */
 
+@Config
 @TeleOp(name = "Utility: Camera Frame Capture", group = "Utility")
 //@Disabled
 public class UtilityCameraFrameCapture extends LinearOpMode {
     /*
      * EDIT THESE PARAMETERS AS NEEDED
      */
-    final boolean USING_WEBCAM = true;
-    final BuiltinCameraDirection INTERNAL_CAM_DIR = BuiltinCameraDirection.BACK;
-    final int RESOLUTION_WIDTH = 640;
-    final int RESOLUTION_HEIGHT = 480;
+
+    public static boolean RANDOMIZE_LIGHTING = false;
 
     // Internal state
     boolean lastX;
@@ -77,33 +83,36 @@ public class UtilityCameraFrameCapture extends LinearOpMode {
     @Override
     public void runOpMode() {
         VisionPortal portal;
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
-        if (USING_WEBCAM) {
-            portal = new VisionPortal.Builder()
-                    .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                    .setCameraResolution(new Size(RESOLUTION_WIDTH, RESOLUTION_HEIGHT))
-                    .build();
-        } else {
-            portal = new VisionPortal.Builder()
-                    .setCamera(INTERNAL_CAM_DIR)
-                    .setCameraResolution(new Size(RESOLUTION_WIDTH, RESOLUTION_HEIGHT))
-                    .build();
-        }
+        portal = new VisionPortal.Builder()
+                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .setCameraResolution(new Size(640, 480))
+                .build();
 
         while (!isStopRequested()) {
-            boolean x = gamepad1.x;
+            boolean x = gamepad1.square;
+
+            drive.setWeightedDrivePower(new Pose2d(
+                    -gamepad1.left_stick_y,
+                    -gamepad1.left_stick_x,
+                    -gamepad1.right_stick_x
+            ));
 
             if (x && !lastX) {
                 portal.saveNextFrameRaw(String.format(Locale.US, "CameraFrameCapture-%06d", frameCount++));
                 capReqTime = System.currentTimeMillis();
+
+                if (RANDOMIZE_LIGHTING)
+                    randomizeLighting(portal);
             }
 
             lastX = x;
 
             telemetry.addLine("######## Camera Capture Utility ########");
-            telemetry.addLine(String.format(Locale.US, " > Resolution: %dx%d", RESOLUTION_WIDTH, RESOLUTION_HEIGHT));
-            telemetry.addLine(" > Press X (or Square) to capture a frame");
+            telemetry.addLine(" > Press Square to capture a frame");
             telemetry.addData(" > Camera Status", portal.getCameraState());
+            telemetry.addData("Photos Taken", frameCount);
 
             if (capReqTime != 0) {
                 telemetry.addLine("\nCaptured Frame!");
@@ -115,5 +124,20 @@ public class UtilityCameraFrameCapture extends LinearOpMode {
 
             telemetry.update();
         }
+    }
+
+    public void randomizeLighting(VisionPortal portal) {
+        ExposureControl exposure = portal.getCameraControl(ExposureControl.class);
+        GainControl gain = portal.getCameraControl(GainControl.class);
+
+        Pair<Integer, Integer> gain_limits = new Pair<>(gain.getMinGain(), gain.getMaxGain());
+        Pair<Long, Long> exposure_limits = new Pair<>(exposure.getMinExposure(TimeUnit.MILLISECONDS), exposure.getMaxExposure(TimeUnit.MILLISECONDS));
+
+        Random random = new Random();
+        long new_exposure = random.nextInt((int) (exposure_limits.second - exposure_limits.first)) + exposure_limits.first;
+        int new_gain = random.nextInt(gain_limits.second - gain_limits.first) + gain_limits.first;
+
+        exposure.setExposure(new_exposure, TimeUnit.MILLISECONDS);
+        gain.setGain(new_gain);
     }
 }
