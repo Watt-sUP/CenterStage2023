@@ -15,6 +15,7 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
@@ -26,6 +27,7 @@ import org.firstinspires.ftc.vision.VisionPortal;
 
 import java.util.HashMap;
 
+@Disabled
 @Autonomous(name = "Blue Autonomous", group = "auto")
 public class BlueAuto extends CommandOpMode {
     @Override

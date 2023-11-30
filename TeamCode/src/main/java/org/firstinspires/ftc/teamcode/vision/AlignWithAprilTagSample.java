@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.vision;
 
-import android.util.Size;
-
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -51,8 +49,6 @@ public class AlignWithAprilTagSample extends LinearOpMode {
 
         VisionPortal visionPortal = new VisionPortal.Builder()
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                .setCameraResolution(new Size(640, 480))
-                .setStreamFormat(VisionPortal.StreamFormat.YUY2)
                 .addProcessor(aprilTagProcessor)
                 .setAutoStopLiveView(true)
                 .build();
