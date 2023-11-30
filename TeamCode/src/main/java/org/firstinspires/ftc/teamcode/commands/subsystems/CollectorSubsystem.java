@@ -100,7 +100,7 @@ public class CollectorSubsystem extends SubsystemBase {
                 clamping = ClampState.CLOSED;
                 break;
             case CLOSED:
-                claw.setPosition(location != LiftState.RAISED ? OPENED_POS : 0.2);
+                claw.setPosition(location != LiftState.RAISED ? OPENED_POS : 0.22);
                 clamping = ClampState.OPENED;
                 break;
         }

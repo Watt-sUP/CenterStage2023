@@ -38,12 +38,14 @@ import android.util.Size;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
+import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.vision.VisionPortal;
 
@@ -84,6 +86,12 @@ public class UtilityCameraFrameCapture extends LinearOpMode {
     public void runOpMode() {
         VisionPortal portal;
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+
+        CollectorSubsystem collectorSystem = new CollectorSubsystem(
+                new SimpleServo(hardwareMap, "v4b_left", 0, 180),
+                new SimpleServo(hardwareMap, "v4b_right", 0, 180),
+                new SimpleServo(hardwareMap, "claw", 0, 300)
+        );
 
         portal = new VisionPortal.Builder()
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
