@@ -25,6 +25,8 @@ public class TensorflowSubsystem extends SubsystemBase {
     public TensorflowSubsystem(HardwareMap hardwareMap, String cameraName, String modelName, String... labels) {
         tensorflowProcessor = new TfodProcessor.Builder()
                 .setIsModelTensorFlow2(true)
+                .setModelAspectRatio(4.0 / 3.0)
+                .setModelInputSize(640)
                 .setModelFileName(Environment.getExternalStorageDirectory().getPath() + "/FIRST/tflitemodels/" + modelName)
                 .setModelLabels(labels)
                 .build();
