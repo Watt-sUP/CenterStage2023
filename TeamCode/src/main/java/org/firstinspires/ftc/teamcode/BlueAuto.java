@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.util.Size;
+import android.annotation.SuppressLint;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -10,42 +10,40 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SelectCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
+import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
+import org.firstinspires.ftc.teamcode.commands.subsystems.TensorflowSubsystem;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
-import org.firstinspires.ftc.teamcode.vision.TeamPropProcessor;
-import org.firstinspires.ftc.vision.VisionPortal;
 
 import java.util.HashMap;
 
-@Disabled
 @Autonomous(name = "Blue Autonomous", group = "auto")
 public class BlueAuto extends CommandOpMode {
+
+    private PropLocations location;
+
+    @SuppressLint("DefaultLocale")
     @Override
     public void initialize() {
-        TeamPropProcessor processor = new TeamPropProcessor(TeamPropProcessor.PropColor.BLUE, 4000., 100., 450.);
-        TeamPropProcessor.Location location = TeamPropProcessor.Location.NOT_FOUND;
 
-        VisionPortal visionPortal = new VisionPortal.Builder()
-                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                .setCameraResolution(new Size(640, 480))
-                .setStreamFormat(VisionPortal.StreamFormat.YUY2)
-                .addProcessor(processor)
-                .setAutoStopLiveView(true)
-                .build();
+        TensorflowSubsystem tensorflow = new TensorflowSubsystem(hardwareMap, "Webcam 1",
+                "red_prop.tflite", "Blue Prop");
+
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
-        telemetry.addLine("Loading trajectory...");
+        telemetry.addLine("Loading trajectories...");
         telemetry.update();
 
         OdometrySubsystem odometrySystem = new OdometrySubsystem(
@@ -58,27 +56,44 @@ public class BlueAuto extends CommandOpMode {
                 new SimpleServo(hardwareMap, "v4b_right", 0, 180),
                 new SimpleServo(hardwareMap, "claw", 0, 300)
         );
+        DepositSubsystem depositSystem = new DepositSubsystem(
+                new SimpleServo(hardwareMap, "depo_left", 0, 180),
+                new SimpleServo(hardwareMap, "depo_right", 0, 180),
+                new SimpleServo(hardwareMap, "stopper_top", 0, 300),
+                new SimpleServo(hardwareMap, "stopper_bottom", 0, 1800),
+                hardwareMap.dcMotor.get("gli_sus")
+        );
 
-        TrajectorySequence lines = drive.trajectorySequenceBuilder(new Pose2d(-63.88, 12.74, Math.toRadians(0.00)))
-                .forward(47)
-                .lineToConstantHeading(new Vector2d(-37.53, 11.61))
+        TrajectorySequence leftPurple = drive.trajectorySequenceBuilder(new Pose2d(10.85, 64.07, Math.toRadians(-90.00)))
+                .splineTo(new Vector2d(23.12, 22.93), Math.toRadians(-90.00))
+                .setReversed(true)
+                .lineTo(new Vector2d(22.58, 42.00))
+                .setReversed(false)
                 .build();
-        TrajectorySequence rightPositioning = drive.trajectorySequenceBuilder(lines.end())
-                .forward(3)
-                .strafeLeft(5)
-                .build();
-        TrajectorySequence leftPositioning = drive.trajectorySequenceBuilder(lines.end())
-                .forward(3)
-                .build();
-        TrajectorySequence park = drive.trajectorySequenceBuilder(leftPositioning.end().plus(new Pose2d(0, 0, 90)))
-                .lineToLinearHeading(new Pose2d(-58.28, 11.28, Math.toRadians(90)))
-                .splineTo(new Vector2d(-60.80, 61.00), Math.toRadians(90.00))
-                .build();
-        Trajectory park_reverse = drive.trajectoryBuilder(rightPositioning.end().plus(new Pose2d(0, 0, -90)), true)
-                .splineTo(new Vector2d(-60.80, 61.00), Math.toRadians(90.00))
+        Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end(), true)
+                .splineTo(new Vector2d(47.35, 41.7), Math.toRadians(0.00))
                 .build();
 
-        drive.setPoseEstimate(lines.start());
+        TrajectorySequence middlePurple = drive.trajectorySequenceBuilder(new Pose2d(10.85, 64.07, Math.toRadians(-90.00)))
+                .lineToConstantHeading(new Vector2d(10.85, 18.95))
+                .lineToConstantHeading(new Vector2d(10.85, 40.3))
+                .build();
+        Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), true)
+                .splineTo(new Vector2d(47.65, 35.85), Math.toRadians(0.00))
+                .build();
+
+        TrajectorySequence rightPurple = drive.trajectorySequenceBuilder(new Pose2d(10.85, 64.07, Math.toRadians(-90.00)))
+                .splineTo(new Vector2d(16, 32), Math.toRadians(-90))
+                .turn(Math.toRadians(-90))
+                .setReversed(true)
+                .build();
+        Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), true)
+                .splineTo(new Vector2d(47.2, 31.4), Math.toRadians(0))
+                .build();
+
+
+        drive.setPoseEstimate(rightPurple.start());
+        tensorflow.setMinConfidence(0.75);
         odometrySystem.lower();
 
         telemetry.addLine("Ready!");
@@ -88,69 +103,70 @@ public class BlueAuto extends CommandOpMode {
             if (isStopRequested())
                 return;
 
-            location = processor.getCurrentLocation();
-            telemetry.addData("FPS", visionPortal.getFps());
-            telemetry.addData("Current Location", location);
-            telemetry.addData("Contour Area", processor.getLargestContourArea());
-            telemetry.addData("Contour Coords", processor.getLargestContourCoords().toString());
+            Recognition bestDetection = tensorflow.getBestDetection();
+            location = PropLocations.LEFT;
+
+            if (bestDetection != null) {
+                double x = (bestDetection.getLeft() + bestDetection.getRight()) / 2;
+
+                if (x < 450)
+                    location = PropLocations.MIDDLE;
+                else location = PropLocations.RIGHT;
+            }
+
+            telemetry.addData("FPS", tensorflow.portal.getFps());
+            telemetry.addData("Current Location", location.toString());
+            telemetry.addData("Confidence", String.format("%.2f%%", bestDetection != null ? bestDetection.getConfidence() * 100 : 0));
             telemetry.update();
         }
 
         waitForStart();
-        TeamPropProcessor.Location finalLocation = location;
         schedule(new SequentialCommandGroup(
-                new InstantCommand(() -> drive.followTrajectorySequence(lines)),
-                new WaitCommand(250),
-                new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
                 new SelectCommand(
                         new HashMap<Object, Command>() {{
-                            put(TeamPropProcessor.Location.RIGHT, new SequentialCommandGroup(
-                                    new InstantCommand(() -> drive.followTrajectorySequence(rightPositioning)),
-                                    new InstantCommand(() -> drive.turn(Math.toRadians(-90))),
-                                    new WaitCommand(300),
-                                    new InstantCommand(collectorSystem::toggleLiftLocation),
-                                    new WaitCommand(400),
-                                    new InstantCommand(collectorSystem::toggleLiftLocation),
-                                    new WaitCommand(250),
-                                    new InstantCommand(() -> drive.followTrajectory(park_reverse))
-                            ));
-                            put(TeamPropProcessor.Location.NOT_FOUND, new SequentialCommandGroup(
-                                    new InstantCommand(() ->
-                                    {
-                                        drive.followTrajectorySequence(leftPositioning);
-                                        drive.turn(Math.toRadians(90));
-                                    }),
-                                    new WaitCommand(300),
-                                    new InstantCommand(collectorSystem::toggleLiftLocation),
-                                    new WaitCommand(400),
-                                    new InstantCommand(collectorSystem::toggleLiftLocation),
-                                    new WaitCommand(250),
-                                    new InstantCommand(() -> drive.followTrajectorySequence(park))
-                            ));
-                            put(TeamPropProcessor.Location.LEFT, new SequentialCommandGroup(
-                                    new InstantCommand(() -> {
-                                        drive.followTrajectorySequence(leftPositioning);
-                                        drive.turn(Math.toRadians(90));
-                                    }),
-                                    new WaitCommand(300),
-                                    new InstantCommand(collectorSystem::toggleLiftLocation),
-                                    new WaitCommand(400),
-                                    new InstantCommand(collectorSystem::toggleLiftLocation),
-                                    new WaitCommand(250),
-                                    new InstantCommand(() -> drive.followTrajectorySequence(park))
-                            ));
-                            put(TeamPropProcessor.Location.MIDDLE, new SequentialCommandGroup(
-                                    new WaitCommand(300),
-                                    new InstantCommand(collectorSystem::toggleLiftLocation),
-                                    new WaitCommand(400),
-                                    new InstantCommand(collectorSystem::toggleLiftLocation),
-                                    new WaitCommand(250),
-                                    new InstantCommand(() -> drive.turn(Math.toRadians(-90))),
-                                    new InstantCommand(() -> drive.followTrajectory(park_reverse))
-                            ));
+                            put(PropLocations.RIGHT, new InstantCommand(() -> drive.followTrajectorySequence(rightPurple)));
+                            put(PropLocations.MIDDLE, new InstantCommand(() -> drive.followTrajectorySequence(middlePurple)));
+                            put(PropLocations.LEFT, new InstantCommand(() -> drive.followTrajectorySequence(leftPurple)));
                         }},
-                        () -> finalLocation
-                )
-        ));
+                        () -> location
+                ),
+                new InstantCommand(collectorSystem::toggleLiftLocation),
+                new WaitCommand(300),
+                new InstantCommand(collectorSystem::toggleLiftLocation),
+                new WaitCommand(600),
+                new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
+                new WaitCommand(300),
+                new SelectCommand(
+                        new HashMap<Object, Command>() {{
+                            put(PropLocations.RIGHT, new InstantCommand(() -> drive.followTrajectoryAsync(rightYellow)));
+                            put(PropLocations.MIDDLE, new InstantCommand(() -> drive.followTrajectoryAsync(middleYellow)));
+                            put(PropLocations.LEFT, new InstantCommand(() -> drive.followTrajectoryAsync(leftYellow)));
+                        }},
+                        () -> location
+                ),
+                new InstantCommand(() -> depositSystem.setSlidesTicks(200)),
+                new WaitUntilCommand(() -> !(drive.isBusy() || depositSystem.slidesBusy())),
+                new InstantCommand(() -> {
+                    depositSystem.toggleBlockers();
+                    depositSystem.toggleBlockers();
+                }),
+                new WaitCommand(500),
+                new InstantCommand(() -> drive.adjustPoseAsync(new Pose2d(-5, 0, 0))),
+                new WaitUntilCommand(() -> !drive.isBusy()),
+                new InstantCommand(() -> {
+                    depositSystem.setSlidesTicks(0);
+                    depositSystem.toggleSpike();
+                    drive.adjustPoseAsync(new Pose2d(5, 0, 0));
+                }),
+                new WaitCommand(2000),
+                new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED)),
+                new WaitUntilCommand(() -> !drive.isBusy())
+        ).raceWith(new RunCommand(drive::update)));
+    }
+
+    private enum PropLocations {
+        LEFT,
+        MIDDLE,
+        RIGHT
     }
 }
