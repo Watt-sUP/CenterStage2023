@@ -12,10 +12,10 @@ import java.util.List;
 
 @Config
 public class DepositSubsystem extends SubsystemBase {
-    public static Double LOW_LEFT = 0.0, LOW_RIGHT = 0.0;
+    public static Double LOW_LEFT = 0.06, LOW_RIGHT = 0.06;
     private final DcMotor slides;
     private final ServoEx leftLift, rightLift, stopper_top, stopper_bottom;
-    public static Double HIGH_LEFT = 0.59, HIGH_RIGHT = 0.58;
+    public static Double HIGH_LEFT = 1.0, HIGH_RIGHT = 1.0;
 
     private enum Blocker {
         TWO_PIXELS,
@@ -39,7 +39,7 @@ public class DepositSubsystem extends SubsystemBase {
         this.stopper_bottom = stopper_bottom;
         this.slides = slides;
 
-        this.leftLift.setInverted(true);
+        this.rightLift.setInverted(true);
         this.stopper_bottom.setInverted(true);
 
         this.stopper_top.turnToAngle(0);

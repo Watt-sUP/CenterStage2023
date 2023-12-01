@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.vision;
 
-import androidx.annotation.NonNull;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -10,15 +8,10 @@ import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.commands.subsystems.ApriltagSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 
@@ -27,7 +20,7 @@ import java.util.List;
 public class AlignWithAprilTagSample extends LinearOpMode {
 
     public static int TARGET_ID = 1;
-    public static Pose TARGET_POSITION = new Pose(5, 0, 0), THRESHOLDS = new Pose(2, 2, 2.5);
+    public static ApriltagSubsystem.Pose TARGET_POSITION = new ApriltagSubsystem.Pose(5, 0, 0), THRESHOLDS = new ApriltagSubsystem.Pose(2, 2, 2.5);
     private RobotStates robotState = RobotStates.DRIVE;
 
     @Override
@@ -38,43 +31,26 @@ public class AlignWithAprilTagSample extends LinearOpMode {
                 new SimpleServo(hardwareMap, "odo_right", 0, 300),
                 new SimpleServo(hardwareMap, "odo_back", 0, 1800)
         );
-
-        AprilTagProcessor aprilTagProcessor = new AprilTagProcessor.Builder()
-                .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
-                .setTagLibrary(AprilTagGameDatabase.getCurrentGameTagLibrary())
-                .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
-                .setDrawTagOutline(true)
-                .setDrawTagID(true)
-                .build();
-
-        VisionPortal visionPortal = new VisionPortal.Builder()
-                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                .addProcessor(aprilTagProcessor)
-                .setAutoStopLiveView(true)
-                .build();
+        ApriltagSubsystem apriltagSubsystem = new ApriltagSubsystem(hardwareMap, "Webcam 1", TARGET_ID);
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         drive.setPoseEstimate(new Pose2d());
-        aprilTagProcessor.setDecimation(3);
-        visionPortal.stopLiveView();
         odometry.raise();
 
         while (opModeInInit()) {
             if (isStopRequested())
                 return;
 
-            List<AprilTagDetection> detections = aprilTagProcessor.getDetections();
-            for (AprilTagDetection detection : detections)
-                if (detection.metadata != null && detection.id == TARGET_ID) {
-                    Pose positionData = getAprilTagPose(detection);
-                    telemetry.addData("Forward Offset (Inch)", positionData.f);
-                    telemetry.addData("Strafe Offset (Inch)", positionData.s);
-                    telemetry.addData("Turn Offset (Degrees)", positionData.r);
-                    telemetry.addData("Bearing", detection.ftcPose.bearing);
+            List<ApriltagSubsystem.Pose> detections = apriltagSubsystem.getDetections();
+            for (ApriltagSubsystem.Pose detection : detections) {
+                telemetry.addData("Forward Offset (Inch)", detection.y);
+                telemetry.addData("Strafe Offset (Inch)", detection.x);
+                telemetry.addData("Turn Offset (Degrees)", detection.heading);
+                telemetry.addData("Detection ID", detection.id);
 
-                    telemetry.update();
-                }
+                telemetry.update();
+            }
         }
 
         while (opModeIsActive()) {
@@ -97,43 +73,40 @@ public class AlignWithAprilTagSample extends LinearOpMode {
                         drive.setMotorPowers(0, 0, 0, 0);
                         odometry.lower();
 
-                        if (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING)
-                            visionPortal.resumeStreaming();
+                        if (apriltagSubsystem.portal.getCameraState() != VisionPortal.CameraState.STREAMING)
+                            apriltagSubsystem.portal.resumeStreaming();
                         robotState = RobotStates.ALIGN_TO_TAG;
                     }
                     break;
 
                 case ALIGN_TO_TAG:
                     // Don't do anything if the camera hasn't started yet
-                    if (visionPortal.getCameraState() == VisionPortal.CameraState.STREAMING) {
-                        Pose adjustment;
-                        List<AprilTagDetection> detections = aprilTagProcessor.getDetections();
+                    if (apriltagSubsystem.portal.getCameraState() == VisionPortal.CameraState.STREAMING) {
+                        ApriltagSubsystem.Pose adjustment;
+                        List<ApriltagSubsystem.Pose> detections = apriltagSubsystem.getDetections();
 
-                        for (AprilTagDetection detection : detections)
-                            if (detection.metadata != null && detection.id == TARGET_ID) {
-                                Pose tagPosition = getAprilTagPose(detection);
-                                // Log tag position
-                                telemetry.addLine("Tag Position");
-                                telemetry.addLine("--------------------------");
-                                telemetry.addData("Forward Offset", tagPosition.f);
-                                telemetry.addData("Strafe Offset", tagPosition.s);
-                                telemetry.addData("Turn Offset", tagPosition.r);
-                                telemetry.addData("Bearing", detection.ftcPose.bearing);
+                        for (ApriltagSubsystem.Pose detection : detections) {
+                            // Log tag position
+                            telemetry.addLine("Tag Position");
+                            telemetry.addLine("--------------------------");
+                            telemetry.addData("Forward Offset", detection.y);
+                            telemetry.addData("Strafe Offset", detection.x);
+                            telemetry.addData("Turn Offset", detection.heading);
 
-                                // Bearing is positive to the left and Y increases as you stray further away,
-                                // leaving X to be reversed
-                                adjustment = tagPosition.minus(TARGET_POSITION);
-                                adjustment.s *= -1;
+                            // Bearing is positive to the left and Y increases as you stray further away,
+                            // leaving X to be reversed
+                            adjustment = detection.minus(TARGET_POSITION);
+                            adjustment.x *= -1;
 
-                                // Don't start movement until existing trajectories finish or you're already in position
-                                if (!adjustment.fitsThreshold(THRESHOLDS) && !drive.isBusy())
-                                    drive.adjustPoseAsync(adjustment.toPose2d());
-                            }
+                            // Don't start movement until existing trajectories finish or you're already in position
+                            if (!drive.isBusy())
+                                drive.adjustPoseAsync(adjustment.toPose2d());
+                        }
                     }
 
                     if (gamepad1.b) {
-                        if (visionPortal.getCameraState() == VisionPortal.CameraState.STREAMING)
-                            visionPortal.stopStreaming();
+                        if (apriltagSubsystem.portal.getCameraState() == VisionPortal.CameraState.STREAMING)
+                            apriltagSubsystem.portal.stopStreaming();
 
                         // End any ongoing trajectory
                         if (drive.isBusy())
@@ -144,14 +117,14 @@ public class AlignWithAprilTagSample extends LinearOpMode {
                         robotState = RobotStates.DRIVE;
                     }
 
-                    telemetry.addData("Target Pose", TARGET_POSITION.f + ", " +
-                            TARGET_POSITION.s + ", " + TARGET_POSITION.r);
+                    telemetry.addData("Target Pose", TARGET_POSITION.y + ", " +
+                            TARGET_POSITION.x + ", " + TARGET_POSITION.heading);
                     drive.update();
                     break;
 
                 default:
-                    if (visionPortal.getCameraState() == VisionPortal.CameraState.STREAMING)
-                        visionPortal.stopStreaming();
+                    if (apriltagSubsystem.portal.getCameraState() == VisionPortal.CameraState.STREAMING)
+                        apriltagSubsystem.portal.stopStreaming();
 
                     odometry.raise();
                     robotState = RobotStates.DRIVE;
@@ -160,52 +133,11 @@ public class AlignWithAprilTagSample extends LinearOpMode {
             telemetry.addData("Current Mode", robotState.toString());
             telemetry.update();
         }
-        visionPortal.close();
-    }
-
-    @NonNull
-    public Pose getAprilTagPose(AprilTagDetection detection) {
-        return new Pose(
-                detection.ftcPose.y,
-                detection.ftcPose.x,
-                detection.ftcPose.yaw
-        );
+        apriltagSubsystem.shutdown();
     }
 
     private enum RobotStates {
         ALIGN_TO_TAG,
         DRIVE
-    }
-}
-
-class Pose {
-    public double f, s, r;
-
-    public Pose(double f, double s, double r) {
-        this.f = f;
-        this.s = s;
-        this.r = r;
-    }
-
-    public Pose plus(Pose x) {
-        return new Pose(this.f + x.f, this.s + x.s, this.r + x.r);
-    }
-
-    public Pose times(double scalar) {
-        return new Pose(this.f * scalar, this.s * scalar, this.r * scalar);
-    }
-
-    public Pose minus(Pose x) {
-        return this.plus(x.times(-1));
-    }
-
-    public boolean fitsThreshold(Pose threshold) {
-        return Math.abs(this.f) <= threshold.f &&
-                Math.abs(this.s) <= threshold.s &&
-                Math.abs(this.r) <= threshold.r;
-    }
-
-    public Pose2d toPose2d() {
-        return new Pose2d(this.f, this.s, this.r);
     }
 }

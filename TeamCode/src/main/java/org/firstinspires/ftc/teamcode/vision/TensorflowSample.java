@@ -8,10 +8,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.teamcode.commands.subsystems.TensorflowSubsystem;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.tfod.TfodProcessor;
-
-import java.util.List;
 
 @TeleOp(name = "Vision: TensorFlow Sample", group = "Vision")
 public class TensorflowSample extends LinearOpMode {
@@ -32,24 +31,14 @@ public class TensorflowSample extends LinearOpMode {
                 .setAutoStopLiveView(true)
                 .build();
 
+        TensorflowSubsystem tensorflowSystem = new TensorflowSubsystem(visionPortal, tensorflowProcessor);
         visionPortal.stopLiveView();
-        tensorflowProcessor.setMinResultConfidence(0.6F);
+        tensorflowSystem.setMinConfidence(0.7);
         while (opModeInInit()) {
             if (isStopRequested())
                 return;
 
-            List<Recognition> detections = tensorflowProcessor.getRecognitions();
-            telemetry.addData("# Objects Detected", detections.size());
-
-            float best_conf = 0;
-            Recognition best_detection = null;
-            for (Recognition detection : detections) {
-                if (detection.getConfidence() > best_conf) {
-                    best_conf = 0;
-                    best_detection = detection;
-                }
-            }
-
+            Recognition best_detection = tensorflowSystem.getBestDetection();
             if (best_detection != null) {
                 telemetry.addData("Confidence", best_detection.getConfidence());
                 telemetry.addData("X, Y", new Pair<>(
@@ -60,13 +49,12 @@ public class TensorflowSample extends LinearOpMode {
                         best_detection.getWidth(),
                         best_detection.getHeight()
                 ).toString());
-            }
+            } else telemetry.addLine("No Objects Found");
 
             telemetry.update();
         }
 
-        tensorflowProcessor.shutdown();
-        visionPortal.close();
+        tensorflowSystem.shutdown();
         while (opModeIsActive()) {
             if (isStopRequested())
                 return;
