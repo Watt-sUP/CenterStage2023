@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 @Config
 public class CollectorSubsystem extends SubsystemBase {
     ServoEx liftLeft, liftRight;
-    public static Double LOWER_LIFT = 0.87, RAISE_LIFT = 0.12, STACK_LIFT = 0.78;
+    public static Double LOWER_LIFT = 0.83, RAISE_LIFT = 0.06, STACK_LIFT = 0.76;
     private final InterpLUT rightConverter = new InterpLUT();
     private final Double CLOSED_POS = 0., OPENED_POS = .55;
 

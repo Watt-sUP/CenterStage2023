@@ -10,19 +10,19 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
-import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SelectCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
-import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.TensorflowSubsystem;
+import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
@@ -38,7 +38,7 @@ public class BlueAuto extends CommandOpMode {
     public void initialize() {
 
         TensorflowSubsystem tensorflow = new TensorflowSubsystem(hardwareMap, "Webcam 1",
-                "red_prop.tflite", "Blue Prop");
+                "blue_prop.tflite", "Blue Prop");
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
@@ -65,30 +65,36 @@ public class BlueAuto extends CommandOpMode {
         );
 
         TrajectorySequence leftPurple = drive.trajectorySequenceBuilder(new Pose2d(10.85, 64.07, Math.toRadians(-90.00)))
-                .splineTo(new Vector2d(23.12, 22.93), Math.toRadians(-90.00))
+                .splineTo(new Vector2d(21.12, 22.93), Math.toRadians(-90.00))
                 .setReversed(true)
-                .lineTo(new Vector2d(22.58, 42.00))
-                .setReversed(false)
+                .lineTo(new Vector2d(21.58, 44.00))
                 .build();
         Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end(), true)
-                .splineTo(new Vector2d(47.35, 41.7), Math.toRadians(0.00))
+                .splineTo(new Vector2d(48.5, 42), Math.toRadians(0.00),
+                        SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
 
         TrajectorySequence middlePurple = drive.trajectorySequenceBuilder(new Pose2d(10.85, 64.07, Math.toRadians(-90.00)))
                 .lineToConstantHeading(new Vector2d(10.85, 18.95))
-                .lineToConstantHeading(new Vector2d(10.85, 40.3))
+                .lineToConstantHeading(new Vector2d(10.85, 41.3))
                 .build();
         Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), true)
-                .splineTo(new Vector2d(47.65, 35.85), Math.toRadians(0.00))
+                .splineTo(new Vector2d(48.5, 37.85), Math.toRadians(0.00),
+                        SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
 
         TrajectorySequence rightPurple = drive.trajectorySequenceBuilder(new Pose2d(10.85, 64.07, Math.toRadians(-90.00)))
-                .splineTo(new Vector2d(16, 32), Math.toRadians(-90))
+                .splineTo(new Vector2d(12, 32), Math.toRadians(-90))
                 .turn(Math.toRadians(-90))
-                .setReversed(true)
+                .lineTo(new Vector2d(3, 32))
+                .lineTo(new Vector2d(15, 32))
                 .build();
         Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), true)
-                .splineTo(new Vector2d(47.2, 31.4), Math.toRadians(0))
+                .splineTo(new Vector2d(48.5, 30.4), Math.toRadians(0),
+                        SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
 
 
@@ -122,6 +128,7 @@ public class BlueAuto extends CommandOpMode {
 
         waitForStart();
         schedule(new SequentialCommandGroup(
+                new InstantCommand(tensorflow::shutdown),
                 new SelectCommand(
                         new HashMap<Object, Command>() {{
                             put(PropLocations.RIGHT, new InstantCommand(() -> drive.followTrajectorySequence(rightPurple)));
@@ -136,32 +143,31 @@ public class BlueAuto extends CommandOpMode {
                 new WaitCommand(600),
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
                 new WaitCommand(300),
+                new InstantCommand(() -> {
+                    depositSystem.toggleBlockers();
+                    depositSystem.toggleSpike();
+                }),
                 new SelectCommand(
                         new HashMap<Object, Command>() {{
-                            put(PropLocations.RIGHT, new InstantCommand(() -> drive.followTrajectoryAsync(rightYellow)));
-                            put(PropLocations.MIDDLE, new InstantCommand(() -> drive.followTrajectoryAsync(middleYellow)));
-                            put(PropLocations.LEFT, new InstantCommand(() -> drive.followTrajectoryAsync(leftYellow)));
+                            put(PropLocations.RIGHT, new InstantCommand(() -> drive.followTrajectory(rightYellow)));
+                            put(PropLocations.MIDDLE, new InstantCommand(() -> drive.followTrajectory(middleYellow)));
+                            put(PropLocations.LEFT, new InstantCommand(() -> drive.followTrajectory(leftYellow)));
                         }},
                         () -> location
                 ),
-                new InstantCommand(() -> depositSystem.setSlidesTicks(200)),
-                new WaitUntilCommand(() -> !(drive.isBusy() || depositSystem.slidesBusy())),
+                new InstantCommand(() -> drive.turn(Math.toRadians(180) - drive.getPoseEstimate().getHeading(), AngleUnit.RADIANS)),
+                new WaitCommand(300),
                 new InstantCommand(() -> {
                     depositSystem.toggleBlockers();
                     depositSystem.toggleBlockers();
                 }),
-                new WaitCommand(500),
-                new InstantCommand(() -> drive.adjustPoseAsync(new Pose2d(-5, 0, 0))),
-                new WaitUntilCommand(() -> !drive.isBusy()),
-                new InstantCommand(() -> {
-                    depositSystem.setSlidesTicks(0);
-                    depositSystem.toggleSpike();
-                    drive.adjustPoseAsync(new Pose2d(5, 0, 0));
-                }),
-                new WaitCommand(2000),
-                new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED)),
-                new WaitUntilCommand(() -> !drive.isBusy())
-        ).raceWith(new RunCommand(drive::update)));
+                new WaitCommand(1500),
+                new InstantCommand(() -> drive.adjustPose(new Pose2d(-5, 0, 0))),
+                new InstantCommand(depositSystem::toggleSpike),
+                new WaitCommand(1000),
+                new InstantCommand(() -> drive.adjustPose(new Pose2d(5, 0, 0))),
+                new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
+        ));
     }
 
     private enum PropLocations {
