@@ -1,11 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.command.CommandOpMode;
-import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.RunCommand;
-import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
@@ -54,14 +51,17 @@ public class TeleOp extends CommandOpMode {
 
         // Raise odometry to avoid sliding
         odometrySystem.raise();
-
         driveSystem.setDefaultCommand(driveCommand);
+
+        // Brakes
         driver1.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
                 .whenPressed(() -> driveSystem.setPowerLimit(0.5))
                 .whenReleased(() -> driveSystem.setPowerLimit(1.0));
         driver1.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
-                .whenPressed(() -> driveSystem.setPowerLimit(0.2))
+                .whenPressed(() -> driveSystem.setPowerLimit(0.25))
                 .whenReleased(() -> driveSystem.setPowerLimit(1.0));
+
+        // Endgame specific controls
         driver1.getGamepadButton(GamepadKeys.Button.B)
                 .whenPressed(endgameSystem::toggleClimb);
         driver1.getGamepadButton(GamepadKeys.Button.Y)
@@ -75,10 +75,12 @@ public class TeleOp extends CommandOpMode {
                 .whenPressed(depositSystem::raiseSlidesPosition);
         driver2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
                 .whenPressed(depositSystem::lowerSlidesPosition);
+
         driver2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
                 .whenPressed(() -> depositSystem.setSlidesPosition(4));
         driver2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
                 .whenPressed(() -> depositSystem.setSlidesPosition(0));
+
         driver2.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
                 .whenPressed(() -> depositSystem.adjustSlidesTicks(-75));
         driver2.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
@@ -86,17 +88,12 @@ public class TeleOp extends CommandOpMode {
 
 
         driver2.getGamepadButton(GamepadKeys.Button.Y)
-                .whenPressed(depositSystem::toggleSpike);
+                .whenPressed(() -> {
+                    if (collectorSystem.location != CollectorSubsystem.LiftState.RAISED)
+                        depositSystem.toggleSpike();
+                });
         driver2.getGamepadButton(GamepadKeys.Button.A)
-                .whenPressed(new ConditionalCommand(
-                        new SequentialCommandGroup(
-                                new InstantCommand(collectorSystem::toggleClamp),
-                                new WaitCommand(225),
-                                new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
-                        ),
-                        new InstantCommand(collectorSystem::toggleClamp),
-                        () -> collectorSystem.clamping == CollectorSubsystem.ClampState.OPENED && collectorSystem.location != CollectorSubsystem.LiftState.RAISED
-                ));
+                .whenPressed(new InstantCommand(collectorSystem::toggleClamp));
         driver2.getGamepadButton(GamepadKeys.Button.B)
                 .whenPressed(depositSystem::toggleBlockers);
 

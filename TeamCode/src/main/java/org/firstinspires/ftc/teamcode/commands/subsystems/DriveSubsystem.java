@@ -11,10 +11,6 @@ public class DriveSubsystem extends SubsystemBase {
     private double powerLimit = 1.0;
     private final MecanumDrive drive;
 
-    public DriveSubsystem(Motor leftFront, Motor rightFront, Motor leftBack, Motor rightBack) {
-        drive = new MecanumDrive(leftFront, rightFront, leftBack, rightBack);
-    }
-
     public DriveSubsystem(HardwareMap hardwareMap, String leftFront, String rightFront, String leftBack, String rightBack) {
         drive = new MecanumDrive(
                 new Motor(hardwareMap, leftFront),
@@ -25,7 +21,7 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     public void drive(double fwd, double st, double rot) {
-        drive.driveRobotCentric(st, fwd, rot, true);
+        drive.driveRobotCentric(st, fwd, rot, false);
     }
 
     public double getPowerLimit() {
@@ -33,7 +29,7 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     public void setPowerLimit(double limit) {
-        powerLimit = MathUtils.clamp(limit, -1.0, -1.0);
-        drive.setRange(-limit, limit);
+        powerLimit = MathUtils.clamp(Math.abs(limit), 0, 1);
+        drive.setMaxSpeed(powerLimit);
     }
 }

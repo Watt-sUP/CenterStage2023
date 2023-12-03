@@ -20,7 +20,7 @@ import java.util.List;
 public class AlignWithAprilTagSample extends LinearOpMode {
 
     public static int TARGET_ID = 1;
-    public static ApriltagSubsystem.Pose TARGET_POSITION = new ApriltagSubsystem.Pose(5, 0, 0), THRESHOLDS = new ApriltagSubsystem.Pose(2, 2, 2.5);
+    public static ApriltagSubsystem.Pose TARGET_POSITION = new ApriltagSubsystem.Pose(10, 0, 0), THRESHOLDS = new ApriltagSubsystem.Pose(2, 2, 2.5);
     private RobotStates robotState = RobotStates.DRIVE;
 
     @Override
@@ -44,8 +44,8 @@ public class AlignWithAprilTagSample extends LinearOpMode {
 
             List<ApriltagSubsystem.Pose> detections = apriltagSubsystem.getDetections();
             for (ApriltagSubsystem.Pose detection : detections) {
-                telemetry.addData("Forward Offset (Inch)", detection.y);
-                telemetry.addData("Strafe Offset (Inch)", detection.x);
+                telemetry.addData("Forward Offset (Inch)", detection.forward);
+                telemetry.addData("Strafe Offset (Inch)", detection.strafe);
                 telemetry.addData("Turn Offset (Degrees)", detection.heading);
                 telemetry.addData("Detection ID", detection.id);
 
@@ -89,14 +89,14 @@ public class AlignWithAprilTagSample extends LinearOpMode {
                             // Log tag position
                             telemetry.addLine("Tag Position");
                             telemetry.addLine("--------------------------");
-                            telemetry.addData("Forward Offset", detection.y);
-                            telemetry.addData("Strafe Offset", detection.x);
+                            telemetry.addData("Forward Offset", detection.forward);
+                            telemetry.addData("Strafe Offset", detection.strafe);
                             telemetry.addData("Turn Offset", detection.heading);
 
-                            // Bearing is positive to the left and Y increases as you stray further away,
-                            // leaving X to be reversed
+                            // Heading is positive to the left and forward distance increases as you stray further away,
+                            // leaving strafing to be reversed
                             adjustment = detection.minus(TARGET_POSITION);
-                            adjustment.x *= -1;
+                            adjustment.strafe *= -1;
 
                             // Don't start movement until existing trajectories finish or you're already in position
                             if (!drive.isBusy())
@@ -117,8 +117,8 @@ public class AlignWithAprilTagSample extends LinearOpMode {
                         robotState = RobotStates.DRIVE;
                     }
 
-                    telemetry.addData("Target Pose", TARGET_POSITION.y + ", " +
-                            TARGET_POSITION.x + ", " + TARGET_POSITION.heading);
+                    telemetry.addData("Target Pose", TARGET_POSITION.forward + ", " +
+                            TARGET_POSITION.strafe + ", " + TARGET_POSITION.heading);
                     drive.update();
                     break;
 

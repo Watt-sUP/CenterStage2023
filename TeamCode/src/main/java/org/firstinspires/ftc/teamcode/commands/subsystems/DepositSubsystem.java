@@ -12,10 +12,11 @@ import java.util.List;
 
 @Config
 public class DepositSubsystem extends SubsystemBase {
-    public static Double LOW_LEFT = 0.06, LOW_RIGHT = 0.06;
     private final DcMotor slides;
-    private final ServoEx leftLift, rightLift, stopper_top, stopper_bottom;
+    public static Double LOW_LEFT = 0.06, LOW_RIGHT = 0.06;
+    private final ServoEx leftLift, rightLift;
     public static Double HIGH_LEFT = 1.0, HIGH_RIGHT = 1.0;
+    private final ServoEx stopperTop, stopperBottom;
 
     private enum Blocker {
         TWO_PIXELS,
@@ -27,23 +28,24 @@ public class DepositSubsystem extends SubsystemBase {
         RAISED,
         LOWERED
     }
+
     private Spike spikeState = Spike.RAISED;
 
     private Blocker blockerState = Blocker.FREE;
     private boolean raisingSlides = false;
 
-    public DepositSubsystem(ServoEx leftLift, ServoEx rightLift, ServoEx stopper_top, ServoEx stopper_bottom, DcMotor slides) {
+    public DepositSubsystem(ServoEx leftLift, ServoEx rightLift, ServoEx stopperTop, ServoEx stopperBottom, DcMotor slides) {
         this.leftLift = leftLift;
         this.rightLift = rightLift;
-        this.stopper_top = stopper_top;
-        this.stopper_bottom = stopper_bottom;
+        this.stopperTop = stopperTop;
+        this.stopperBottom = stopperBottom;
         this.slides = slides;
 
         this.rightLift.setInverted(true);
-        this.stopper_bottom.setInverted(true);
+        this.stopperBottom.setInverted(true);
 
-        this.stopper_top.turnToAngle(0);
-        this.stopper_bottom.turnToAngle(45);
+        this.stopperTop.turnToAngle(0);
+        this.stopperBottom.turnToAngle(45);
         this.toggleSpike();
 
         this.slides.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -52,15 +54,12 @@ public class DepositSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        if (slides.getCurrentPosition() > 100 && raisingSlides)
-        {
+        if (slides.getCurrentPosition() > 100 && raisingSlides) {
             while (blockerState != Blocker.TWO_PIXELS)
                 this.toggleBlockers();
 
             if (spikeState == Spike.LOWERED)
                 this.toggleSpike();
-
-            raisingSlides = false;
         }
     }
 
@@ -123,16 +122,16 @@ public class DepositSubsystem extends SubsystemBase {
     public void toggleBlockers() {
         switch (blockerState) {
             case FREE:
-                stopper_bottom.turnToAngle(90);
-                stopper_top.turnToAngle(135);
+                stopperBottom.turnToAngle(90);
+                stopperTop.turnToAngle(135);
                 blockerState = Blocker.TWO_PIXELS;
                 break;
             case ONE_PIXEL:
-                stopper_bottom.turnToAngle(45);
+                stopperBottom.turnToAngle(45);
                 blockerState = Blocker.FREE;
                 break;
             case TWO_PIXELS:
-                stopper_top.turnToAngle(0);
+                stopperTop.turnToAngle(0);
                 blockerState = Blocker.ONE_PIXEL;
                 break;
         }

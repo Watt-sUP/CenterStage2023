@@ -14,7 +14,7 @@ public class EndgameSubsystem extends SubsystemBase {
 
     private ClimbState climbState = ClimbState.LOWERED;
 
-    public EndgameSubsystem(DcMotor leftPull, @Nullable DcMotor rightPull, @Nullable ServoEx launcher) {
+    public EndgameSubsystem(DcMotor leftPull, DcMotor rightPull, @Nullable ServoEx launcher) {
         this.leftPull = leftPull;
         this.rightPull = rightPull;
         this.launcher = launcher;
@@ -22,10 +22,8 @@ public class EndgameSubsystem extends SubsystemBase {
         this.leftPull.setDirection(DcMotorSimple.Direction.REVERSE);
         this.leftPull.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        if (rightPull != null) {
-            this.rightPull.setDirection(DcMotorSimple.Direction.REVERSE);
-            this.rightPull.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        }
+        this.rightPull.setDirection(DcMotorSimple.Direction.REVERSE);
+        this.rightPull.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         if (launcher != null)
             this.launcher.turnToAngle(0);
@@ -39,9 +37,9 @@ public class EndgameSubsystem extends SubsystemBase {
                 break;
             case HOOKING:
                 this.setClimbToTicks(1500);
-                climbState = ClimbState.LIFT;
+                climbState = ClimbState.HANGING;
                 break;
-            case LIFT:
+            case HANGING:
                 this.setClimbToTicks(0);
                 climbState = ClimbState.LOWERED;
                 break;
@@ -53,15 +51,13 @@ public class EndgameSubsystem extends SubsystemBase {
         leftPull.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftPull.setPower(1);
 
-        if (rightPull != null) {
-            rightPull.setTargetPosition(ticks);
-            rightPull.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightPull.setPower(1);
-        }
+        rightPull.setTargetPosition(ticks);
+        rightPull.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightPull.setPower(1);
     }
 
     public void launchPlane() {
-        if (launcher == null || climbState == ClimbState.LOWERED)
+        if (launcher == null || climbState != ClimbState.HOOKING)
             return;
 
         if ((int) launcher.getAngle() == 0)
@@ -74,12 +70,12 @@ public class EndgameSubsystem extends SubsystemBase {
     }
 
     public boolean isBusy() {
-        return rightPull != null ? leftPull.isBusy() || rightPull.isBusy() : leftPull.isBusy();
+        return leftPull.isBusy() || rightPull.isBusy();
     }
 
     private enum ClimbState {
         HOOKING,
-        LIFT,
+        HANGING,
         LOWERED
     }
 }

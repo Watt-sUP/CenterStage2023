@@ -15,6 +15,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ApriltagSubsystem extends SubsystemBase {
 
@@ -31,7 +32,7 @@ public class ApriltagSubsystem extends SubsystemBase {
         aprilTagProcessor = new AprilTagProcessor.Builder()
                 .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
                 .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
-                .setTagLibrary(AprilTagGameDatabase.getCenterStageTagLibrary())
+                .setTagLibrary(AprilTagGameDatabase.getCurrentGameTagLibrary())
                 .build();
 
         portal = new VisionPortal.Builder()
@@ -59,25 +60,14 @@ public class ApriltagSubsystem extends SubsystemBase {
         if (portal.getCameraState() != VisionPortal.CameraState.STREAMING || targetsList.isEmpty())
             return new ArrayList<>();
 
-        List<Pose> detections = new ArrayList<>();
         List<AprilTagDetection> aprilTagDetections = aprilTagProcessor.getDetections();
-        for (AprilTagDetection detection : aprilTagDetections) {
-            if (targetsList.contains(detection.id) && detection.metadata != null)
-                detections.add(new Pose(
-                        detection.id,
-                        detection.ftcPose.x,
-                        detection.ftcPose.y,
-                        detection.ftcPose.yaw
-                ));
-            else if (targetsList.contains(detection.id)) {
-                detections.add(new Pose(
-                        detection.id,
-                        -1, -1, -1
-                ));
-            }
-        }
-
-        return detections;
+        return aprilTagDetections.stream()
+                .filter(detection -> targetsList.contains(detection.id))
+                .map(detection -> {
+                    if (detection.metadata != null)
+                        return new Pose(detection.id, detection.ftcPose.y, detection.ftcPose.x, detection.ftcPose.yaw);
+                    else return new Pose(detection.id, -1, -1, -1);
+                }).collect(Collectors.toList());
     }
 
     public void shutdown() {
@@ -88,26 +78,26 @@ public class ApriltagSubsystem extends SubsystemBase {
     }
 
     public static class Pose {
-        public double x, y, heading;
+        public double strafe, forward, heading;
         public int id;
 
-        public Pose(double x, double y, double heading) {
-            this.x = x;
-            this.y = y;
+        public Pose(double forward, double strafe, double heading) {
+            this.strafe = strafe;
+            this.forward = forward;
             this.heading = heading;
         }
 
-        public Pose(int id, double x, double y, double heading) {
-            this(x, y, heading);
+        public Pose(int id, double forward, double strafe, double heading) {
+            this(forward, strafe, heading);
             this.id = id;
         }
 
         public Pose plus(Pose pose) {
-            return new Pose(this.x + pose.x, this.y + pose.y, this.heading + pose.heading);
+            return new Pose(this.forward + pose.forward, this.strafe + pose.strafe, this.heading + pose.heading);
         }
 
         public Pose times(double scalar) {
-            return new Pose(this.x * scalar, this.y * scalar, this.heading * scalar);
+            return new Pose(this.forward * scalar, this.strafe * scalar, this.heading * scalar);
         }
 
         public Pose minus(Pose pose) {
@@ -115,7 +105,7 @@ public class ApriltagSubsystem extends SubsystemBase {
         }
 
         public Pose2d toPose2d() {
-            return new Pose2d(this.x, this.y, this.heading);
+            return new Pose2d(this.strafe, this.forward, this.heading);
         }
     }
 }

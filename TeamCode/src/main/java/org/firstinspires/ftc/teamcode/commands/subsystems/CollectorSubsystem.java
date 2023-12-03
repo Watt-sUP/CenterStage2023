@@ -4,16 +4,17 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.util.InterpLUT;
+import com.arcrobotics.ftclib.util.Timing;
 
-import javax.annotation.Nullable;
+import java.util.concurrent.TimeUnit;
 
 @Config
 public class CollectorSubsystem extends SubsystemBase {
-    ServoEx liftLeft, liftRight;
+    private final ServoEx liftLeft, liftRight;
     public static Double LOWER_LIFT = 0.83, RAISE_LIFT = 0.06, STACK_LIFT = 0.76;
     private final InterpLUT rightConverter = new InterpLUT();
     private final Double CLOSED_POS = 0., OPENED_POS = .55;
-
+    private final ServoEx claw;
     public LiftState location = LiftState.STACK;
 
     public enum ClampState {
@@ -21,10 +22,10 @@ public class CollectorSubsystem extends SubsystemBase {
         OPENED
     }
 
-    public ClampState clamping;
-    ServoEx claw;
+    public ClampState clamping = ClampState.CLOSED;
+    private Timing.Timer clampTimer = new Timing.Timer(275, TimeUnit.MILLISECONDS);
 
-    public CollectorSubsystem(ServoEx liftL, ServoEx liftR, @Nullable ServoEx clamp) {
+    public CollectorSubsystem(ServoEx liftL, ServoEx liftR, ServoEx clamp) {
         liftLeft = liftL;
         liftRight = liftR;
         claw = clamp;
@@ -35,7 +36,6 @@ public class CollectorSubsystem extends SubsystemBase {
 
         liftR.setInverted(true);
         claw.setPosition(CLOSED_POS);
-        clamping = ClampState.CLOSED;
         this.setLiftLocation(LiftState.RAISED);
     }
 
@@ -44,7 +44,7 @@ public class CollectorSubsystem extends SubsystemBase {
         if (target == location)
             return;
 
-        if (claw.getPosition() > 0.2)
+        if (clamping == ClampState.OPENED)
             this.toggleClamp();
 
         switch (target) {
@@ -80,29 +80,37 @@ public class CollectorSubsystem extends SubsystemBase {
                 this.setLiftLocation(LiftState.STACK);
                 break;
             case STACK:
+                if (clamping == ClampState.CLOSED)
+                    this.toggleClamp();
+
                 this.setLiftLocation(LiftState.LOWERED);
-                if (claw.getPosition() < .5) {
-                    if (clamping == ClampState.CLOSED)
-                        this.toggleClamp();
-                    else claw.setPosition(OPENED_POS);
-                }
                 break;
         }
     }
 
     public void toggleClamp() {
-        if (claw == null)
-            return;
-
         switch (clamping) {
             case OPENED:
                 claw.setPosition(CLOSED_POS);
                 clamping = ClampState.CLOSED;
                 break;
             case CLOSED:
-                claw.setPosition(location != LiftState.RAISED ? OPENED_POS : 0.22);
+                if (location != LiftState.RAISED)
+                    claw.setPosition(OPENED_POS);
+                else {
+                    claw.setPosition(0.22);
+                    clampTimer.start();
+                }
                 clamping = ClampState.OPENED;
                 break;
+        }
+    }
+
+    @Override
+    public void periodic() {
+        if (clampTimer.done() && clampTimer.isTimerOn() && location != LiftState.RAISED) {
+            this.setLiftLocation(LiftState.RAISED);
+            clampTimer.pause();
         }
     }
 

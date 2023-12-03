@@ -34,6 +34,9 @@ public class ServoTuner extends LinearOpMode {
             else if (!USE_ANGLE && servo.getPosition() != POSITION)
                 servo.setPosition(POSITION);
 
+            if (servo.getInverted() != INVERT)
+                servo.setInverted(INVERT);
+
             telemetry.addData("Servo Name", SERVO_NAME);
             telemetry.addData("Current Angle", servo.getAngle());
             telemetry.addData("Current Position", servo.getPosition());

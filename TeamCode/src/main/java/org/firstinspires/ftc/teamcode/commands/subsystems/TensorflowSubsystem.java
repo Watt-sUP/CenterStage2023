@@ -10,6 +10,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 
+import java.util.Comparator;
 import java.util.List;
 
 public class TensorflowSubsystem extends SubsystemBase {
@@ -52,15 +53,9 @@ public class TensorflowSubsystem extends SubsystemBase {
     }
 
     public Recognition getBestDetection() {
-        float bestConf = 0;
-        Recognition bestDetection = null;
         List<Recognition> detections = tensorflowProcessor.getRecognitions();
-        for (Recognition detection : detections)
-            if (detection.getConfidence() > bestConf) {
-                bestDetection = detection;
-                bestConf = detection.getConfidence();
-            }
-
-        return bestDetection;
+        return detections.stream()
+                .max(Comparator.comparingDouble(Recognition::getConfidence))
+                .orElse(null);
     }
 }
