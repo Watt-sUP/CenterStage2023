@@ -51,6 +51,7 @@ public class TeleOp extends CommandOpMode {
 
         // Raise odometry to avoid sliding
         odometrySystem.raise();
+        depositSystem.setSafeguard(() -> collectorSystem.location != CollectorSubsystem.LiftState.RAISED);
         driveSystem.setDefaultCommand(driveCommand);
 
         // Brakes
@@ -88,10 +89,7 @@ public class TeleOp extends CommandOpMode {
 
 
         driver2.getGamepadButton(GamepadKeys.Button.Y)
-                .whenPressed(() -> {
-                    if (collectorSystem.location != CollectorSubsystem.LiftState.RAISED)
-                        depositSystem.toggleSpike();
-                });
+                .whenPressed(depositSystem::toggleSpike);
         driver2.getGamepadButton(GamepadKeys.Button.A)
                 .whenPressed(new InstantCommand(collectorSystem::toggleClamp));
         driver2.getGamepadButton(GamepadKeys.Button.B)

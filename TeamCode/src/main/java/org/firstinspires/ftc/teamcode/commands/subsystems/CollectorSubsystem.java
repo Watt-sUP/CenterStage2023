@@ -13,7 +13,6 @@ public class CollectorSubsystem extends SubsystemBase {
     private final ServoEx liftLeft, liftRight;
     public static Double LOWER_LIFT = 0.83, RAISE_LIFT = 0.06, STACK_LIFT = 0.76;
     private final InterpLUT rightConverter = new InterpLUT();
-    private final Double CLOSED_POS = 0., OPENED_POS = .55;
     private final ServoEx claw;
     public LiftState location = LiftState.STACK;
 
@@ -23,7 +22,7 @@ public class CollectorSubsystem extends SubsystemBase {
     }
 
     public ClampState clamping = ClampState.CLOSED;
-    private Timing.Timer clampTimer = new Timing.Timer(275, TimeUnit.MILLISECONDS);
+    private final Timing.Timer clampTimer = new Timing.Timer(275, TimeUnit.MILLISECONDS);
 
     public CollectorSubsystem(ServoEx liftL, ServoEx liftR, ServoEx clamp) {
         liftLeft = liftL;
@@ -35,7 +34,7 @@ public class CollectorSubsystem extends SubsystemBase {
         rightConverter.createLUT();
 
         liftR.setInverted(true);
-        claw.setPosition(CLOSED_POS);
+        claw.setPosition(0);
         this.setLiftLocation(LiftState.RAISED);
     }
 
@@ -91,16 +90,12 @@ public class CollectorSubsystem extends SubsystemBase {
     public void toggleClamp() {
         switch (clamping) {
             case OPENED:
-                claw.setPosition(CLOSED_POS);
+                clampTimer.start();
+                claw.setPosition(0);
                 clamping = ClampState.CLOSED;
                 break;
             case CLOSED:
-                if (location != LiftState.RAISED)
-                    claw.setPosition(OPENED_POS);
-                else {
-                    claw.setPosition(0.22);
-                    clampTimer.start();
-                }
+                claw.setPosition(location != LiftState.RAISED ? .55 : .22);
                 clamping = ClampState.OPENED;
                 break;
         }
@@ -108,7 +103,7 @@ public class CollectorSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        if (clampTimer.done() && clampTimer.isTimerOn() && location != LiftState.RAISED) {
+        if (clampTimer.done() && clampTimer.isTimerOn()) {
             this.setLiftLocation(LiftState.RAISED);
             clampTimer.pause();
         }

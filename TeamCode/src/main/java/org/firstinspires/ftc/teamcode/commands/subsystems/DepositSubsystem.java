@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 @Config
 public class DepositSubsystem extends SubsystemBase {
@@ -17,6 +18,7 @@ public class DepositSubsystem extends SubsystemBase {
     private final ServoEx leftLift, rightLift;
     public static Double HIGH_LEFT = 1.0, HIGH_RIGHT = 1.0;
     private final ServoEx stopperTop, stopperBottom;
+    private BooleanSupplier safeToMove = () -> true;
 
     private enum Blocker {
         TWO_PIXELS,
@@ -50,6 +52,10 @@ public class DepositSubsystem extends SubsystemBase {
 
         this.slides.setDirection(DcMotorSimple.Direction.FORWARD);
         this.slides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+
+    public void setSafeguard(BooleanSupplier safeToMove) {
+        this.safeToMove = safeToMove;
     }
 
     @Override
@@ -86,14 +92,14 @@ public class DepositSubsystem extends SubsystemBase {
         int ticks = slides.getTargetPosition();
         int current_pos = Arrays.binarySearch(new int[]{0, 400, 700, 1000, 1300}, ticks);
 
-        this.setSlidesPosition(current_pos < 0 ? MathUtils.clamp(current_pos * -1 - 1, 0, 4) : (current_pos + 1));
+        this.setSlidesPosition(current_pos < 0 ? -(current_pos + 1) : (current_pos + 1));
     }
 
     public void lowerSlidesPosition() {
         int ticks = slides.getTargetPosition();
         int current_pos = Arrays.binarySearch(new int[]{0, 400, 700, 1000, 1300}, ticks);
 
-        this.setSlidesPosition(current_pos < 0 ? MathUtils.clamp(current_pos * -1 - 2, 0, 4) : (current_pos - 1));
+        this.setSlidesPosition(current_pos < 0 ? -(current_pos + 1) - 1 : (current_pos - 1));
     }
 
     public void adjustSlidesTicks(int ticks) {
@@ -105,6 +111,9 @@ public class DepositSubsystem extends SubsystemBase {
     }
 
     public void toggleSpike() {
+        if (!safeToMove.getAsBoolean())
+            return;
+
         switch (spikeState) {
             case RAISED:
                 leftLift.setPosition(LOW_LEFT);
