@@ -175,7 +175,7 @@ public class RedAuto extends CommandOpMode {
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
         ));
         schedule(new RunCommand(() -> {
-            telemetry.addData("Robot Heading", drive.getPoseEstimate().getHeading());
+            telemetry.addData("Robot Heading", Math.toDegrees(drive.getPoseEstimate().getHeading()));
             telemetry.update();
         }));
     }

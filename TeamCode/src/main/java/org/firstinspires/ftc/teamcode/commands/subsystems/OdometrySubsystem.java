@@ -13,8 +13,8 @@ public class OdometrySubsystem extends SubsystemBase {
 
     private final Map<String, ServoEx> odometry = new HashMap<>();
     private final Map<String, Pair<Double, Double>> positions = new HashMap<String, Pair<Double, Double>>() {{
-        put("left", new Pair<>(0.35, 0.8));
-        put("right", new Pair<>(0.3, 0.75));
+        put("left", new Pair<>(0.45, 0.8));
+        put("right", new Pair<>(0.4, 0.75));
         put("front", new Pair<>(160.0 / 1800.0, 0.));
     }};
 
