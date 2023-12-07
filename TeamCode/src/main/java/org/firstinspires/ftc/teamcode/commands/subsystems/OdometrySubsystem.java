@@ -1,41 +1,54 @@
 package org.firstinspires.ftc.teamcode.commands.subsystems;
 
-import android.util.Pair;
-
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
+import com.arcrobotics.ftclib.util.InterpLUT;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
+@Config
 public class OdometrySubsystem extends SubsystemBase {
 
-    private final Map<String, ServoEx> odometry = new HashMap<>();
-    private final Map<String, Pair<Double, Double>> positions = new HashMap<String, Pair<Double, Double>>() {{
-        put("left", new Pair<>(0.45, 0.8));
-        put("right", new Pair<>(0.4, 0.75));
-        put("front", new Pair<>(160.0 / 1800.0, 0.));
-    }};
+    public static double PARALLEL_UP = 0, PARALLEL_DOWN = 0.5;
+    public static double PERPENDICULAR_UP = 0, PERPENDICULAR_DOWN = 1;
 
-    public OdometrySubsystem(ServoEx left, ServoEx right, ServoEx front) {
-        odometry.put("left", left);
-        odometry.put("right", right);
-        odometry.put("front", front);
+    private final ServoEx left, right, back;
+    private final InterpLUT leftTable = new InterpLUT();
+    private final InterpLUT backTable = new InterpLUT();
+    private final InterpLUT rightTable = new InterpLUT();
+
+    public OdometrySubsystem(ServoEx left, ServoEx right, ServoEx back) {
+        this.left = left;
+        this.right = right;
+        this.back = back;
+
+        this.back.setInverted(true);
+
+        leftTable.add(-1e-9, 210);
+        leftTable.add(0.5, 110);
+        leftTable.add(1.0 + 1e-9, 0);
+
+        rightTable.add(-1e-9, 205);
+        rightTable.add(0.5, 115);
+        rightTable.add(1.0 + 1e-9, 15);
+
+        backTable.add(-1e-9, 400);
+        backTable.add(0.5, 270);
+        backTable.add(1.0 + 1e-9, 180);
+
+        leftTable.createLUT();
+        rightTable.createLUT();
+        backTable.createLUT();
     }
 
     public void raise() {
-        for (String name : odometry.keySet()) {
-            ServoEx servo = odometry.get(name);
-            servo.setPosition(positions.get(name).second);
-        }
+        left.turnToAngle(leftTable.get(PARALLEL_UP));
+        right.turnToAngle(rightTable.get(PARALLEL_UP));
+        back.turnToAngle(backTable.get(PERPENDICULAR_UP));
     }
 
     public void lower() {
-        for (String name : odometry.keySet()) {
-            ServoEx servo = odometry.get(name);
-            if (servo != null)
-                servo.setPosition(Objects.requireNonNull(positions.get(name)).first);
-        }
+        left.turnToAngle(leftTable.get(PARALLEL_DOWN));
+        right.turnToAngle(rightTable.get(PARALLEL_DOWN));
+        back.turnToAngle(backTable.get(PERPENDICULAR_DOWN));
     }
 }

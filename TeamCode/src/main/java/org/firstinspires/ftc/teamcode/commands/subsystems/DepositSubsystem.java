@@ -66,6 +66,8 @@ public class DepositSubsystem extends SubsystemBase {
 
             if (spikeState == Spike.LOWERED)
                 this.toggleSpike();
+
+            raisingSlides = false;
         }
     }
 
@@ -103,7 +105,7 @@ public class DepositSubsystem extends SubsystemBase {
     }
 
     public void adjustSlidesTicks(int ticks) {
-        this.setSlidesTicks(this.getSlidesTicks() + ticks);
+        this.setSlidesTicks(this.slides.getTargetPosition() + ticks);
     }
 
     public boolean slidesBusy() {
