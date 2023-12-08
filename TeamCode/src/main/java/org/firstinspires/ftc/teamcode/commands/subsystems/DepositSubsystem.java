@@ -14,7 +14,7 @@ import java.util.function.BooleanSupplier;
 @Config
 public class DepositSubsystem extends SubsystemBase {
     private final DcMotor slides;
-    public static Double LOW_LEFT = 0.06, LOW_RIGHT = 0.06;
+    public static Double LOW_LEFT = 0.08, LOW_RIGHT = 0.08;
     private final ServoEx leftLift, rightLift;
     public static Double HIGH_LEFT = 1.0, HIGH_RIGHT = 1.0;
     private final ServoEx stopperTop, stopperBottom;
