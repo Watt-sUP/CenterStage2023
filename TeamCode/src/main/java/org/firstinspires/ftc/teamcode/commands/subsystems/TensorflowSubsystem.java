@@ -55,6 +55,8 @@ public class TensorflowSubsystem extends SubsystemBase {
     public Recognition getBestDetection() {
         List<Recognition> detections = tensorflowProcessor.getRecognitions();
         return detections.stream()
+                // Filter out detections bigger than half of the image (likely junk)
+                .filter(detection -> (detection.getWidth() < detection.getImageWidth() / 2.0))
                 .max(Comparator.comparingDouble(Recognition::getConfidence))
                 .orElse(null);
     }

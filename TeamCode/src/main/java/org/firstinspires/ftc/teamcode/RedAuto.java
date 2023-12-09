@@ -10,7 +10,6 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
-import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SelectCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
@@ -73,7 +72,7 @@ public class RedAuto extends CommandOpMode {
                 .setReversed(false)
                 .build();
         Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), true)
-                .splineTo(new Vector2d(47.5, -44.7), Math.toRadians(0.00),
+                .splineTo(new Vector2d(50, -44.7), Math.toRadians(0.00),
                         SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL)
                 )
@@ -84,19 +83,19 @@ public class RedAuto extends CommandOpMode {
                 .lineToConstantHeading(new Vector2d(10.85, -40.3))
                 .build();
         Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), true)
-                .splineTo(new Vector2d(47, -37.5), Math.toRadians(0),
+                .splineTo(new Vector2d(50, -37.5), Math.toRadians(0),
                         SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
 
         TrajectorySequence leftPurple = drive.trajectorySequenceBuilder(new Pose2d(10.85, -64.07, Math.toRadians(90.00)))
-                .splineTo(new Vector2d(12, -32), Math.toRadians(90))
+                .splineTo(new Vector2d(12, -35.5), Math.toRadians(90))
                 .turn(Math.toRadians(90))
-                .lineTo(new Vector2d(3, -32))
-                .lineTo(new Vector2d(12, -32))
+                .lineTo(new Vector2d(1, -35.5))
+                .lineTo(new Vector2d(13.5, -35.5))
                 .build();
         Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end(), true)
-                .splineTo(new Vector2d(48, -30.4), Math.toRadians(0),
+                .splineTo(new Vector2d(50, -31.5), Math.toRadians(0),
                         SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
@@ -105,6 +104,7 @@ public class RedAuto extends CommandOpMode {
         drive.setPoseEstimate(rightPurple.start());
         tensorflow.setMinConfidence(0.75);
         odometrySystem.lower();
+
 
         telemetry.addLine("Ready!");
         telemetry.update();
@@ -159,25 +159,20 @@ public class RedAuto extends CommandOpMode {
                         () -> location
                 ),
                 new WaitUntilCommand(() -> !depositSystem.slidesBusy()),
-                new InstantCommand(() -> {
-                }),
                 new InstantCommand(() -> drive.turn(Math.toRadians(180) - drive.getPoseEstimate().getHeading(), AngleUnit.RADIANS)),
                 new WaitCommand(500),
                 new InstantCommand(() -> {
                     depositSystem.toggleBlockers();
                     depositSystem.toggleBlockers();
                 }),
-                new WaitCommand(1500),
+                new WaitCommand(1000),
                 new InstantCommand(() -> drive.adjustPose(new Pose2d(-5, 0, 0))),
                 new InstantCommand(depositSystem::toggleSpike),
                 new WaitCommand(1000),
-                new InstantCommand(() -> drive.adjustPose(new Pose2d(5, 0, 0))),
+//                new InstantCommand(() -> drive.adjustPose(new Pose2d(5, 0, 0))),
+                new InstantCommand(() -> drive.lineToPose(new Pose2d(47, -62.2, Math.toRadians(180)))),
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
         ));
-        schedule(new RunCommand(() -> {
-            telemetry.addData("Robot Heading", Math.toDegrees(drive.getPoseEstimate().getHeading()));
-            telemetry.update();
-        }));
     }
 
     private enum PropLocations {

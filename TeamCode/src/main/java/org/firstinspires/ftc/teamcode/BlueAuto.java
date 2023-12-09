@@ -70,7 +70,7 @@ public class BlueAuto extends CommandOpMode {
                 .lineTo(new Vector2d(21.58, 44.00))
                 .build();
         Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end(), true)
-                .splineTo(new Vector2d(48.5, 42), Math.toRadians(0.00),
+                .splineTo(new Vector2d(50, 43.5), Math.toRadians(0.00),
                         SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
@@ -80,19 +80,19 @@ public class BlueAuto extends CommandOpMode {
                 .lineToConstantHeading(new Vector2d(10.85, 41.3))
                 .build();
         Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), true)
-                .splineTo(new Vector2d(48.5, 37.85), Math.toRadians(0.00),
+                .splineTo(new Vector2d(50, 37.85), Math.toRadians(0.00),
                         SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
 
         TrajectorySequence rightPurple = drive.trajectorySequenceBuilder(new Pose2d(10.85, 64.07, Math.toRadians(-90.00)))
-                .splineTo(new Vector2d(12, 32), Math.toRadians(-90))
+                .splineTo(new Vector2d(12, 35.5), Math.toRadians(-90))
                 .turn(Math.toRadians(-90))
-                .lineTo(new Vector2d(3, 32))
-                .lineTo(new Vector2d(15, 32))
+                .lineTo(new Vector2d(1, 35.5))
+                .lineTo(new Vector2d(13.5, 35.5))
                 .build();
         Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), true)
-                .splineTo(new Vector2d(48.5, 30.4), Math.toRadians(0),
+                .splineTo(new Vector2d(50, 30.4), Math.toRadians(0),
                         SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
@@ -165,7 +165,7 @@ public class BlueAuto extends CommandOpMode {
                 new InstantCommand(() -> drive.adjustPose(new Pose2d(-5, 0, 0))),
                 new InstantCommand(depositSystem::toggleSpike),
                 new WaitCommand(1000),
-                new InstantCommand(() -> drive.adjustPose(new Pose2d(5, 0, 0))),
+                new InstantCommand(() -> drive.lineToPose(new Pose2d(47, 62.2, Math.toRadians(180)))),
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
         ));
     }
