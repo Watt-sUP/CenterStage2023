@@ -42,7 +42,7 @@ public class CollectorSubsystem extends SubsystemBase {
         rightConverter.createLUT();
 
         liftR.setInverted(true);
-        claw.setPosition(0);
+        claw.setPosition(0.12);
         this.setLiftLocation(LiftState.RAISED);
     }
 
@@ -98,15 +98,19 @@ public class CollectorSubsystem extends SubsystemBase {
                 // The code of the timer resets it every time .start() is called (equivalent to a .reset())
                 if (location != LiftState.RAISED) // Can't collect when raised
                     clampTimer.start();
-                claw.setPosition(0);
+                claw.setPosition(0.12);
                 clamping = ClampState.CLOSED;
                 break;
             case CLOSED:
                 // Don't open the claw fully when the lift is raised to avoid the belts
-                claw.setPosition(location != LiftState.RAISED ? .44 : .22);
+                claw.setPosition(location != LiftState.RAISED ? .44 : .25);
                 clamping = ClampState.OPENED;
                 break;
         }
+    }
+
+    public void setClampPosition(double position) {
+        claw.setPosition(position);
     }
 
     // Periodic check: Automatically raise the claw 275ms after collection

@@ -29,6 +29,9 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     public void setPowerLimit(double limit) {
+        if (MathUtils.clamp(Math.abs(limit), 0, 1) == powerLimit)
+            return;
+
         powerLimit = MathUtils.clamp(Math.abs(limit), 0, 1);
         drive.setMaxSpeed(powerLimit);
     }

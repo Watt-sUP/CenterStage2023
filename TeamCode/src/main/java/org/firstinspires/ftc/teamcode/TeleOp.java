@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.command.CommandOpMode;
-import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -56,10 +55,10 @@ public class TeleOp extends CommandOpMode {
 
         // Brakes
         driver1.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
-                .whenPressed(() -> driveSystem.setPowerLimit(0.5))
+                .whileHeld(() -> driveSystem.setPowerLimit(0.5))
                 .whenReleased(() -> driveSystem.setPowerLimit(1.0));
         driver1.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
-                .whenPressed(() -> driveSystem.setPowerLimit(0.25))
+                .whileHeld(() -> driveSystem.setPowerLimit(0.25))
                 .whenReleased(() -> driveSystem.setPowerLimit(1.0));
 
         // Endgame specific controls
@@ -91,7 +90,7 @@ public class TeleOp extends CommandOpMode {
         driver2.getGamepadButton(GamepadKeys.Button.Y)
                 .whenPressed(depositSystem::toggleSpike);
         driver2.getGamepadButton(GamepadKeys.Button.A)
-                .whenPressed(new InstantCommand(collectorSystem::toggleClamp));
+                .whenPressed(collectorSystem::toggleClamp);
         driver2.getGamepadButton(GamepadKeys.Button.B)
                 .whenPressed(depositSystem::toggleBlockers);
 
