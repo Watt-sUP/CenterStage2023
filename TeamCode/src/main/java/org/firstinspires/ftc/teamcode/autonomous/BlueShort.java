@@ -8,10 +8,13 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.CommandOpMode;
+import com.arcrobotics.ftclib.command.CommandScheduler;
+import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
@@ -30,6 +33,7 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 public class BlueShort extends CommandOpMode {
 
     private PropLocations location;
+    private SampleMecanumDrive drive;
 
     @SuppressLint("DefaultLocale")
     @Override
@@ -39,7 +43,7 @@ public class BlueShort extends CommandOpMode {
                 "blue_prop.tflite", "Blue Prop");
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+        drive = new SampleMecanumDrive(hardwareMap);
 
         telemetry.addLine("Loading trajectories...");
         telemetry.update();
@@ -83,15 +87,28 @@ public class BlueShort extends CommandOpMode {
                 .build();
 
         TrajectorySequence rightPurple = drive.trajectorySequenceBuilder(new Pose2d(10.85, 64.07, Math.toRadians(-90.00)))
-                .splineTo(new Vector2d(12, 35.5), Math.toRadians(-90))
+                .lineTo(new Vector2d(12, 37))
                 .turn(Math.toRadians(-90))
-                .lineTo(new Vector2d(1, 35.5))
-                .lineTo(new Vector2d(13.5, 35.5))
+                .lineTo(new Vector2d(1, 37))
+                .lineTo(new Vector2d(13.5, 37))
                 .build();
         Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), true)
                 .splineTo(new Vector2d(50, 30.4), Math.toRadians(0),
                         SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .build();
+
+        TrajectorySequence headForStack = drive.trajectorySequenceBuilder(new Pose2d(-29.9, 62.2, Math.toRadians(180.0)), 40)
+                .splineTo(new Vector2d(-57.28, 45.95), Math.toRadians(180.00))
+                .build();
+
+        TrajectorySequence goToBackdrop = drive.trajectorySequenceBuilder(headForStack.end())
+                .setReversed(true)
+                .resetVelConstraint()
+                .splineTo(new Vector2d(-29.91, 62.2), Math.toRadians(0.00))
+                .splineTo(new Vector2d(23.69, 62.2), Math.toRadians(0.00))
+                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
+                .splineTo(new Vector2d(48.41, 36.52), Math.toRadians(0.00))
                 .build();
 
 
@@ -125,6 +142,7 @@ public class BlueShort extends CommandOpMode {
 
         waitForStart();
         schedule(new SequentialCommandGroup(
+                // Place the purple pixel in the detected case
                 new InstantCommand(tensorflow::shutdown),
                 new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple),
                 new InstantCommand(collectorSystem::toggleLiftLocation),
@@ -132,7 +150,7 @@ public class BlueShort extends CommandOpMode {
                 new InstantCommand(collectorSystem::toggleLiftLocation),
                 new WaitCommand(600),
 
-
+                // Head for the backdrop
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
                 new WaitCommand(300),
                 new ParallelCommandGroup(
@@ -142,10 +160,11 @@ public class BlueShort extends CommandOpMode {
                         }),
                         new RunByCaseCommand(location.toString(), drive, leftYellow, middleYellow, rightYellow)
                 ),
+                // Correct the heading for proper pixel placement
                 new InstantCommand(() -> drive.turn(Math.toRadians(180) - drive.getPoseEstimate().getHeading(), AngleUnit.RADIANS)),
                 new WaitCommand(300),
 
-
+                // Place the yellow pixel
                 new InstantCommand(() -> {
                     depositSystem.toggleBlockers();
                     depositSystem.toggleBlockers();
@@ -155,10 +174,41 @@ public class BlueShort extends CommandOpMode {
                 new InstantCommand(depositSystem::toggleSpike),
                 new WaitCommand(1000),
 
+                // Prepare for the cycle
+                new InstantCommand(() -> {
+                    drive.lineToPoseAsync(new Pose2d(47, 62.2, Math.toRadians(180)));
+                    collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED);
+                }),
+                new WaitUntilCommand(() -> !drive.isBusy()),
+                new InstantCommand(() -> drive.turn(Math.toRadians(180) - drive.getPoseEstimate().getHeading(), AngleUnit.RADIANS)),
 
-                new InstantCommand(() -> drive.lineToPose(new Pose2d(47, 62.2, Math.toRadians(180)))),
-                new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
+                // Head for the other side of the field
+                new InstantCommand(() -> drive.lineToPoseAsync(new Pose2d(-29.9, 62.2, Math.toRadians(180.0)))),
+                new WaitUntilCommand(() -> !drive.isBusy()),
+                new ConditionalCommand(
+                        // If you made it through, head for the stacks and come back to the backdrop
+                        new ParallelCommandGroup(
+                                new SequentialCommandGroup(
+                                        new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
+                                        new WaitCommand(300),
+                                        new InstantCommand(collectorSystem::toggleClamp),
+                                        new WaitUntilCommand(() -> !drive.isBusy()),
+                                        new WaitUntilCommand(() -> drive.getPoseEstimate().getX() > -24),
+                                        new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
+                                ),
+                                new InstantCommand(() -> drive.followTrajectorySequenceAsync(headForStack))
+                        ),
+                        // Go back to parking if you got stuck
+                        new InstantCommand(() -> drive.lineToPoseAsync(new Pose2d(47, 62.2, Math.toRadians(180)))),
+                        () -> drive.getPoseEstimate().getX() < -24 // Check position
+                )
         ));
+    }
+
+    @Override
+    public void run() {
+        CommandScheduler.getInstance().run();
+        drive.update();
     }
 
     private enum PropLocations {

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.commands.subsystems;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -7,10 +8,12 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import javax.annotation.Nullable;
 
+@Config
 public class EndgameSubsystem extends SubsystemBase {
 
-    DcMotor leftPull, rightPull;
-    ServoEx launcher;
+    public static int HOOKING_POS = 4000, HANGING_POS = 1800;
+    private final DcMotor leftPull, rightPull;
+    private final ServoEx launcher;
 
     private ClimbState climbState = ClimbState.LOWERED;
 
@@ -25,18 +28,20 @@ public class EndgameSubsystem extends SubsystemBase {
         this.rightPull.setDirection(DcMotorSimple.Direction.REVERSE);
         this.rightPull.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        if (launcher != null)
-            this.launcher.turnToAngle(0);
+        if (launcher != null) {
+            this.launcher.setInverted(true);
+            this.launcher.turnToAngle(35);
+        }
     }
 
     public void toggleClimb() {
         switch (climbState) {
             case LOWERED:
-                this.setClimbToTicks(3750);
+                this.setClimbToTicks(HOOKING_POS);
                 climbState = ClimbState.HOOKING;
                 break;
             case HOOKING:
-                this.setClimbToTicks(1500);
+                this.setClimbToTicks(HANGING_POS);
                 climbState = ClimbState.HANGING;
                 break;
             case HANGING:
@@ -57,12 +62,12 @@ public class EndgameSubsystem extends SubsystemBase {
     }
 
     public void launchPlane() {
-        if (launcher == null || climbState != ClimbState.HOOKING)
+        if (launcher == null || climbState != ClimbState.HANGING)
             return;
 
-        if ((int) launcher.getAngle() == 0)
-            launcher.turnToAngle(55);
-        else launcher.turnToAngle(0);
+        if (Math.round(launcher.getAngle()) == 35)
+            launcher.turnToAngle(80);
+        else launcher.turnToAngle(35);
     }
 
     public Integer getClimbTicks() {

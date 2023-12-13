@@ -8,17 +8,21 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.teamcode.commands.RunByCaseCommand;
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.TensorflowSubsystem;
+import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
@@ -63,10 +67,24 @@ public class BlueLong extends CommandOpMode {
                 .splineTo(new Vector2d(-46.25, 22.93), Math.toRadians(-90.00))
                 .lineTo(new Vector2d(-46.25, 44.00))
                 .build();
+        TrajectorySequence rightYellow = drive.trajectorySequenceBuilder(rightPurple.end())
+                .setReversed(true)
+                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
+                .splineTo(new Vector2d(7.45, 59.73), Math.toRadians(0.00))
+                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
+                .splineTo(new Vector2d(52.50, 34.00), Math.toRadians(0.00))
+                .build();
 
         TrajectorySequence middlePurple = drive.trajectorySequenceBuilder(startPose)
                 .lineTo(new Vector2d(-34.85, 18.95))
                 .lineTo(new Vector2d(-34.85, 40.3))
+                .build();
+        TrajectorySequence middleYellow = drive.trajectorySequenceBuilder(new Pose2d(-48.25, 46.25, Math.toRadians(-90.00)))
+                .setReversed(true)
+                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
+                .splineTo(new Vector2d(7.45, 59.73), Math.toRadians(0.00))
+                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
+                .splineTo(new Vector2d(52.50, 41.00), Math.toRadians(0.00))
                 .build();
 
         TrajectorySequence leftPurple = drive.trajectorySequenceBuilder(startPose)
@@ -74,6 +92,14 @@ public class BlueLong extends CommandOpMode {
                 .turn(Math.toRadians(90))
                 .lineTo(new Vector2d(-25, 35.5))
                 .lineTo(new Vector2d(-36, 35.5))
+                .build();
+        TrajectorySequence leftYellow = drive.trajectorySequenceBuilder(leftPurple.end())
+                .setReversed(true)
+                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
+                .splineTo(new Vector2d(-35.76, 60.49), Math.toRadians(0.00))
+                .splineTo(new Vector2d(26.14, 60.68), Math.toRadians(0.00))
+                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
+                .splineTo(new Vector2d(52.50, 48), Math.toRadians(0.00))
                 .build();
 
 
@@ -115,29 +141,33 @@ public class BlueLong extends CommandOpMode {
 
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
                 new WaitCommand(300),
-//                new InstantCommand(() -> {
-//                    depositSystem.toggleSpike();
-//                    depositSystem.toggleBlockers();
-//                }),
-//                new SelectCommand(
-//                        new HashMap<Object, Command>() {{
-//                            put(PropLocations.RIGHT, new InstantCommand(() -> drive.followTrajectory(rightYellow)));
-//                            put(PropLocations.MIDDLE, new InstantCommand(() -> drive.followTrajectory(middleYellow)));
-//                            put(PropLocations.LEFT, new InstantCommand(() -> drive.followTrajectory(leftYellow)));
-//                        }},
-//                        () -> location
-//                ),
-//                new InstantCommand(() -> drive.turn(Math.toRadians(180) - drive.getPoseEstimate().getHeading(), AngleUnit.RADIANS)),
-//                new WaitCommand(300),
-//                new InstantCommand(() -> {
-//                    depositSystem.toggleBlockers();
-//                    depositSystem.toggleBlockers();
-//                }),
-//                new WaitCommand(1000),
-//                new InstantCommand(() -> drive.adjustPose(new Pose2d(-5, 0, 0))),
-//                new InstantCommand(depositSystem::toggleSpike),
-//                new WaitCommand(1000),
-//                new InstantCommand(() -> drive.lineToPose(new Pose2d(47, 62.2, Math.toRadians(180)))),
+                new InstantCommand(() -> {
+                    if (location == PropLocations.MIDDLE)
+                        drive.lineToPose(middleYellow.start());
+                }),
+                new ParallelCommandGroup(
+                        new SequentialCommandGroup(
+                                new WaitUntilCommand(() -> drive.getPoseEstimate().getX() > 0),
+                                new InstantCommand(() -> {
+                                    depositSystem.toggleSpike();
+                                    depositSystem.toggleBlockers();
+                                })
+                        ),
+                        new RunByCaseCommand(location.toString(), drive, leftYellow, middleYellow, rightYellow)
+                ),
+                new InstantCommand(() -> drive.turn(Math.toRadians(180) - drive.getPoseEstimate().getHeading(), AngleUnit.RADIANS)),
+                new WaitCommand(300),
+
+
+                new InstantCommand(() -> {
+                    depositSystem.toggleBlockers();
+                    depositSystem.toggleBlockers();
+                }),
+                new WaitCommand(1000),
+                new InstantCommand(() -> drive.adjustPose(new Pose2d(-5, 0, 0))),
+                new InstantCommand(depositSystem::toggleSpike),
+                new WaitCommand(1000),
+
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
         ));
     }
