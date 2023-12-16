@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 @Config
 public class EndgameSubsystem extends SubsystemBase {
 
-    public static int HOOKING_POS = 4000, HANGING_POS = 1800;
+    public static int HOOKING_POS = 4000, HANGING_POS = 2100;
     private final DcMotor leftPull, rightPull;
     private final ServoEx launcher;
 
@@ -66,7 +66,7 @@ public class EndgameSubsystem extends SubsystemBase {
             return;
 
         if (Math.round(launcher.getAngle()) == 35)
-            launcher.turnToAngle(80);
+            launcher.turnToAngle(120);
         else launcher.turnToAngle(35);
     }
 

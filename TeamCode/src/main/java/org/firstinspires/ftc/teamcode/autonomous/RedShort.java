@@ -74,9 +74,9 @@ public class RedShort extends CommandOpMode {
                 )
                 .build();
 
-        TrajectorySequence middlePurple = drive.trajectorySequenceBuilder(startPose)
+        TrajectorySequence middlePurple = drive.trajectorySequenceBuilder(startPose, 30)
                 .lineTo(new Vector2d(10.85, -18.95))
-                .lineTo(new Vector2d(10.85, -40.3))
+                .lineTo(new Vector2d(10.85, -42.3))
                 .build();
         Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), true)
                 .splineTo(new Vector2d(50, -37.5), Math.toRadians(0),

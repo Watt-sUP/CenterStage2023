@@ -19,7 +19,7 @@ import java.util.List;
 @TeleOp(name = "Vision: AprilTag Preview", group = "Vision")
 public class AlignWithAprilTagSample extends LinearOpMode {
 
-    public static int TARGET_ID = 1;
+    public static int TARGET_ID = 2;
     public static ApriltagSubsystem.Pose TARGET_POSITION = new ApriltagSubsystem.Pose(10, 0, 0), THRESHOLDS = new ApriltagSubsystem.Pose(2, 2, 2.5);
     private RobotStates robotState = RobotStates.DRIVE;
 
@@ -46,7 +46,7 @@ public class AlignWithAprilTagSample extends LinearOpMode {
             for (ApriltagSubsystem.Pose detection : detections) {
                 telemetry.addData("Forward Offset (Inch)", detection.forward);
                 telemetry.addData("Strafe Offset (Inch)", detection.strafe);
-                telemetry.addData("Turn Offset (Degrees)", detection.heading);
+                telemetry.addData("Turn Offset (Degrees)", Math.toDegrees(detection.heading));
                 telemetry.addData("Detection ID", detection.id);
 
                 telemetry.update();
@@ -98,7 +98,7 @@ public class AlignWithAprilTagSample extends LinearOpMode {
                             adjustment = detection.minus(TARGET_POSITION);
                             adjustment.strafe *= -1;
 
-                            // Don't start movement until existing trajectories finish or you're already in position
+                            // Don't start movement until existing trajectories finish or if you're already in position
                             if (!drive.isBusy())
                                 drive.adjustPoseAsync(adjustment.toPose2d());
                         }

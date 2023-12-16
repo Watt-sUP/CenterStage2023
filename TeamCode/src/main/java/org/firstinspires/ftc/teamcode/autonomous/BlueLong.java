@@ -29,7 +29,7 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 @Autonomous(name = "Blue Long", group = "auto")
 public class BlueLong extends CommandOpMode {
 
-    private PropLocations location;
+    private PropLocations location, lastLocation = PropLocations.LEFT;
 
     @SuppressLint("DefaultLocale")
     @Override
@@ -71,6 +71,7 @@ public class BlueLong extends CommandOpMode {
                 .setReversed(true)
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
                 .splineTo(new Vector2d(7.45, 59.73), Math.toRadians(0.00))
+                .waitSeconds(6)
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
                 .splineTo(new Vector2d(52.50, 34.00), Math.toRadians(0.00))
                 .build();
@@ -83,6 +84,7 @@ public class BlueLong extends CommandOpMode {
                 .setReversed(true)
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
                 .splineTo(new Vector2d(7.45, 59.73), Math.toRadians(0.00))
+                .waitSeconds(6)
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
                 .splineTo(new Vector2d(52.50, 41.00), Math.toRadians(0.00))
                 .build();
@@ -98,6 +100,7 @@ public class BlueLong extends CommandOpMode {
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
                 .splineTo(new Vector2d(-35.76, 60.49), Math.toRadians(0.00))
                 .splineTo(new Vector2d(26.14, 60.68), Math.toRadians(0.00))
+                .waitSeconds(6)
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
                 .splineTo(new Vector2d(52.50, 48), Math.toRadians(0.00))
                 .build();
@@ -124,6 +127,11 @@ public class BlueLong extends CommandOpMode {
                     location = PropLocations.MIDDLE;
                 else location = PropLocations.RIGHT;
             }
+
+            if (location != lastLocation)
+                tensorflow.screenshot();
+
+            lastLocation = location;
 
             telemetry.addData("FPS", tensorflow.portal.getFps());
             telemetry.addData("Current Location", location.toString());
@@ -168,6 +176,7 @@ public class BlueLong extends CommandOpMode {
                 new InstantCommand(depositSystem::toggleSpike),
                 new WaitCommand(1000),
 
+//                new InstantCommand(() -> drive.lineToPose(new Pose2d(47, 62.2, Math.toRadians(180)))),
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
         ));
     }

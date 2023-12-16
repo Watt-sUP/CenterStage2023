@@ -85,15 +85,15 @@ public class RedLong extends CommandOpMode {
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
                 .splineTo(new Vector2d(7.45, -59.73), Math.toRadians(0.00))
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(50.00, -32.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.00, -32.50), Math.toRadians(0.00))
                 .build();
 
 
         TrajectorySequence rightPurple = drive.trajectorySequenceBuilder(startPose)
-                .splineTo(new Vector2d(-36, -35.5), Math.toRadians(90))
+                .splineTo(new Vector2d(-36, -37), Math.toRadians(90))
                 .turn(Math.toRadians(-90))
-                .lineTo(new Vector2d(-25, -35.5))
-                .lineTo(new Vector2d(-36, -35.5))
+                .lineTo(new Vector2d(-25, -37))
+                .lineTo(new Vector2d(-37, -37))
                 .build();
         TrajectorySequence rightYellow = drive.trajectorySequenceBuilder(rightPurple.end())
                 .setReversed(true)
@@ -101,7 +101,7 @@ public class RedLong extends CommandOpMode {
                 .splineTo(new Vector2d(-35.76, -60.49), Math.toRadians(0.00))
                 .splineTo(new Vector2d(26.14, -60.68), Math.toRadians(0.00))
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(50.00, -43.5), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.00, -41.5), Math.toRadians(0.00))
                 .build();
 
 
@@ -170,6 +170,7 @@ public class RedLong extends CommandOpMode {
                 new InstantCommand(depositSystem::toggleSpike),
                 new WaitCommand(1000),
 
+                new InstantCommand(() -> drive.lineToPose(new Pose2d(47, -62.2, Math.toRadians(180)))),
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
         ));
     }

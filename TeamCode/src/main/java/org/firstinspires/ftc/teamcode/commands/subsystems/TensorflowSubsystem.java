@@ -12,10 +12,12 @@ import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 public class TensorflowSubsystem extends SubsystemBase {
 
     private final TfodProcessor tensorflowProcessor;
+    private int frameCount = 0;
     public VisionPortal portal;
 
     public TensorflowSubsystem(VisionPortal portal, TfodProcessor processor) {
@@ -46,6 +48,10 @@ public class TensorflowSubsystem extends SubsystemBase {
 
     public void setMinConfidence(double confidence) {
         tensorflowProcessor.setMinResultConfidence((float) confidence);
+    }
+
+    public void screenshot() {
+        portal.saveNextFrameRaw(String.format(Locale.US, "TensorflowDebugFrame-%06d", frameCount++));
     }
 
     public List<Recognition> getDetections() {

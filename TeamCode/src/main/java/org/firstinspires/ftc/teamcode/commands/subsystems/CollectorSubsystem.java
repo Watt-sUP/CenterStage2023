@@ -103,7 +103,7 @@ public class CollectorSubsystem extends SubsystemBase {
                 break;
             case CLOSED:
                 // Don't open the claw fully when the lift is raised to avoid the belts
-                claw.setPosition(location != LiftState.RAISED ? .44 : .25);
+                claw.setPosition(location != LiftState.RAISED ? .44 : .275);
                 clamping = ClampState.OPENED;
                 break;
         }
