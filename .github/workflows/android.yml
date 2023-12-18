@@ -22,23 +22,20 @@ jobs:
           java-version: 11
 
       - name: Grant gradlew execution permission
-        run: chmod +x gradlew
-
-      - name: Move gradlew to shared workspace
-        run: mv ./gradlew $GITHUB_WORKSPACE/gradlew
+        run: chmod +x ./gradlew
 
   build:
     needs: setup
     runs-on: ubuntu-latest
     steps:
       - name: Build project with Gradle
-        run: $GITHUB_WORKSPACE/gradlew build
+        run: ./gradlew build
 
   test:
     needs: setup
     runs-on: ubuntu-latest
     steps:
       - name: Test project with Gradle
-        run: $GITHUB_WORKSPACE/gradlew test --stacktrace
+        run: ./gradlew test --stacktrace
       - name: Assemble APK file
-        run: $GITHUB_WORKSPACE/gradlew assemble
+        run: ./gradlew assemble
