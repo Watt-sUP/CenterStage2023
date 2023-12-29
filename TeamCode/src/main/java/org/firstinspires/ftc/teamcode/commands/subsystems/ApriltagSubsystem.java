@@ -68,10 +68,10 @@ public class ApriltagSubsystem extends SubsystemBase {
                         return new Pose(detection.id, -1, -1, -1);
 
                     double range = detection.ftcPose.range;
-                    double x0 = range * Math.sin(detection.ftcPose.yaw);
-                    double y0 = range * Math.cos(detection.ftcPose.yaw);
+                    double x0 = range * Math.cos(detection.ftcPose.bearing - detection.ftcPose.yaw);
+                    double y0 = range * Math.sin(detection.ftcPose.bearing - detection.ftcPose.yaw);
 
-                    return new Pose(detection.id, y0, x0, detection.ftcPose.yaw);
+                    return new Pose(detection.id, x0, y0, detection.ftcPose.yaw);
                 }).collect(Collectors.toList());
     }
 

@@ -22,6 +22,7 @@ public class AlignWithAprilTagSample extends LinearOpMode {
     public static int TARGET_ID = 2;
     public static ApriltagSubsystem.Pose TARGET_POSITION = new ApriltagSubsystem.Pose(10, 0, 0), THRESHOLDS = new ApriltagSubsystem.Pose(2, 2, 2.5);
     private RobotStates robotState = RobotStates.DRIVE;
+    private List<ApriltagSubsystem.Pose> detections;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -68,22 +69,47 @@ public class AlignWithAprilTagSample extends LinearOpMode {
                             )
                     );
 
-                    if (gamepad1.y) {
-                        // Shut down the motors, prepare the odometry and start the camera processing
-                        drive.setMotorPowers(0, 0, 0, 0);
-                        odometry.lower();
+                    detections = apriltagSubsystem.getDetections();
+                    for (ApriltagSubsystem.Pose detection : detections) {
+                        telemetry.addData("Forward Offset (Inch)", detection.forward);
+                        telemetry.addData("Strafe Offset (Inch)", detection.strafe);
+                        telemetry.addData("Turn Offset (Degrees)", Math.toDegrees(detection.heading));
+                        telemetry.addData("Detection ID", detection.id);
 
-                        if (apriltagSubsystem.portal.getCameraState() != VisionPortal.CameraState.STREAMING)
-                            apriltagSubsystem.portal.resumeStreaming();
-                        robotState = RobotStates.ALIGN_TO_TAG;
+                        telemetry.update();
                     }
+
+//                    if (gamepad1.y) {
+//                        // Shut down the motors, prepare the odometry and start the camera processing
+//                        drive.setMotorPowers(0, 0, 0, 0);
+//                        odometry.lower();
+//
+//                        if (apriltagSubsystem.portal.getCameraState() != VisionPortal.CameraState.STREAMING)
+//                            apriltagSubsystem.portal.resumeStreaming();
+//                        robotState = RobotStates.ALIGN_TO_TAG;
+//                    }
                     break;
 
                 case ALIGN_TO_TAG:
+                    if (gamepad1.b) {
+                        // End any ongoing trajectory
+                        if (drive.isBusy())
+                            drive.breakFollowing();
+
+                        // Lift the odometry for proper driving
+                        odometry.raise();
+                        robotState = RobotStates.DRIVE;
+                    }
+
+                    if (drive.isBusy()) {
+                        drive.update();
+                        continue;
+                    }
+
                     // Don't do anything if the camera hasn't started yet
                     if (apriltagSubsystem.portal.getCameraState() == VisionPortal.CameraState.STREAMING) {
                         ApriltagSubsystem.Pose adjustment;
-                        List<ApriltagSubsystem.Pose> detections = apriltagSubsystem.getDetections();
+                        detections = apriltagSubsystem.getDetections();
 
                         for (ApriltagSubsystem.Pose detection : detections) {
                             // Log tag position
@@ -104,22 +130,8 @@ public class AlignWithAprilTagSample extends LinearOpMode {
                         }
                     }
 
-                    if (gamepad1.b) {
-                        if (apriltagSubsystem.portal.getCameraState() == VisionPortal.CameraState.STREAMING)
-                            apriltagSubsystem.portal.stopStreaming();
-
-                        // End any ongoing trajectory
-                        if (drive.isBusy())
-                            drive.breakFollowing();
-
-                        // Lift the odometry for proper driving
-                        odometry.raise();
-                        robotState = RobotStates.DRIVE;
-                    }
-
                     telemetry.addData("Target Pose", TARGET_POSITION.forward + ", " +
                             TARGET_POSITION.strafe + ", " + TARGET_POSITION.heading);
-                    drive.update();
                     break;
 
                 default:
