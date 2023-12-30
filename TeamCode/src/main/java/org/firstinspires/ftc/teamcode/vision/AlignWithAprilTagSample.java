@@ -20,9 +20,9 @@ import java.util.List;
 public class AlignWithAprilTagSample extends LinearOpMode {
 
     public static int TARGET_ID = 2;
-    public static ApriltagSubsystem.Pose TARGET_POSITION = new ApriltagSubsystem.Pose(10, 0, 0), THRESHOLDS = new ApriltagSubsystem.Pose(2, 2, 2.5);
     private RobotStates robotState = RobotStates.DRIVE;
-    private List<ApriltagSubsystem.Pose> detections;
+    private final Pose2d TARGET_POSE = new Pose2d(15, 0, 0);
+    private List<Pose2d> tagPoses;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -43,12 +43,11 @@ public class AlignWithAprilTagSample extends LinearOpMode {
             if (isStopRequested())
                 return;
 
-            List<ApriltagSubsystem.Pose> detections = apriltagSubsystem.getDetections();
-            for (ApriltagSubsystem.Pose detection : detections) {
-                telemetry.addData("Forward Offset (Inch)", detection.forward);
-                telemetry.addData("Strafe Offset (Inch)", detection.strafe);
-                telemetry.addData("Turn Offset (Degrees)", Math.toDegrees(detection.heading));
-                telemetry.addData("Detection ID", detection.id);
+            tagPoses = apriltagSubsystem.getDetectionPoses();
+            for (Pose2d pose : tagPoses) {
+                telemetry.addData("Forward Offset (Inch)", pose.getX());
+                telemetry.addData("Strafe Offset (Inch)", pose.getY());
+                telemetry.addData("Turn Offset (Degrees)", Math.toDegrees(pose.getHeading()));
 
                 telemetry.update();
             }
@@ -69,25 +68,24 @@ public class AlignWithAprilTagSample extends LinearOpMode {
                             )
                     );
 
-                    detections = apriltagSubsystem.getDetections();
-                    for (ApriltagSubsystem.Pose detection : detections) {
-                        telemetry.addData("Forward Offset (Inch)", detection.forward);
-                        telemetry.addData("Strafe Offset (Inch)", detection.strafe);
-                        telemetry.addData("Turn Offset (Degrees)", Math.toDegrees(detection.heading));
-                        telemetry.addData("Detection ID", detection.id);
+                    tagPoses = apriltagSubsystem.getDetectionPoses();
+                    for (Pose2d pose : tagPoses) {
+                        telemetry.addData("Forward Offset (Inch)", pose.getX());
+                        telemetry.addData("Strafe Offset (Inch)", pose.getY());
+                        telemetry.addData("Turn Offset (Degrees)", Math.toDegrees(pose.getHeading()));
 
                         telemetry.update();
                     }
 
-//                    if (gamepad1.y) {
-//                        // Shut down the motors, prepare the odometry and start the camera processing
-//                        drive.setMotorPowers(0, 0, 0, 0);
-//                        odometry.lower();
-//
-//                        if (apriltagSubsystem.portal.getCameraState() != VisionPortal.CameraState.STREAMING)
-//                            apriltagSubsystem.portal.resumeStreaming();
-//                        robotState = RobotStates.ALIGN_TO_TAG;
-//                    }
+                    if (gamepad1.y) {
+                        // Shut down the motors, prepare the odometry and start the camera processing
+                        drive.setMotorPowers(0, 0, 0, 0);
+                        odometry.lower();
+
+                        if (apriltagSubsystem.portal.getCameraState() != VisionPortal.CameraState.STREAMING)
+                            apriltagSubsystem.portal.resumeStreaming();
+                        robotState = RobotStates.ALIGN_TO_TAG;
+                    }
                     break;
 
                 case ALIGN_TO_TAG:
@@ -101,6 +99,7 @@ public class AlignWithAprilTagSample extends LinearOpMode {
                         robotState = RobotStates.DRIVE;
                     }
 
+                    // Don't check for more tags if you're already following a trajectory
                     if (drive.isBusy()) {
                         drive.update();
                         continue;
@@ -108,30 +107,23 @@ public class AlignWithAprilTagSample extends LinearOpMode {
 
                     // Don't do anything if the camera hasn't started yet
                     if (apriltagSubsystem.portal.getCameraState() == VisionPortal.CameraState.STREAMING) {
-                        ApriltagSubsystem.Pose adjustment;
-                        detections = apriltagSubsystem.getDetections();
 
-                        for (ApriltagSubsystem.Pose detection : detections) {
+                        tagPoses = apriltagSubsystem.getDetectionPoses();
+                        for (Pose2d pose : tagPoses) {
+
                             // Log tag position
                             telemetry.addLine("Tag Position");
                             telemetry.addLine("--------------------------");
-                            telemetry.addData("Forward Offset", detection.forward);
-                            telemetry.addData("Strafe Offset", detection.strafe);
-                            telemetry.addData("Turn Offset", detection.heading);
+                            telemetry.addData("Forward Offset", pose.getX());
+                            telemetry.addData("Strafe Offset", pose.getY());
+                            telemetry.addData("Turn Offset", pose.getHeading());
 
                             // Heading is positive to the left and forward distance increases as you stray further away,
                             // leaving strafing to be reversed
-                            adjustment = detection.minus(TARGET_POSITION);
-                            adjustment.strafe *= -1;
-
-                            // Don't start movement until existing trajectories finish or if you're already in position
-                            if (!drive.isBusy())
-                                drive.adjustPoseAsync(adjustment.toPose2d());
+                            Pose2d adjustment = new Pose2d(TARGET_POSE.vec().minus(pose.vec()), pose.getHeading() - TARGET_POSE.getHeading());
+                            drive.adjustPoseAsync(adjustment);
                         }
                     }
-
-                    telemetry.addData("Target Pose", TARGET_POSITION.forward + ", " +
-                            TARGET_POSITION.strafe + ", " + TARGET_POSITION.heading);
                     break;
 
                 default:
