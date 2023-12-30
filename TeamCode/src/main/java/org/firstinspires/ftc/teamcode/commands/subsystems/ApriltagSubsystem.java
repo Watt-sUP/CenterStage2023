@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.commands.subsystems;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -23,11 +24,6 @@ public class ApriltagSubsystem extends SubsystemBase {
     public VisionPortal portal;
     private List<Integer> targetsList;
 
-    public ApriltagSubsystem(VisionPortal portal, AprilTagProcessor processor) {
-        aprilTagProcessor = processor;
-        this.portal = portal;
-    }
-
     public ApriltagSubsystem(HardwareMap hardwareMap, String cameraName) {
         aprilTagProcessor = new AprilTagProcessor.Builder()
                 .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
@@ -42,11 +38,6 @@ public class ApriltagSubsystem extends SubsystemBase {
                 .build();
     }
 
-    public ApriltagSubsystem(VisionPortal portal, AprilTagProcessor processor, Integer... targets) {
-        this(portal, processor);
-        this.setTargetTags(targets);
-    }
-
     public ApriltagSubsystem(HardwareMap hardwareMap, String cameraName, Integer... targets) {
         this(hardwareMap, cameraName);
         this.setTargetTags(targets);
@@ -56,23 +47,72 @@ public class ApriltagSubsystem extends SubsystemBase {
         targetsList = Arrays.asList(targets);
     }
 
-    public List<Pose> getDetections() {
+    /**
+     * Filters currently detected AprilTags based on the set targets.
+     *
+     * @return A list of AprilTag detections containing targets exclusively
+     */
+    public List<AprilTagDetection> getFilteredDetections() {
         if (portal.getCameraState() != VisionPortal.CameraState.STREAMING || targetsList.isEmpty())
             return new ArrayList<>();
 
         List<AprilTagDetection> aprilTagDetections = aprilTagProcessor.getDetections();
         return aprilTagDetections.stream()
                 .filter(detection -> targetsList.contains(detection.id))
-                .map(detection -> {
-                    if (detection.metadata == null)
-                        return new Pose(detection.id, -1, -1, -1);
+                .collect(Collectors.toList());
+    }
 
-                    double range = detection.ftcPose.range;
-                    double x0 = range * Math.cos(detection.ftcPose.bearing - detection.ftcPose.yaw);
-                    double y0 = range * Math.sin(detection.ftcPose.bearing - detection.ftcPose.yaw);
-
-                    return new Pose(detection.id, x0, y0, detection.ftcPose.yaw);
+    /**
+     * <p>Converts a list of AprilTag detections to field-based distances.</p>
+     * <p>The vector represents the translational offset from the tag, with the X and Y axes representing the forward and strafe offset, respectively.</p>
+     *
+     * @param detections A list of AprilTag detections to calculate the vectors of
+     * @return A list of Vector2d objects containing the offsets of each tag
+     */
+    public List<Vector2d> getDetectionVectors(List<AprilTagDetection> detections) {
+        return detections.stream()
+                .map(tag -> {
+                    // TODO: Verify whether the yaw or its negative should be used
+                    double x = tag.ftcPose.range * Math.cos(tag.ftcPose.bearing);
+                    double y = tag.ftcPose.range * Math.sin(tag.ftcPose.bearing);
+                    return new Vector2d(x, y).rotated(-tag.ftcPose.yaw);
                 }).collect(Collectors.toList());
+    }
+
+    /**
+     * <p>Converts the current AprilTag detections to field-based distances.</p>
+     * <p>The vector represents the translational offset from the tag, with the X and Y axes representing the forward and strafe offset, respectively.</p>
+     *
+     * @return A list of Vector2d objects containing the offsets of each tag
+     */
+    public List<Vector2d> getDetectionVectors() {
+        return this.getDetectionVectors(this.getFilteredDetections());
+    }
+
+    /**
+     * <p>Converts a list of AprilTag detections to Pose2d objects.</p>
+     * <p>The X and Y axes of a pose constitute the camera's forward and strafe offsets, while the heading represents the yaw.</p>
+     *
+     * @param detections A list of AprilTag detections to calculate the poses of
+     * @return A list of Pose2d objects containing the pose relative to each tag
+     */
+    public List<Pose2d> getDetectionPoses(List<AprilTagDetection> detections) {
+        return detections.stream()
+                .map(tag -> {
+                    double x = tag.ftcPose.range * Math.cos(tag.ftcPose.bearing);
+                    double y = tag.ftcPose.range * Math.sin(tag.ftcPose.bearing);
+                    return new Pose2d(new Vector2d(x, y).rotated(-tag.ftcPose.yaw), tag.ftcPose.yaw);
+                }).collect(Collectors.toList());
+    }
+
+    /**
+     * <p>Converts the current AprilTag detections to Pose2d objects.</p>
+     * <p>The X and Y axes of a pose constitute the camera's forward and strafe offsets, while the heading represents the yaw.</p>
+     *
+     * @return A list of Pose2d objects containing the pose relative to each tag
+     */
+    public List<Pose2d> getDetectionPoses() {
+        return this.getDetectionPoses(this.getFilteredDetections());
     }
 
     public void shutdown() {
@@ -80,37 +120,5 @@ public class ApriltagSubsystem extends SubsystemBase {
             return;
 
         portal.close();
-    }
-
-    public static class Pose {
-        public double strafe, forward, heading;
-        public int id;
-
-        public Pose(double forward, double strafe, double heading) {
-            this.strafe = strafe;
-            this.forward = forward;
-            this.heading = heading;
-        }
-
-        public Pose(int id, double forward, double strafe, double heading) {
-            this(forward, strafe, heading);
-            this.id = id;
-        }
-
-        public Pose plus(Pose pose) {
-            return new Pose(this.forward + pose.forward, this.strafe + pose.strafe, this.heading + pose.heading);
-        }
-
-        public Pose times(double scalar) {
-            return new Pose(this.forward * scalar, this.strafe * scalar, this.heading * scalar);
-        }
-
-        public Pose minus(Pose pose) {
-            return this.plus(pose.times(-1));
-        }
-
-        public Pose2d toPose2d() {
-            return new Pose2d(this.strafe, this.forward, this.heading);
-        }
     }
 }
