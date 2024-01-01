@@ -36,9 +36,9 @@ package org.firstinspires.ftc.teamcode;
 import android.util.Pair;
 import android.util.Size;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -67,9 +67,9 @@ import java.util.concurrent.TimeUnit;
  * In OnBot Java, use "Add File" to add this OpMode from the list of Samples.
  */
 
-@Config
+//@Config
 @TeleOp(name = "Utility: Camera Frame Capture", group = "Utility")
-//@Disabled
+@Disabled
 public class UtilityCameraFrameCapture extends LinearOpMode {
     /*
      * EDIT THESE PARAMETERS AS NEEDED
@@ -138,8 +138,11 @@ public class UtilityCameraFrameCapture extends LinearOpMode {
         ExposureControl exposure = portal.getCameraControl(ExposureControl.class);
         GainControl gain = portal.getCameraControl(GainControl.class);
 
+        if (exposure.getMode() != ExposureControl.Mode.Manual)
+            exposure.setMode(ExposureControl.Mode.Manual);
+
         Pair<Integer, Integer> gain_limits = new Pair<>(gain.getMinGain(), gain.getMaxGain());
-        Pair<Long, Long> exposure_limits = new Pair<>(exposure.getMinExposure(TimeUnit.MILLISECONDS), exposure.getMaxExposure(TimeUnit.MILLISECONDS));
+        Pair<Long, Long> exposure_limits = new Pair<>(exposure.getMinExposure(TimeUnit.MILLISECONDS) + 1, exposure.getMaxExposure(TimeUnit.MILLISECONDS));
 
         Random random = new Random();
         long new_exposure = random.nextInt((int) (exposure_limits.second - exposure_limits.first)) + exposure_limits.first;

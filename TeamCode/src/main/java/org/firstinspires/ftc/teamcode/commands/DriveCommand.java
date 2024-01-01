@@ -9,6 +9,7 @@ import java.util.function.DoubleSupplier;
 public class DriveCommand extends CommandBase {
 
     private final DriveSubsystem drive;
+    private DoubleSupplier heading = () -> 0;
     private final DoubleSupplier forward, strafe, rotation;
 
     public DriveCommand(DriveSubsystem drive, DoubleSupplier forward, DoubleSupplier strafe, DoubleSupplier rotation) {
@@ -19,8 +20,14 @@ public class DriveCommand extends CommandBase {
         addRequirements(drive);
     }
 
+    public DriveCommand(DriveSubsystem drive, DoubleSupplier forward, DoubleSupplier strafe,
+                        DoubleSupplier rotation, DoubleSupplier heading) {
+        this(drive, forward, strafe, rotation);
+        this.heading = heading;
+    }
+
     @Override
     public void execute() {
-        drive.drive(forward.getAsDouble(), strafe.getAsDouble(), rotation.getAsDouble());
+        drive.updateSpeeds(forward.getAsDouble(), strafe.getAsDouble(), rotation.getAsDouble(), heading.getAsDouble());
     }
 }

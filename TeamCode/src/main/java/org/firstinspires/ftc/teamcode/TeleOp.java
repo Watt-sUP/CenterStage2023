@@ -1,11 +1,18 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
+import com.qualcomm.hardware.bosch.BHI260IMU;
+import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.commands.DriveCommand;
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
@@ -13,11 +20,30 @@ import org.firstinspires.ftc.teamcode.commands.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.EndgameSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 
-//@Config
+import java.util.List;
+import java.util.Locale;
+
+@Config
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp
 public class TeleOp extends CommandOpMode {
+    public static LynxModule.BulkCachingMode cacheMethod = LynxModule.BulkCachingMode.OFF;
+    private final ElapsedTime fps = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+    private List<LynxModule> hubs;
 
     public void initialize() {
+        hubs = hardwareMap.getAll(LynxModule.class);
+
+        for (LynxModule hub : hubs)
+            hub.setBulkCachingMode(cacheMethod);
+
+        BHI260IMU imu = hardwareMap.get(BHI260IMU.class, "imu");
+        imu.initialize(new IMU.Parameters(
+                new RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                        RevHubOrientationOnRobot.UsbFacingDirection.RIGHT
+                )
+        ));
+
         OdometrySubsystem odometrySystem = new OdometrySubsystem(
                 new SimpleServo(hardwareMap, "odo_left", 0, 300),
                 new SimpleServo(hardwareMap, "odo_right", 0, 300),
@@ -46,7 +72,8 @@ public class TeleOp extends CommandOpMode {
 
         GamepadEx driver1 = new GamepadEx(gamepad1);
         GamepadEx driver2 = new GamepadEx(gamepad2);
-        DriveCommand driveCommand = new DriveCommand(driveSystem, driver1::getLeftY, driver1::getLeftX, driver1::getRightX);
+        DriveCommand driveCommand = new DriveCommand(driveSystem, driver1::getLeftY,
+                driver1::getLeftX, driver1::getRightX, () -> imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
 
         // Raise odometry to avoid sliding
         odometrySystem.raise();
@@ -60,15 +87,14 @@ public class TeleOp extends CommandOpMode {
         driver1.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
                 .whileHeld(() -> driveSystem.setPowerLimit(0.25))
                 .whenReleased(() -> driveSystem.setPowerLimit(1.0));
+        driver1.getGamepadButton(GamepadKeys.Button.START)
+                .whenPressed(imu::resetYaw);
 
         // Endgame specific controls
         driver1.getGamepadButton(GamepadKeys.Button.B)
                 .whenPressed(endgameSystem::toggleClimb);
         driver1.getGamepadButton(GamepadKeys.Button.Y)
                 .whenPressed(endgameSystem::launchPlane);
-
-        driver2.getGamepadButton(GamepadKeys.Button.X)
-                .whenPressed(collectorSystem::toggleLiftLocation);
 
         // Slides commands
         driver2.getGamepadButton(GamepadKeys.Button.DPAD_UP)
@@ -86,19 +112,34 @@ public class TeleOp extends CommandOpMode {
         driver2.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
                 .whenPressed(() -> depositSystem.adjustSlidesTicks(75));
 
-
-        driver2.getGamepadButton(GamepadKeys.Button.Y)
-                .whenPressed(depositSystem::toggleSpike);
+        // Claw commands
+        driver2.getGamepadButton(GamepadKeys.Button.X)
+                .whenPressed(collectorSystem::toggleLiftLocation);
         driver2.getGamepadButton(GamepadKeys.Button.A)
                 .whenPressed(collectorSystem::toggleClamp);
+
+        // Depositing commands
+        driver2.getGamepadButton(GamepadKeys.Button.Y)
+                .whenPressed(depositSystem::toggleSpike);
         driver2.getGamepadButton(GamepadKeys.Button.B)
                 .whenPressed(depositSystem::toggleBlockers);
 
         schedule(new RunCommand(() -> {
             telemetry.addData("Power Limit", driveSystem.getPowerLimit());
-            telemetry.addData("Slides Ticks", depositSystem.getSlidesTicks());
             telemetry.addData("Blocker State", depositSystem.getBlockerState());
+            telemetry.addData("Robot Angle", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+            telemetry.addData("FPS", String.format(Locale.US, "%.2f", 1000. / fps.milliseconds()));
             telemetry.update();
         }));
+    }
+
+    @Override
+    public void run() {
+        for (LynxModule hub : hubs)
+            if (hub.getBulkCachingMode() == LynxModule.BulkCachingMode.MANUAL)
+                hub.clearBulkCache();
+
+        fps.reset();
+        super.run();
     }
 }
