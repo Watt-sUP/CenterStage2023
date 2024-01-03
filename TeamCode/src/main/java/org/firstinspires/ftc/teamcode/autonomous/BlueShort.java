@@ -180,13 +180,6 @@ public class BlueShort extends CommandOpMode {
                 }),
                 new WaitUntilCommand(() -> !drive.isBusy()),
                 new InstantCommand(() -> drive.turn(Math.toRadians(180) - drive.getPoseEstimate().getHeading(), AngleUnit.RADIANS)),
-                new InstantCommand(() -> {
-                    // End the OpMode in the right case as the trajectory of cycle
-                    // runs over the right stripe
-                    if (location == PropLocations.RIGHT)
-                        this.terminateOpModeNow();
-                }),
-//                new InstantCommand(this::terminateOpModeNow),
 
                 // Head for the other side of the field
                 new InstantCommand(() -> drive.lineToPoseAsync(new Pose2d(-29.9, 62.2, Math.toRadians(180.0)))),
@@ -215,12 +208,15 @@ public class BlueShort extends CommandOpMode {
                                                 new WaitCommand(500),
                                                 new WaitUntilCommand(() -> !drive.isBusy())
                                         ),
-                                        new InstantCommand(() -> drive.turn(Math.toRadians(180) - drive.getPoseEstimate().getHeading(), AngleUnit.RADIANS)).andThen(new InstantCommand(depositSystem::toggleBlockers)),
+                                        new InstantCommand(() -> drive.turn(Math.toRadians(180) - drive.getPoseEstimate().getHeading(), AngleUnit.RADIANS)).andThen(
+                                                new InstantCommand(depositSystem::toggleBlockers),
+                                                new WaitCommand(400)
+                                        ),
                                         new InstantCommand(() -> drive.adjustPoseAsync(new Pose2d(-5, 0, 0))).andThen(new WaitUntilCommand(() -> !drive.isBusy())),
                                         new InstantCommand(() -> drive.adjustPoseAsync(new Pose2d(5, 0, 0))).andThen(
                                                 new WaitUntilCommand(() -> !drive.isBusy()),
                                                 new InstantCommand(depositSystem::toggleBlockers),
-                                                new WaitCommand(300)
+                                                new WaitCommand(700)
                                         ),
 
                                         new InstantCommand(() -> drive.adjustPoseAsync(new Pose2d(-5, 0, 0))).andThen(

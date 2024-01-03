@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 @Config
 public class EndgameSubsystem extends SubsystemBase {
 
-    public static int HOOKING_POS = 4000, HANGING_POS = 2100;
+    public static int HOOKING_POS = 4000, DRONE_POS = 2100;
     private final DcMotor leftPull, rightPull;
     private final ServoEx launcher;
 
@@ -37,14 +37,14 @@ public class EndgameSubsystem extends SubsystemBase {
     public void toggleClimb() {
         switch (climbState) {
             case LOWERED:
+                this.setClimbToTicks(DRONE_POS);
+                climbState = ClimbState.DRONE;
+                break;
+            case DRONE:
                 this.setClimbToTicks(HOOKING_POS);
                 climbState = ClimbState.HOOKING;
                 break;
             case HOOKING:
-                this.setClimbToTicks(HANGING_POS);
-                climbState = ClimbState.HANGING;
-                break;
-            case HANGING:
                 this.setClimbToTicks(0);
                 climbState = ClimbState.LOWERED;
                 break;
@@ -62,7 +62,7 @@ public class EndgameSubsystem extends SubsystemBase {
     }
 
     public void launchPlane() {
-        if (launcher == null || climbState != ClimbState.HANGING)
+        if (launcher == null || climbState != ClimbState.DRONE)
             return;
 
         if (Math.round(launcher.getAngle()) == 35)
@@ -80,7 +80,7 @@ public class EndgameSubsystem extends SubsystemBase {
 
     private enum ClimbState {
         HOOKING,
-        HANGING,
+        DRONE,
         LOWERED
     }
 }
