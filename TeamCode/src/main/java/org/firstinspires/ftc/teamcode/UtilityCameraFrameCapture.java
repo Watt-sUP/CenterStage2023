@@ -36,9 +36,9 @@ package org.firstinspires.ftc.teamcode;
 import android.util.Pair;
 import android.util.Size;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -67,15 +67,16 @@ import java.util.concurrent.TimeUnit;
  * In OnBot Java, use "Add File" to add this OpMode from the list of Samples.
  */
 
-//@Config
+@Config
 @TeleOp(name = "Utility: Camera Frame Capture", group = "Utility")
-@Disabled
+//@Disabled
 public class UtilityCameraFrameCapture extends LinearOpMode {
     /*
      * EDIT THESE PARAMETERS AS NEEDED
      */
 
     public static boolean RANDOMIZE_LIGHTING = false;
+    public static String IMAGE_NAME = "CameraCalibrationFrame";
 
     // Internal state
     boolean lastX;
@@ -108,7 +109,7 @@ public class UtilityCameraFrameCapture extends LinearOpMode {
             ));
 
             if (x && !lastX) {
-                portal.saveNextFrameRaw(String.format(Locale.US, "CameraFrameCapture-%06d", frameCount++));
+                portal.saveNextFrameRaw(String.format(Locale.US, IMAGE_NAME + "-%06d", frameCount++));
                 capReqTime = System.currentTimeMillis();
 
                 if (RANDOMIZE_LIGHTING)

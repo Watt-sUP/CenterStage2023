@@ -9,6 +9,7 @@ import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.hardware.bosch.BHI260IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -24,9 +25,9 @@ import java.util.List;
 import java.util.Locale;
 
 @Config
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp
-public class TeleOp extends CommandOpMode {
-    public static LynxModule.BulkCachingMode cacheMethod = LynxModule.BulkCachingMode.OFF;
+@TeleOp(name = "TeleOp (Field Centric)")
+public class FieldTeleOp extends CommandOpMode {
+    public static LynxModule.BulkCachingMode bulkMethod = LynxModule.BulkCachingMode.AUTO;
     private final ElapsedTime fps = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
     private List<LynxModule> hubs;
 
@@ -34,7 +35,7 @@ public class TeleOp extends CommandOpMode {
         hubs = hardwareMap.getAll(LynxModule.class);
 
         for (LynxModule hub : hubs)
-            hub.setBulkCachingMode(cacheMethod);
+            hub.setBulkCachingMode(bulkMethod);
 
         BHI260IMU imu = hardwareMap.get(BHI260IMU.class, "imu");
         imu.initialize(new IMU.Parameters(
@@ -127,7 +128,11 @@ public class TeleOp extends CommandOpMode {
         schedule(new RunCommand(() -> {
             telemetry.addData("Power Limit", driveSystem.getPowerLimit());
             telemetry.addData("Blocker State", depositSystem.getBlockerState());
-            telemetry.addData("Robot Angle", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+
+            telemetry.addData("Yaw", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+            telemetry.addData("Pitch", imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.DEGREES));
+            telemetry.addData("Roll", imu.getRobotYawPitchRollAngles().getRoll(AngleUnit.DEGREES));
+
             telemetry.addData("FPS", String.format(Locale.US, "%.2f", 1000. / fps.milliseconds()));
             telemetry.update();
         }));

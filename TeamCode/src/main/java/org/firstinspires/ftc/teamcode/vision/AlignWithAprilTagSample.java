@@ -21,7 +21,7 @@ public class AlignWithAprilTagSample extends LinearOpMode {
 
     public static int TARGET_ID = 2;
     private RobotStates robotState = RobotStates.DRIVE;
-    private final Pose2d TARGET_POSE = new Pose2d(15, 0, 0);
+    public static Pose2d TARGET_POSE = new Pose2d(15, 0, 0);
     private List<Pose2d> tagPoses;
 
     @Override
@@ -74,6 +74,7 @@ public class AlignWithAprilTagSample extends LinearOpMode {
                         telemetry.addData("Strafe Offset (Inch)", pose.getY());
                         telemetry.addData("Turn Offset (Degrees)", Math.toDegrees(pose.getHeading()));
 
+                        telemetry.addData("Suggested Adjustment", pose.minus(TARGET_POSE));
                         telemetry.update();
                     }
 
@@ -105,6 +106,7 @@ public class AlignWithAprilTagSample extends LinearOpMode {
                         continue;
                     }
 
+                    sleep(100); // Share the CPU
                     // Don't do anything if the camera hasn't started yet
                     if (apriltagSubsystem.portal.getCameraState() == VisionPortal.CameraState.STREAMING) {
 
@@ -120,8 +122,9 @@ public class AlignWithAprilTagSample extends LinearOpMode {
 
                             // Heading is positive to the left and forward distance increases as you stray further away,
                             // leaving strafing to be reversed
-                            Pose2d adjustment = new Pose2d(TARGET_POSE.vec().minus(pose.vec()), pose.getHeading() - TARGET_POSE.getHeading());
-                            drive.adjustPoseAsync(adjustment);
+                            Pose2d adjustment = pose.minus(TARGET_POSE);
+                            drive.setPoseEstimate(new Pose2d(0, 0, 0));
+                            drive.lineToPoseAsync(adjustment);
                         }
                     }
                     break;

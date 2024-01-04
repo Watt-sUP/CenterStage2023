@@ -28,6 +28,7 @@ public class ApriltagSubsystem extends SubsystemBase {
         aprilTagProcessor = new AprilTagProcessor.Builder()
                 .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
                 .setOutputUnits(DistanceUnit.INCH, AngleUnit.RADIANS)
+                .setLensIntrinsics(810.823, 810.823, 317.617, 219.355)
                 .setTagLibrary(AprilTagGameDatabase.getCurrentGameTagLibrary())
                 .build();
 
@@ -72,7 +73,6 @@ public class ApriltagSubsystem extends SubsystemBase {
     public List<Vector2d> getDetectionVectors(List<AprilTagDetection> detections) {
         return detections.stream()
                 .map(tag -> {
-                    // TODO: Verify whether the yaw or its negative should be used
                     double x = tag.ftcPose.range * Math.cos(tag.ftcPose.bearing);
                     double y = tag.ftcPose.range * Math.sin(tag.ftcPose.bearing);
                     return new Vector2d(x, y).rotated(-tag.ftcPose.yaw);
