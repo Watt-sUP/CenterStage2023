@@ -14,9 +14,9 @@ import java.util.function.BooleanSupplier;
 @Config
 public class DepositSubsystem extends SubsystemBase {
     private final DcMotor slides;
-    public static Double LOW_LEFT = .22, LOW_RIGHT = .22;
+    public static Double LOW_LEFT = 0.0, LOW_RIGHT = 0.0;
     private final ServoEx leftLift, rightLift;
-    public static Double HIGH_LEFT = .78, HIGH_RIGHT = .78;
+    public static Double HIGH_LEFT = .75, HIGH_RIGHT = .75;
     private final ServoEx stopperTop, stopperBottom;
     private BooleanSupplier safeToMove = () -> true;
 
@@ -43,11 +43,11 @@ public class DepositSubsystem extends SubsystemBase {
         this.stopperBottom = stopperBottom;
         this.slides = slides;
 
-        this.leftLift.setInverted(true);
+        this.rightLift.setInverted(true);
         this.stopperBottom.setInverted(true);
 
         this.stopperTop.turnToAngle(0);
-        this.stopperBottom.turnToAngle(45);
+        this.stopperBottom.turnToAngle(60);
         this.toggleSpike();
 
         this.slides.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -133,12 +133,12 @@ public class DepositSubsystem extends SubsystemBase {
     public void toggleBlockers() {
         switch (blockerState) {
             case FREE:
-                stopperBottom.turnToAngle(90);
+                stopperBottom.turnToAngle(108);
                 stopperTop.turnToAngle(135);
                 blockerState = Blocker.TWO_PIXELS;
                 break;
             case ONE_PIXEL:
-                stopperBottom.turnToAngle(45);
+                stopperBottom.turnToAngle(60);
                 blockerState = Blocker.FREE;
                 break;
             case TWO_PIXELS:
