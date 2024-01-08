@@ -128,10 +128,7 @@ public class BlueShort extends CommandOpMode {
 
             if (bestDetection != null) {
                 double x = (bestDetection.getLeft() + bestDetection.getRight()) / 2;
-
-                if (x < 450)
-                    location = PropLocations.MIDDLE;
-                else location = PropLocations.RIGHT;
+                location = (x < 450 ? PropLocations.MIDDLE : PropLocations.RIGHT);
             }
 
             telemetry.addData("FPS", tensorflow.portal.getFps());
