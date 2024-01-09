@@ -134,7 +134,7 @@ public class RedLong extends CommandOpMode {
         }
         schedule(new SequentialCommandGroup(
                 new InstantCommand(tensorflow::shutdown),
-                new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple),
+                new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, false),
                 new InstantCommand(collectorSystem::toggleLiftLocation),
                 new WaitCommand(300),
                 new InstantCommand(collectorSystem::toggleLiftLocation),
@@ -155,7 +155,7 @@ public class RedLong extends CommandOpMode {
                                     depositSystem.toggleBlockers();
                                 })
                         ),
-                        new RunByCaseCommand(location.toString(), drive, leftYellow, middleYellow, rightYellow)
+                        new RunByCaseCommand(location.toString(), drive, leftYellow, middleYellow, rightYellow, false)
                 ),
                 new InstantCommand(() -> drive.turn(Math.toRadians(180) - drive.getPoseEstimate().getHeading(), AngleUnit.RADIANS)),
                 new WaitCommand(300),

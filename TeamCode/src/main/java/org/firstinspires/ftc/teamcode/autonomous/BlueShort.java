@@ -71,7 +71,7 @@ public class BlueShort extends CommandOpMode {
                 .lineTo(new Vector2d(21.58, 44.00))
                 .build();
         Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end(), true)
-                .splineTo(new Vector2d(50, 44.5), Math.toRadians(0.00),
+                .splineTo(new Vector2d(51.5, 44.5), Math.toRadians(0.00),
                         SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
@@ -81,7 +81,7 @@ public class BlueShort extends CommandOpMode {
                 .lineTo(new Vector2d(10.85, 41.3))
                 .build();
         Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), true)
-                .splineTo(new Vector2d(50, 37.85), Math.toRadians(0.00),
+                .splineTo(new Vector2d(51.5, 37.85), Math.toRadians(0.00),
                         SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
@@ -93,7 +93,7 @@ public class BlueShort extends CommandOpMode {
                 .lineTo(new Vector2d(13.5, 37))
                 .build();
         Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), true)
-                .splineTo(new Vector2d(50, 30.4), Math.toRadians(0),
+                .splineTo(new Vector2d(51.5, 30.4), Math.toRadians(0),
                         SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
@@ -107,8 +107,9 @@ public class BlueShort extends CommandOpMode {
                 .resetVelConstraint()
                 .splineTo(new Vector2d(-29.91, 62.2), Math.toRadians(0.00))
                 .splineTo(new Vector2d(23.69, 62.2), Math.toRadians(0.00))
+                .waitSeconds(1)
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(50.41, 36.52), Math.toRadians(0.00))
+                .splineTo(new Vector2d(51.5, 45), Math.toRadians(0.00))
                 .build();
 
 
@@ -140,7 +141,7 @@ public class BlueShort extends CommandOpMode {
         schedule(new SequentialCommandGroup(
                 // Place the purple pixel in the detected case
                 new InstantCommand(tensorflow::shutdown),
-                new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple),
+                new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, false),
                 new InstantCommand(collectorSystem::toggleLiftLocation),
                 new WaitCommand(300),
                 new InstantCommand(collectorSystem::toggleLiftLocation),
@@ -154,7 +155,7 @@ public class BlueShort extends CommandOpMode {
                             depositSystem.toggleSpike();
                             depositSystem.toggleBlockers();
                         }),
-                        new RunByCaseCommand(location.toString(), drive, leftYellow, middleYellow, rightYellow)
+                        new RunByCaseCommand(location.toString(), drive, leftYellow, middleYellow, rightYellow, false)
                 ),
                 // Correct the heading for proper pixel placement
                 new InstantCommand(() -> drive.turn(Math.toRadians(180) - drive.getPoseEstimate().getHeading(), AngleUnit.RADIANS)),
@@ -221,8 +222,8 @@ public class BlueShort extends CommandOpMode {
                                                 new InstantCommand(depositSystem::toggleSpike),
                                                 new WaitCommand(1000),
                                                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
-                                        ),
-                                        new InstantCommand(() -> drive.lineToPoseAsync(new Pose2d(47, 62.2, Math.toRadians(180))))
+                                        )
+//                                        new InstantCommand(() -> drive.lineToPoseAsync(new Pose2d(47, 62.2, Math.toRadians(180))))
                                 ),
                                 new InstantCommand(() -> drive.followTrajectorySequenceAsync(headForStack))
                         ),

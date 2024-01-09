@@ -14,6 +14,7 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
@@ -25,7 +26,9 @@ import org.firstinspires.ftc.teamcode.commands.subsystems.TensorflowSubsystem;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
+import org.firstinspires.ftc.teamcode.util.PropLocations;
 
+@Disabled
 @Autonomous(name = "Red Short", group = "auto")
 public class RedShort extends CommandOpMode {
 
@@ -68,7 +71,7 @@ public class RedShort extends CommandOpMode {
                 .lineTo(new Vector2d(20.58, -42.00))
                 .build();
         Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), true)
-                .splineTo(new Vector2d(50, -44.7), Math.toRadians(0.00),
+                .splineTo(new Vector2d(51.5, -44.7), Math.toRadians(0.00),
                         SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL)
                 )
@@ -79,7 +82,7 @@ public class RedShort extends CommandOpMode {
                 .lineTo(new Vector2d(10.85, -42.3))
                 .build();
         Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), true)
-                .splineTo(new Vector2d(50, -37.5), Math.toRadians(0),
+                .splineTo(new Vector2d(51.5, -37.5), Math.toRadians(0),
                         SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
@@ -91,7 +94,7 @@ public class RedShort extends CommandOpMode {
                 .lineTo(new Vector2d(13.5, -35.5))
                 .build();
         Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end(), true)
-                .splineTo(new Vector2d(50, -31.5), Math.toRadians(0),
+                .splineTo(new Vector2d(51.5, -31.5), Math.toRadians(0),
                         SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
@@ -127,7 +130,7 @@ public class RedShort extends CommandOpMode {
         }
         schedule(new SequentialCommandGroup(
                 new InstantCommand(tensorflow::shutdown),
-                new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple),
+                new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, false),
                 new InstantCommand(collectorSystem::toggleLiftLocation),
                 new WaitCommand(300),
                 new InstantCommand(collectorSystem::toggleLiftLocation),
@@ -141,7 +144,7 @@ public class RedShort extends CommandOpMode {
                             depositSystem.toggleSpike();
                             depositSystem.toggleBlockers();
                         }),
-                        new RunByCaseCommand(location.toString(), drive, leftYellow, middleYellow, rightYellow)
+                        new RunByCaseCommand(location.toString(), drive, leftYellow, middleYellow, rightYellow, false)
                 ),
                 new InstantCommand(() -> drive.turn(Math.toRadians(180) - drive.getPoseEstimate().getHeading(), AngleUnit.RADIANS)),
                 new WaitCommand(300),
@@ -160,11 +163,5 @@ public class RedShort extends CommandOpMode {
                 new InstantCommand(() -> drive.lineToPose(new Pose2d(47, -62.2, Math.toRadians(180)))),
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
         ));
-    }
-
-    private enum PropLocations {
-        LEFT,
-        MIDDLE,
-        RIGHT
     }
 }

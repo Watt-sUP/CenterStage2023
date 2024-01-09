@@ -34,7 +34,7 @@ public class DriveConstants {
      */
     public static final boolean RUN_USING_ENCODER = false;
     public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(0, 0, 0,
-            getMotorVelocityF(MAX_RPM / 60 * TICKS_PER_REV));
+            13.718702086739732);
 
     /*
      * These are physical constants that can be determined from your robot (including the track
@@ -46,7 +46,7 @@ public class DriveConstants {
      */
     public static double WHEEL_RADIUS = 1.8898; // in
     public static double GEAR_RATIO = 1.1428571428571428; // output (wheel) speed / input (motor) speed
-    public static double TRACK_WIDTH = 11.46; // in
+    public static double TRACK_WIDTH = 11.08; // in
 
     /*
      * These are the feedforward parameters used to model the drive motor behavior. If you are using
@@ -54,9 +54,9 @@ public class DriveConstants {
      * motor encoders or have elected not to use them for velocity control, these values should be
      * empirically tuned.
      */
-    public static double kV = 0.01526;
-    public static double kA = 0.003;
-    public static double kStatic = 0.08911;
+    public static double kV = 0.0155;
+    public static double kA = 0.0033;
+    public static double kStatic = 0.08566;
 
     /*
      * These values are used to generate the trajectories for you robot. To ensure proper operation,
@@ -65,10 +65,10 @@ public class DriveConstants {
      * small and gradually increase them later after everything is working. All distance units are
      * inches.
      */
-    public static double MAX_VEL = 53.15296677278559;
-    public static double MAX_ACCEL = 53.15296677278559;
-    public static double MAX_ANG_VEL = Math.toRadians(251.21408559399362);
-    public static double MAX_ANG_ACCEL = Math.toRadians(251.21408559399362);
+    public static double MAX_VEL = 54.519087459975346;
+    public static double MAX_ACCEL = 54.519087459975346;
+    public static double MAX_ANG_VEL = Math.toRadians(260.4042400507298);
+    public static double MAX_ANG_ACCEL = Math.toRadians(260.4042400507298);
 
     /*
      * Adjust the orientations here to match your robot. See the FTC SDK documentation for details.

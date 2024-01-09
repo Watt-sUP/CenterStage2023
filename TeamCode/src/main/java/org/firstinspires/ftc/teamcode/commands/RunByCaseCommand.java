@@ -17,6 +17,7 @@ public class RunByCaseCommand extends CommandBase {
     private final SampleMecanumDrive drive;
     private final Object left, middle, right;
     private final String targetCase;
+    private final boolean blocking;
 
     /**
      * Creates a new RunByCaseCommand instance.
@@ -26,10 +27,13 @@ public class RunByCaseCommand extends CommandBase {
      * @param leftCase   Path to follow for the left case
      * @param middleCase Path to follow for the middle case
      * @param rightCase  Path to follow for the right case
+     * @param blocking   Whether trajectory following should be synchronous
      */
     public RunByCaseCommand(String location, SampleMecanumDrive drive, Object leftCase,
-                            Object middleCase, Object rightCase) {
+                            Object middleCase, Object rightCase, boolean blocking) {
         this.drive = drive;
+        this.blocking = blocking;
+
         left = leftCase;
         middle = middleCase;
         right = rightCase;
@@ -60,7 +64,8 @@ public class RunByCaseCommand extends CommandBase {
 
     @Override
     public void execute() {
-        drive.update();
+        if (!blocking)
+            drive.update();
     }
 
     @Override
@@ -68,16 +73,26 @@ public class RunByCaseCommand extends CommandBase {
         return !drive.isBusy();
     }
 
+    @Override
+    public void cancel() {
+        if (drive.isBusy())
+            drive.breakFollowing();
+    }
+
     /**
      * @param path The path object for the robot to follow
      * @throws IllegalArgumentException Occurs if the provided path isn't a RoadRunner trajectory
      */
     private void followPath(Object path) throws IllegalArgumentException {
-        if (path instanceof Trajectory)
-            drive.followTrajectoryAsync((Trajectory) path);
-        else if (path instanceof TrajectorySequence)
-            drive.followTrajectorySequenceAsync((TrajectorySequence) path);
-        else
+        if (path instanceof Trajectory) {
+            if (blocking)
+                drive.followTrajectory((Trajectory) path);
+            else drive.followTrajectoryAsync((Trajectory) path);
+        } else if (path instanceof TrajectorySequence) {
+            if (blocking)
+                drive.followTrajectorySequence((TrajectorySequence) path);
+            else drive.followTrajectorySequenceAsync((TrajectorySequence) path);
+        } else
             throw new IllegalArgumentException("Invalid path type: " + path.getClass().getSimpleName() + "." +
                     "Must be either Trajectory or TrajectorySequence.");
     }
