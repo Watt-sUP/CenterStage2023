@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Config
-@TeleOp(name = "TeleOp (Robot Centric)")
+@TeleOp(name = "TeleOp (Tomoiu + Vulpoiu)")
 public class RobotTeleOp extends CommandOpMode {
     public static LynxModule.BulkCachingMode bulkMethod = LynxModule.BulkCachingMode.AUTO;
     private final ElapsedTime fps = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);

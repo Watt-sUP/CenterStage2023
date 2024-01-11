@@ -9,6 +9,7 @@ import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.hardware.bosch.BHI260IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -24,6 +25,7 @@ import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import java.util.List;
 import java.util.Locale;
 
+@Disabled
 @Config
 @TeleOp(name = "TeleOp (Field Centric)")
 public class FieldTeleOp extends CommandOpMode {

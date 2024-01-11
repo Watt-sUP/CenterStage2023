@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 @Config
 public class CollectorSubsystem extends SubsystemBase {
-    public static Double LOWER_LIFT = 0.79, RAISE_LIFT = 0.02, STACK_LIFT = 0.715;
+    public static Double LOWER_LIFT = 0.8, RAISE_LIFT = 0.0, STACK_LIFT = 0.715;
     private final ServoEx liftLeft, liftRight;
     private final ServoEx claw;
     private final InterpLUT rightConverter = new InterpLUT();
@@ -36,7 +36,7 @@ public class CollectorSubsystem extends SubsystemBase {
         liftRight = liftR;
         claw = clamp;
 
-        // Servos have slight factory mismatch, create position table for synchronization
+        // Servos have slight factory mismatch, create a look-up table for synchronization
         rightConverter.add(-1e-6, 0.05);
         rightConverter.add(0.93 + 1e-6, 0.96);
         rightConverter.createLUT();
