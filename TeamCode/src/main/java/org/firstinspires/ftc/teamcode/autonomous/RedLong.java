@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.autonomous;
 
-import android.annotation.SuppressLint;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -26,12 +24,13 @@ import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
+import java.util.Locale;
+
 @Autonomous(name = "Red Long", group = "auto")
 public class RedLong extends CommandOpMode {
 
     private PropLocations location;
 
-    @SuppressLint("DefaultLocale")
     @Override
     public void initialize() {
 
@@ -129,7 +128,7 @@ public class RedLong extends CommandOpMode {
 
             telemetry.addData("FPS", tensorflow.portal.getFps());
             telemetry.addData("Current Location", location.toString());
-            telemetry.addData("Confidence", String.format("%.2f%%", bestDetection != null ? bestDetection.getConfidence() * 100 : 0));
+            telemetry.addData("Confidence", String.format(Locale.US, "%.2f%%", bestDetection != null ? bestDetection.getConfidence() * 100 : 0));
             telemetry.update();
         }
         schedule(new SequentialCommandGroup(

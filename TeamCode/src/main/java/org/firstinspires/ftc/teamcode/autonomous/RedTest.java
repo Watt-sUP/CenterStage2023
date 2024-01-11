@@ -68,13 +68,15 @@ public class RedTest extends CommandOpMode {
         odometrySystem.lower();
 
         Trajectory middlePurple = drive.trajectoryBuilder(startPose)
-                .splineTo(new Vector2d(14, -24.5).plus(new Vector2d(0, -16)), Math.toRadians(90.00))
+                .splineTo(new Vector2d(14, -40.5), Math.toRadians(90.00))
                 .build();
         Trajectory leftPurple = drive.trajectoryBuilder(startPose)
-                .splineTo(new Vector2d(.5, -35).plus(new Vector2d(0, -10).rotated(Math.toRadians(45))), Math.toRadians(135.00))
+                .splineTo(new Vector2d(.5, -35)
+                        .plus(new Vector2d(0, -10).rotated(Math.toRadians(45))), Math.toRadians(135.00))
                 .build();
         Trajectory rightPurple = drive.trajectoryBuilder(startPose)
-                .splineTo(new Vector2d(23.5, -32).plus(new Vector2d(0, -16).rotated(Math.toRadians(-30))), Math.toRadians(60.00))
+                .splineTo(new Vector2d(23.5, -32)
+                        .plus(new Vector2d(0, -16).rotated(Math.toRadians(-30))), Math.toRadians(60.00))
                 .build();
 
         Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), true)
