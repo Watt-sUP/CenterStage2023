@@ -32,7 +32,7 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 @Disabled
 @Deprecated // Currently being replaced by BlueTest.java
-@Autonomous(name = "Blue Short", group = "auto")
+@Autonomous(name = "Blue Short (Old)", group = "auto")
 public class BlueShort extends CommandOpMode {
 
     private PropLocations location;
