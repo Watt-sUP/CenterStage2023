@@ -86,14 +86,14 @@ public class BlueLong extends CommandOpMode {
                 .splineTo(new Vector2d(7.45, 59.73), Math.toRadians(0.00))
                 .waitSeconds(6)
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(52.50, 41.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(52.50, 39.50), Math.toRadians(0.00))
                 .build();
 
         TrajectorySequence leftPurple = drive.trajectorySequenceBuilder(startPose)
-                .splineTo(new Vector2d(-36, 35.5), Math.toRadians(-90))
+                .splineTo(new Vector2d(-38, 37), Math.toRadians(-90))
                 .turn(Math.toRadians(90))
-                .lineTo(new Vector2d(-25, 35.5))
-                .lineTo(new Vector2d(-36, 35.5))
+                .lineTo(new Vector2d(-25, 37))
+                .lineTo(new Vector2d(-38, 37))
                 .build();
         TrajectorySequence leftYellow = drive.trajectorySequenceBuilder(leftPurple.end())
                 .setReversed(true)
@@ -102,7 +102,7 @@ public class BlueLong extends CommandOpMode {
                 .splineTo(new Vector2d(26.14, 60.68), Math.toRadians(0.00))
                 .waitSeconds(6)
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(52.50, 48), Math.toRadians(0.00))
+                .splineTo(new Vector2d(51.00, 48), Math.toRadians(0.00))
                 .build();
 
 
