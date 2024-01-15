@@ -74,7 +74,7 @@ public class RobotTeleOp extends CommandOpMode {
                 .whileHeld(() -> driveSystem.setPowerLimit(0.5))
                 .whenReleased(() -> driveSystem.setPowerLimit(1.0));
         driver1.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
-                .whileHeld(() -> driveSystem.setPowerLimit(0.25))
+                .whileHeld(() -> driveSystem.setPowerLimit(0.33))
                 .whenReleased(() -> driveSystem.setPowerLimit(1.0));
 
         // Endgame specific controls

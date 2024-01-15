@@ -92,7 +92,7 @@ public class RedTest extends CommandOpMode {
 
         TrajectorySequence stackLeft = drive.trajectorySequenceBuilder(leftYellow.end())
                 .splineTo(new Vector2d(2.55, -60.00), Math.toRadians(180.00))
-                .splineTo(new Vector2d(-23.00, -60.00), Math.toRadians(180.00))
+                .splineTo(new Vector2d(-24.00, -60.00), Math.toRadians(180.00))
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
                 .splineTo(new Vector2d(-48.00, -12.50), Math.toRadians(180.00))
                 .splineTo(new Vector2d(-55.50, -12.50), Math.toRadians(180.00))
@@ -189,16 +189,21 @@ public class RedTest extends CommandOpMode {
                                         })
                                 )
                 ),
-                new InstantCommand(depositSystem::toggleBlockers).andThen(
-                        new WaitCommand(500),
-                        new InstantCommand(depositSystem::toggleSpike),
-                        new WaitCommand(300),
-                        new InstantCommand(depositSystem::toggleSpike)
-                ),
-                new InstantCommand(depositSystem::toggleBlockers).andThen(
-                        new WaitCommand(1000),
-                        new InstantCommand(depositSystem::toggleSpike)
-                )
+                new InstantCommand(depositSystem::toggleBlockers)
+                        .andThen(
+                                new WaitCommand(600),
+                                new InstantCommand(depositSystem::toggleSpike),
+                                new WaitCommand(300),
+                                new InstantCommand(depositSystem::toggleSpike),
+                                new WaitCommand(700)
+                        ),
+                new InstantCommand(depositSystem::toggleBlockers)
+                        .andThen(
+                                new WaitCommand(1000),
+                                new InstantCommand(depositSystem::toggleSpike)
+                        ),
+                new WaitCommand(1000)
+                        .andThen(new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED)))
         ));
     }
 }
