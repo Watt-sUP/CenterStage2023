@@ -121,7 +121,6 @@ public class SampleMecanumDrive extends MecanumDrive {
         List<Integer> lastTrackingEncPositions = new ArrayList<>();
         List<Integer> lastTrackingEncVels = new ArrayList<>();
 
-        // TODO: if desired, use setLocalizer() to change the localization method
         setLocalizer(new StandardTrackingWheelLocalizer(hardwareMap, lastTrackingEncPositions, lastTrackingEncVels));
 
         trajectorySequenceRunner = new TrajectorySequenceRunner(
@@ -200,13 +199,12 @@ public class SampleMecanumDrive extends MecanumDrive {
      * @param unit  The angle of the unit. Options include degrees and radians
      */
     public void turn(double angle, AngleUnit unit) {
-        if (unit == AngleUnit.RADIANS) {
+        if (unit == AngleUnit.RADIANS)
             turnAsync(angle);
-            waitForIdle();
-        } else if (unit == AngleUnit.DEGREES) {
+        else if (unit == AngleUnit.DEGREES)
             turnAsync(Math.toRadians(angle));
-            waitForIdle();
-        }
+
+        waitForIdle();
     }
 
     /**
