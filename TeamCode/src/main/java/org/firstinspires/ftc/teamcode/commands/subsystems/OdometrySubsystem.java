@@ -8,7 +8,7 @@ import com.arcrobotics.ftclib.util.InterpLUT;
 @Config
 public class OdometrySubsystem extends SubsystemBase {
 
-    public static double PARALLEL_UP = 0, PARALLEL_DOWN = 0.5;
+    public static double PARALLEL_UP = 0, PARALLEL_DOWN = 1;
     public static double PERPENDICULAR_UP = 0, PERPENDICULAR_DOWN = 1;
 
     private final ServoEx left, right, back;
@@ -21,15 +21,14 @@ public class OdometrySubsystem extends SubsystemBase {
         this.right = right;
         this.back = back;
 
+        this.left.setInverted(true);
         this.back.setInverted(true);
 
-        leftTable.add(-1e-9, 210);
-        leftTable.add(0.5, 110);
-        leftTable.add(1.0 + 1e-9, 0);
+        leftTable.add(-1e-9, 93);
+        leftTable.add(1.0 + 1e-9, 125);
 
-        rightTable.add(-1e-9, 205);
-        rightTable.add(0.5, 115);
-        rightTable.add(1.0 + 1e-9, 15);
+        rightTable.add(-1e-9, 87);
+        rightTable.add(1.0 + 1e-9, 115);
 
         backTable.add(-1e-9, 400);
         backTable.add(0.5, 270);

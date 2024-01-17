@@ -11,6 +11,7 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
+import com.arcrobotics.ftclib.util.Timing;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -23,13 +24,16 @@ import org.firstinspires.ftc.teamcode.commands.subsystems.TensorflowSubsystem;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
+import org.firstinspires.ftc.teamcode.util.PropLocations;
 
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 @Autonomous(name = "Red Long", group = "auto")
 public class RedLong extends CommandOpMode {
 
     private PropLocations location;
+    private final Timing.Timer timer = new Timing.Timer(10, TimeUnit.SECONDS);
 
     @Override
     public void initialize() {
@@ -76,7 +80,7 @@ public class RedLong extends CommandOpMode {
 
 
         TrajectorySequence middlePurple = drive.trajectorySequenceBuilder(startPose)
-                .lineTo(new Vector2d(-34.85, -18.95))
+//                .lineTo(new Vector2d(-34.85, -18.95))
                 .lineTo(new Vector2d(-34.85, -40.3))
                 .build();
         TrajectorySequence middleYellow = drive.trajectorySequenceBuilder(new Pose2d(-48.25, -46.25, Math.toRadians(90.00)))
@@ -132,16 +136,29 @@ public class RedLong extends CommandOpMode {
             telemetry.update();
         }
         schedule(new SequentialCommandGroup(
-                new InstantCommand(tensorflow::shutdown),
+                new InstantCommand(() -> {
+                    timer.start();
+                    tensorflow.shutdown();
+                }),
+                new InstantCommand(() -> {
+                    if (location == PropLocations.MIDDLE)
+                        collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK);
+                }),
                 new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, false),
-                new InstantCommand(collectorSystem::toggleLiftLocation),
+                new InstantCommand(() -> {
+                    if (location != PropLocations.MIDDLE)
+                        collectorSystem.toggleLiftLocation();
+                }),
                 new WaitCommand(300),
                 new InstantCommand(collectorSystem::toggleLiftLocation),
                 new WaitCommand(600),
 
 
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
-                new WaitCommand(300),
+                new ParallelCommandGroup( // Parallel running if no waiting is needed
+                        new WaitCommand(300),
+                        new WaitUntilCommand(timer::done)
+                ),
                 new InstantCommand(() -> {
                     if (location == PropLocations.MIDDLE)
                         drive.lineToPose(middleYellow.start());
@@ -169,14 +186,9 @@ public class RedLong extends CommandOpMode {
                 new InstantCommand(depositSystem::toggleSpike),
                 new WaitCommand(1000),
 
+                new InstantCommand(this::terminateOpModeNow),
                 new InstantCommand(() -> drive.lineToPose(new Pose2d(47, -62.2, Math.toRadians(180)))),
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
         ));
-    }
-
-    private enum PropLocations {
-        LEFT,
-        MIDDLE,
-        RIGHT
     }
 }

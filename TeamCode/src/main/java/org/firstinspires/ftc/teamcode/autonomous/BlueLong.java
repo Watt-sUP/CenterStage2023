@@ -13,6 +13,7 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
+import com.arcrobotics.ftclib.util.Timing;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -25,11 +26,15 @@ import org.firstinspires.ftc.teamcode.commands.subsystems.TensorflowSubsystem;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
+import org.firstinspires.ftc.teamcode.util.PropLocations;
+
+import java.util.concurrent.TimeUnit;
 
 @Autonomous(name = "Blue Long", group = "auto")
 public class BlueLong extends CommandOpMode {
 
     private PropLocations location, lastLocation = PropLocations.LEFT;
+    private final Timing.Timer timer = new Timing.Timer(8, TimeUnit.SECONDS);
 
     @SuppressLint("DefaultLocale")
     @Override
@@ -46,7 +51,7 @@ public class BlueLong extends CommandOpMode {
         telemetry.update();
 
         OdometrySubsystem odometrySystem = new OdometrySubsystem(
-                new SimpleServo(hardwareMap, "odo_left", 0, 300),
+                new SimpleServo(hardwareMap, "odo_left", 0, 300), //.65
                 new SimpleServo(hardwareMap, "odo_right", 0, 300),
                 new SimpleServo(hardwareMap, "odo_back", 0, 1800)
         );
@@ -71,22 +76,20 @@ public class BlueLong extends CommandOpMode {
                 .setReversed(true)
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
                 .splineTo(new Vector2d(7.45, 59.73), Math.toRadians(0.00))
-                .waitSeconds(6)
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(52.50, 34.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(52.50, 33.00), Math.toRadians(0.00))
                 .build();
 
-        TrajectorySequence middlePurple = drive.trajectorySequenceBuilder(startPose)
-                .lineTo(new Vector2d(-34.85, 18.95))
+        TrajectorySequence middlePurple = drive.trajectorySequenceBuilder(startPose, 30)
+//                .lineTo(new Vector2d(-34.85, 18.95))
                 .lineTo(new Vector2d(-34.85, 40.3))
                 .build();
         TrajectorySequence middleYellow = drive.trajectorySequenceBuilder(new Pose2d(-48.25, 46.25, Math.toRadians(-90.00)))
                 .setReversed(true)
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
                 .splineTo(new Vector2d(7.45, 59.73), Math.toRadians(0.00))
-                .waitSeconds(6)
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(52.50, 39.50), Math.toRadians(0.00))
+                .splineTo(new Vector2d(52.50, 37.0 + 0), Math.toRadians(0.00))
                 .build();
 
         TrajectorySequence leftPurple = drive.trajectorySequenceBuilder(startPose)
@@ -100,9 +103,8 @@ public class BlueLong extends CommandOpMode {
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
                 .splineTo(new Vector2d(-35.76, 60.49), Math.toRadians(0.00))
                 .splineTo(new Vector2d(26.14, 60.68), Math.toRadians(0.00))
-                .waitSeconds(6)
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(51.00, 48), Math.toRadians(0.00))
+                .splineTo(new Vector2d(51.00, 46), Math.toRadians(0.00))
                 .build();
 
 
@@ -139,16 +141,26 @@ public class BlueLong extends CommandOpMode {
             telemetry.update();
         }
         schedule(new SequentialCommandGroup(
-                new InstantCommand(tensorflow::shutdown),
+                new InstantCommand(timer::start).andThen(new InstantCommand(tensorflow::shutdown)),
+                new InstantCommand(() -> {
+                    if (location == PropLocations.MIDDLE)
+                        collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK);
+                }),
                 new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, false),
-                new InstantCommand(collectorSystem::toggleLiftLocation),
+                new InstantCommand(() -> {
+                    if (location != PropLocations.MIDDLE)
+                        collectorSystem.toggleLiftLocation();
+                }),
                 new WaitCommand(300),
                 new InstantCommand(collectorSystem::toggleLiftLocation),
                 new WaitCommand(600),
 
 
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
-                new WaitCommand(300),
+                new ParallelCommandGroup( // Parallel running if no waiting is needed
+                        new WaitCommand(300),
+                        new WaitUntilCommand(timer::done)
+                ),
                 new InstantCommand(() -> {
                     if (location == PropLocations.MIDDLE)
                         drive.lineToPose(middleYellow.start());
@@ -176,14 +188,9 @@ public class BlueLong extends CommandOpMode {
                 new InstantCommand(depositSystem::toggleSpike),
                 new WaitCommand(1000),
 
-//                new InstantCommand(() -> drive.lineToPose(new Pose2d(47, 62.2, Math.toRadians(180)))),
+                new InstantCommand(this::terminateOpModeNow),
+                new InstantCommand(() -> drive.lineToPose(new Pose2d(47, 62.2, Math.toRadians(180)))),
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
         ));
-    }
-
-    private enum PropLocations {
-        LEFT,
-        MIDDLE,
-        RIGHT
     }
 }
