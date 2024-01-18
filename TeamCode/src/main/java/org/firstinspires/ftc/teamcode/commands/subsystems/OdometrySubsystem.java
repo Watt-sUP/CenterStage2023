@@ -22,7 +22,6 @@ public class OdometrySubsystem extends SubsystemBase {
         this.back = back;
 
         this.left.setInverted(true);
-        this.back.setInverted(true);
 
         leftTable.add(-1e-9, 93);
         leftTable.add(1.0 + 1e-9, 125);

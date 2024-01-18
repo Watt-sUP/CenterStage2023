@@ -51,8 +51,8 @@ public class BlueLong extends CommandOpMode {
         telemetry.update();
 
         OdometrySubsystem odometrySystem = new OdometrySubsystem(
-                new SimpleServo(hardwareMap, "odo_left", 0, 300), //.65
-                new SimpleServo(hardwareMap, "odo_right", 0, 300),
+                new SimpleServo(hardwareMap, "odo_left", 0, 180),
+                new SimpleServo(hardwareMap, "odo_right", 0, 180),
                 new SimpleServo(hardwareMap, "odo_back", 0, 1800)
         );
         CollectorSubsystem collectorSystem = new CollectorSubsystem(
@@ -61,8 +61,8 @@ public class BlueLong extends CommandOpMode {
                 new SimpleServo(hardwareMap, "claw", 0, 300)
         );
         DepositSubsystem depositSystem = new DepositSubsystem(
-                new SimpleServo(hardwareMap, "depo_left", 0, 180),
-                new SimpleServo(hardwareMap, "depo_right", 0, 180),
+                new SimpleServo(hardwareMap, "depo_left", 0, 220),
+                new SimpleServo(hardwareMap, "depo_right", 0, 220),
                 new SimpleServo(hardwareMap, "stopper_top", 0, 300),
                 new SimpleServo(hardwareMap, "stopper_bottom", 0, 300),
                 hardwareMap.dcMotor.get("gli_sus")

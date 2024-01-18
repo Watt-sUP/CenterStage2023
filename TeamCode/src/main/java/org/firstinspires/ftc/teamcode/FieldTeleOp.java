@@ -48,8 +48,8 @@ public class FieldTeleOp extends CommandOpMode {
         ));
 
         OdometrySubsystem odometrySystem = new OdometrySubsystem(
-                new SimpleServo(hardwareMap, "odo_left", 0, 300),
-                new SimpleServo(hardwareMap, "odo_right", 0, 300),
+                new SimpleServo(hardwareMap, "odo_left", 0, 180),
+                new SimpleServo(hardwareMap, "odo_right", 0, 180),
                 new SimpleServo(hardwareMap, "odo_back", 0, 1800)
         );
         CollectorSubsystem collectorSystem = new CollectorSubsystem(
@@ -58,8 +58,8 @@ public class FieldTeleOp extends CommandOpMode {
                 new SimpleServo(hardwareMap, "claw", 0, 300)
         );
         DepositSubsystem depositSystem = new DepositSubsystem(
-                new SimpleServo(hardwareMap, "depo_left", 0, 180),
-                new SimpleServo(hardwareMap, "depo_right", 0, 180),
+                new SimpleServo(hardwareMap, "depo_left", 0, 220),
+                new SimpleServo(hardwareMap, "depo_right", 0, 220),
                 new SimpleServo(hardwareMap, "stopper_top", 0, 300),
                 new SimpleServo(hardwareMap, "stopper_bottom", 0, 300),
                 hardwareMap.dcMotor.get("gli_sus")
@@ -135,6 +135,7 @@ public class FieldTeleOp extends CommandOpMode {
             telemetry.addData("Pitch", imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.DEGREES));
             telemetry.addData("Roll", imu.getRobotYawPitchRollAngles().getRoll(AngleUnit.DEGREES));
 
+            telemetry.addData("Climb position", String.format(Locale.US, "%.2f", endgameSystem.getClimbAngle(AngleUnit.DEGREES)));
             telemetry.addData("FPS", String.format(Locale.US, "%.2f", 1000. / fps.milliseconds()));
             telemetry.update();
         }));

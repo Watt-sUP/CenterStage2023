@@ -48,8 +48,8 @@ public class TrackingWheelForwardOffsetTuner extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
         OdometrySubsystem odometrySystem = new OdometrySubsystem(
-                new SimpleServo(hardwareMap, "odo_left", 0, 300),
-                new SimpleServo(hardwareMap, "odo_right", 0, 300),
+                new SimpleServo(hardwareMap, "odo_left", 0, 180),
+                new SimpleServo(hardwareMap, "odo_right", 0, 180),
                 new SimpleServo(hardwareMap, "odo_back", 0, 1800)
         );
         odometrySystem.lower();
