@@ -37,13 +37,13 @@ public class BlueShort extends CommandOpMode {
     @Override
     public void initialize() {
         TensorflowSubsystem tensorflow = new TensorflowSubsystem(hardwareMap, "Webcam 1",
-                "blue_prop.tflite", "Red Prop");
+                "blue_prop.tflite", "Blue Prop");
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         telemetry.addLine("Loading trajectories...");
         telemetry.update();
 
-        Pose2d startPose = new Pose2d(10.85, 64.07, Math.toRadians(-90.00));
+        Pose2d startPose = new Pose2d(12.75, 62.75, Math.toRadians(-90.00));
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         OdometrySubsystem odometrySystem = new OdometrySubsystem(
@@ -73,56 +73,56 @@ public class BlueShort extends CommandOpMode {
                         .plus(new Vector2d(0, 16).rotated(Math.toRadians(30))), Math.toRadians(-60))
                 .build();
         Trajectory middlePurple = drive.trajectoryBuilder(startPose)
-                .splineTo(new Vector2d(14.00, 40.50), Math.toRadians(-90.00))
+                .splineTo(new Vector2d(15.00, 38.00), Math.toRadians(-90.00))
                 .build();
         Trajectory rightPurple = drive.trajectoryBuilder(startPose)
                 .splineTo(new Vector2d(.5, 35)
-                        .plus(new Vector2d(0, 10).rotated(Math.toRadians(-45))), Math.toRadians(-135))
+                        .plus(new Vector2d(0, 12).rotated(Math.toRadians(-45))), Math.toRadians(-135))
                 .build();
 
         Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end(), true)
                 .splineTo(new Vector2d(31.05, 53.32), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.50, 43.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(52, 43.00), Math.toRadians(0.00))
                 .build();
         Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), true)
-                .splineTo(new Vector2d(50.50, 36.50), Math.toRadians(0.00))
+                .splineTo(new Vector2d(52.00, 35.50), Math.toRadians(0.00))
                 .build();
         Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), true)
-                .splineTo(new Vector2d(50.00, 31.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(52.00, 29.50), Math.toRadians(0.00))
                 .build();
 
         TrajectorySequence stackLeft = drive.trajectorySequenceBuilder(leftYellow.end())
-                .splineTo(new Vector2d(2.12, 63.00), Math.toRadians(180.00))
-                .splineTo(new Vector2d(-28.00, 63.00), Math.toRadians(180.00))
+                .splineTo(new Vector2d(2.12, 60.00), Math.toRadians(180.00))
+                .splineTo(new Vector2d(-24.00, 60.00), Math.toRadians(180.00))
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(-52.00, 46.00), Math.toRadians(180.00))
-                .splineTo(new Vector2d(-61.00, 46.00), Math.toRadians(180.00))
+                .splineTo(new Vector2d(-50.00, 37.00), Math.toRadians(180.00))
+                .splineTo(new Vector2d(-58.00, 37.00), Math.toRadians(180.00))
                 .build();
         TrajectorySequence stackMid = drive.trajectorySequenceBuilder(middleYellow.end())
-                .splineTo(new Vector2d(2.12, 63.00), Math.toRadians(180.00))
-                .splineTo(new Vector2d(-28.00, 63.00), Math.toRadians(180.00))
+                .splineTo(new Vector2d(2.12, 60.00), Math.toRadians(180.00))
+                .splineTo(new Vector2d(-24.00, 60.00), Math.toRadians(180.00))
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(-52.00, 45.50), Math.toRadians(180.00))
-                .splineTo(new Vector2d(-61.00, 45.50), Math.toRadians(180.00))
+                .splineTo(new Vector2d(-50.00, 37.00), Math.toRadians(180.00))
+                .splineTo(new Vector2d(-58.00, 37.00), Math.toRadians(180.00))
                 .build();
         TrajectorySequence stackRight = drive.trajectorySequenceBuilder(rightYellow.end())
-                .splineTo(new Vector2d(2.55, 62.50), Math.toRadians(180.00))
-                .splineTo(new Vector2d(-28.00, 62.50), Math.toRadians(180.00))
+                .splineTo(new Vector2d(2.55, 60.00), Math.toRadians(180.00))
+                .splineTo(new Vector2d(-24.00, 60.00), Math.toRadians(180.00))
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(-52.00, 23.00), Math.toRadians(180.00))
-                .splineTo(new Vector2d(-61.00, 23.00), Math.toRadians(180.00))
+                .splineTo(new Vector2d(-50.00, 12.50), Math.toRadians(180.00))
+                .splineTo(new Vector2d(-58.00, 12.50), Math.toRadians(180.00))
                 .build();
 
-        TrajectorySequence backdropSide = drive.trajectorySequenceBuilder(stackMid.end(), 35)
+        TrajectorySequence backdropSide = drive.trajectorySequenceBuilder(stackMid.end(), 40)
                 .setReversed(true)
-                .splineTo(new Vector2d(-26.00, 64.00), Math.toRadians(0.00))
-                .splineTo(new Vector2d(2.55, 64.00), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.00, 36.50), Math.toRadians(0.00))
+                .splineTo(new Vector2d(-24, 60), Math.toRadians(0.00))
+                .splineTo(new Vector2d(2.12, 60), Math.toRadians(0.00))
+                .splineTo(new Vector2d(52.00, 31.00), Math.toRadians(0.0))
                 .build();
-        TrajectorySequence backdropCenter = drive.trajectorySequenceBuilder(stackRight.end(), 35)
+        TrajectorySequence backdropCenter = drive.trajectorySequenceBuilder(stackLeft.end(), 40)
                 .setReversed(true)
                 .splineTo(new Vector2d(4.00, 13.00), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.00, 39.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(52.00, 42.50), Math.toRadians(0.00))
                 .build();
 
 

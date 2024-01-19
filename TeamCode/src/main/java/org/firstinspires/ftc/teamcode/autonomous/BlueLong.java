@@ -68,6 +68,7 @@ public class BlueLong extends CommandOpMode {
                 hardwareMap.dcMotor.get("gli_sus")
         );
 
+        // TODO: Mirror trajectories
         TrajectorySequence rightPurple = drive.trajectorySequenceBuilder(startPose)
                 .splineTo(new Vector2d(-46.25, 22.93), Math.toRadians(-90.00))
                 .lineTo(new Vector2d(-46.25, 44.00))
@@ -81,7 +82,6 @@ public class BlueLong extends CommandOpMode {
                 .build();
 
         TrajectorySequence middlePurple = drive.trajectorySequenceBuilder(startPose, 30)
-//                .lineTo(new Vector2d(-34.85, 18.95))
                 .lineTo(new Vector2d(-34.85, 40.3))
                 .build();
         TrajectorySequence middleYellow = drive.trajectorySequenceBuilder(new Pose2d(-48.25, 46.25, Math.toRadians(-90.00)))

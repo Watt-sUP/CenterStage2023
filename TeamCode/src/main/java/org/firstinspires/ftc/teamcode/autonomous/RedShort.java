@@ -68,11 +68,11 @@ public class RedShort extends CommandOpMode {
         odometrySystem.lower();
 
         Trajectory middlePurple = drive.trajectoryBuilder(startPose)
-                .splineTo(new Vector2d(14, -38), Math.toRadians(90.00))
+                .splineTo(new Vector2d(15, -38), Math.toRadians(90.00))
                 .build();
         Trajectory leftPurple = drive.trajectoryBuilder(startPose)
                 .splineTo(new Vector2d(.5, -35)
-                        .plus(new Vector2d(0, -10.5).rotated(Math.toRadians(45))), Math.toRadians(135.00))
+                        .plus(new Vector2d(0, -12).rotated(Math.toRadians(45))), Math.toRadians(135.00))
                 .build();
         Trajectory rightPurple = drive.trajectoryBuilder(startPose)
                 .splineTo(new Vector2d(23.5, -32)
@@ -81,10 +81,10 @@ public class RedShort extends CommandOpMode {
 
         Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), true)
                 .splineTo(new Vector2d(31.05, -53.32), Math.toRadians(0.00))
-                .splineTo(new Vector2d(52.00, -44.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(52.00, -43.00), Math.toRadians(0.00))
                 .build();
         Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end(), true)
-                .splineTo(new Vector2d(52.00, -31.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(52.00, -29.50), Math.toRadians(0.00))
                 .build();
         Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), true)
                 .splineTo(new Vector2d(52.00, -35.5), Math.toRadians(0.00))
@@ -121,7 +121,7 @@ public class RedShort extends CommandOpMode {
         TrajectorySequence backdropCenter = drive.trajectorySequenceBuilder(stackLeft.end(), 40)
                 .setReversed(true)
                 .splineTo(new Vector2d(4.00, -13.00), Math.toRadians(0.00))
-                .splineTo(new Vector2d(52.00, -45.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(52.00, -42.50), Math.toRadians(0.00))
                 .build();
 
 
@@ -203,7 +203,8 @@ public class RedShort extends CommandOpMode {
                         .andThen(new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))),
 
                 new InstantCommand(() -> drive.adjustPose(new Pose2d(-5, 0, 0))),
-                new InstantCommand(() -> drive.lineToPose(new Pose2d(50, -62.5, Math.toRadians(180))))
+                new InstantCommand(() -> drive.lineToPose(new Pose2d(48, -62.5, Math.toRadians(180)))),
+                new InstantCommand(() -> drive.adjustPose(new Pose2d(10, 0, 0)))
         ));
     }
 }

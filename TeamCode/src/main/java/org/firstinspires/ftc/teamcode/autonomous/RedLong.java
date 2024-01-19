@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 public class RedLong extends CommandOpMode {
 
     private PropLocations location;
-    private final Timing.Timer timer = new Timing.Timer(10, TimeUnit.SECONDS);
+    private final Timing.Timer timer = new Timing.Timer(0, TimeUnit.SECONDS);
 
     @Override
     public void initialize() {
@@ -43,7 +43,7 @@ public class RedLong extends CommandOpMode {
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        Pose2d startPose = new Pose2d(-34.85, -64.07, Math.toRadians(90.00));
+        Pose2d startPose = new Pose2d(-34.50, -62.75, Math.toRadians(90.00));
 
         telemetry.addLine("Loading trajectories...");
         telemetry.update();
@@ -67,44 +67,41 @@ public class RedLong extends CommandOpMode {
         );
 
         TrajectorySequence leftPurple = drive.trajectorySequenceBuilder(startPose)
-                .splineTo(new Vector2d(-46.25, -22.93), Math.toRadians(90.00))
-                .lineTo(new Vector2d(-46.25, -44.00))
+                .splineTo(new Vector2d(-46.50, -42.00), Math.toRadians(90.00))
                 .build();
         TrajectorySequence leftYellow = drive.trajectorySequenceBuilder(leftPurple.end())
                 .setReversed(true)
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(7.45, -59.73), Math.toRadians(0.00))
+                .splineTo(new Vector2d(7.50, -60.00), Math.toRadians(0.00))
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(50.00, -28.50), Math.toRadians(0.00))
+                .splineTo(new Vector2d(52.00, -29.50), Math.toRadians(0.00))
                 .build();
 
 
         TrajectorySequence middlePurple = drive.trajectorySequenceBuilder(startPose)
-//                .lineTo(new Vector2d(-34.85, -18.95))
-                .lineTo(new Vector2d(-34.85, -40.3))
+                .lineTo(new Vector2d(-32.50, -38.00))
                 .build();
-        TrajectorySequence middleYellow = drive.trajectorySequenceBuilder(new Pose2d(-48.25, -46.25, Math.toRadians(90.00)))
+        TrajectorySequence middleYellow = drive.trajectorySequenceBuilder(new Pose2d(-45.00, -42.00, Math.toRadians(90.00)))
                 .setReversed(true)
-                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(7.45, -59.73), Math.toRadians(0.00))
+                .splineTo(new Vector2d(7.5, -60.00), Math.toRadians(0.00))
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(50.00, -32.50), Math.toRadians(0.00))
+                .splineTo(new Vector2d(52.00, -35.50), Math.toRadians(0.00))
                 .build();
 
 
         TrajectorySequence rightPurple = drive.trajectorySequenceBuilder(startPose)
-                .splineTo(new Vector2d(-36, -37), Math.toRadians(90))
-                .turn(Math.toRadians(-90))
-                .lineTo(new Vector2d(-25, -37))
-                .lineTo(new Vector2d(-37, -37))
+                .splineTo(new Vector2d(-36.00, -36.00), Math.toRadians(90))
+                .turn(Math.toRadians(-90.00))
+                .lineTo(new Vector2d(-24.00, -36.00))
+                .lineTo(new Vector2d(-36.00, -36.00))
                 .build();
         TrajectorySequence rightYellow = drive.trajectorySequenceBuilder(rightPurple.end())
                 .setReversed(true)
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(-35.76, -60.49), Math.toRadians(0.00))
-                .splineTo(new Vector2d(26.14, -60.68), Math.toRadians(0.00))
+                .splineTo(new Vector2d(-32.50, -60.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(0.00, -60.00), Math.toRadians(0.00))
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(50.00, -41.5), Math.toRadians(0.00))
+                .splineTo(new Vector2d(52.00, -43.00), Math.toRadians(0.00))
                 .build();
 
 
@@ -141,12 +138,12 @@ public class RedLong extends CommandOpMode {
                     tensorflow.shutdown();
                 }),
                 new InstantCommand(() -> {
-                    if (location == PropLocations.MIDDLE)
+                    if (location != PropLocations.RIGHT)
                         collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK);
                 }),
                 new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, false),
                 new InstantCommand(() -> {
-                    if (location != PropLocations.MIDDLE)
+                    if (location == PropLocations.RIGHT)
                         collectorSystem.toggleLiftLocation();
                 }),
                 new WaitCommand(300),
@@ -186,8 +183,8 @@ public class RedLong extends CommandOpMode {
                 new InstantCommand(depositSystem::toggleSpike),
                 new WaitCommand(1000),
 
-                new InstantCommand(this::terminateOpModeNow),
-                new InstantCommand(() -> drive.lineToPose(new Pose2d(47, -62.2, Math.toRadians(180)))),
+                new InstantCommand(() -> drive.lineToPose(new Pose2d(48, -62, Math.toRadians(180)))),
+                new InstantCommand(() -> drive.adjustPose(new Pose2d(10, 0, 0))),
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
         ));
     }
