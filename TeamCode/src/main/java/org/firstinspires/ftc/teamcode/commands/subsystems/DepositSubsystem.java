@@ -142,7 +142,7 @@ public class DepositSubsystem extends SubsystemBase {
                 blockerState = Blocker.FREE;
                 break;
             case TWO_PIXELS:
-                stopperTop.turnToAngle(0);
+                stopperTop.turnToAngle(90);
                 blockerState = Blocker.ONE_PIXEL;
                 break;
         }
