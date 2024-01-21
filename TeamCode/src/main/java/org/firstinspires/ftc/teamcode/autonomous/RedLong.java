@@ -14,7 +14,6 @@ import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.util.Timing;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.teamcode.commands.RunByCaseCommand;
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
@@ -33,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 public class RedLong extends CommandOpMode {
 
     private PropLocations location;
-    private final Timing.Timer timer = new Timing.Timer(0, TimeUnit.SECONDS);
+    private final Timing.Timer timer = new Timing.Timer(13, TimeUnit.SECONDS);
 
     @Override
     public void initialize() {
@@ -74,7 +73,7 @@ public class RedLong extends CommandOpMode {
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
                 .splineTo(new Vector2d(7.50, -60.00), Math.toRadians(0.00))
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(52.00, -29.50), Math.toRadians(0.00))
+                .splineTo(new Vector2d(52.50, -30.75), Math.toRadians(0.00))
                 .build();
 
 
@@ -85,7 +84,7 @@ public class RedLong extends CommandOpMode {
                 .setReversed(true)
                 .splineTo(new Vector2d(7.5, -60.00), Math.toRadians(0.00))
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(52.00, -35.50), Math.toRadians(0.00))
+                .splineTo(new Vector2d(52.50, -38.00), Math.toRadians(0.00))
                 .build();
 
 
@@ -101,7 +100,7 @@ public class RedLong extends CommandOpMode {
                 .splineTo(new Vector2d(-32.50, -60.00), Math.toRadians(0.00))
                 .splineTo(new Vector2d(0.00, -60.00), Math.toRadians(0.00))
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(52.00, -43.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(52.50, -44.00), Math.toRadians(0.00))
                 .build();
 
 
@@ -133,15 +132,12 @@ public class RedLong extends CommandOpMode {
             telemetry.update();
         }
         schedule(new SequentialCommandGroup(
-                new InstantCommand(() -> {
-                    timer.start();
-                    tensorflow.shutdown();
-                }),
+                new InstantCommand(timer::start).andThen(new InstantCommand(tensorflow::shutdown)),
                 new InstantCommand(() -> {
                     if (location != PropLocations.RIGHT)
                         collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK);
                 }),
-                new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, false),
+                new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, true),
                 new InstantCommand(() -> {
                     if (location == PropLocations.RIGHT)
                         collectorSystem.toggleLiftLocation();
@@ -161,19 +157,16 @@ public class RedLong extends CommandOpMode {
                         drive.lineToPose(middleYellow.start());
                 }),
                 new ParallelCommandGroup(
-                        new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> drive.getPoseEstimate().getX() > 0),
-                                new InstantCommand(() -> {
-                                    depositSystem.toggleSpike();
-                                    depositSystem.toggleBlockers();
-                                })
-                        ),
+                        new WaitUntilCommand(() -> drive.getPoseEstimate().getX() > 0)
+                                .andThen(
+                                        new InstantCommand(() -> {
+                                            depositSystem.toggleSpike();
+                                            depositSystem.toggleBlockers();
+                                        })
+                                ),
                         new RunByCaseCommand(location.toString(), drive, leftYellow, middleYellow, rightYellow, false)
                 ),
-                new InstantCommand(() -> drive.turn(Math.toRadians(180) - drive.getPoseEstimate().getHeading(), AngleUnit.RADIANS)),
                 new WaitCommand(300),
-
-
                 new InstantCommand(() -> {
                     depositSystem.toggleBlockers();
                     depositSystem.toggleBlockers();
@@ -183,7 +176,7 @@ public class RedLong extends CommandOpMode {
                 new InstantCommand(depositSystem::toggleSpike),
                 new WaitCommand(1000),
 
-                new InstantCommand(() -> drive.lineToPose(new Pose2d(48, -62, Math.toRadians(180)))),
+                new InstantCommand(() -> drive.lineToPose(new Pose2d(48, -12, Math.toRadians(180)))),
                 new InstantCommand(() -> drive.adjustPose(new Pose2d(10, 0, 0))),
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
         ));

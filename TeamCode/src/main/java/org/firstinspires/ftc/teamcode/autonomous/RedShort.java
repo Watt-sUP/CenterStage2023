@@ -76,7 +76,7 @@ public class RedShort extends CommandOpMode {
                 .build();
         Trajectory rightPurple = drive.trajectoryBuilder(startPose)
                 .splineTo(new Vector2d(23.5, -32)
-                        .plus(new Vector2d(0, -16).rotated(Math.toRadians(-30))), Math.toRadians(60.00))
+                        .plus(new Vector2d(0, -13).rotated(Math.toRadians(-30))), Math.toRadians(60.00))
                 .build();
 
         Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), true)
@@ -101,22 +101,22 @@ public class RedShort extends CommandOpMode {
                 .splineTo(new Vector2d(2.12, -60.00), Math.toRadians(180.00))
                 .splineTo(new Vector2d(-24.00, -60.00), Math.toRadians(180.00))
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(-50.00, -37.00), Math.toRadians(180.00))
-                .splineTo(new Vector2d(-58.00, -37.00), Math.toRadians(180.00))
+                .splineTo(new Vector2d(-50.00, -36.50), Math.toRadians(180.00))
+                .splineTo(new Vector2d(-58.00, -36.50), Math.toRadians(180.00))
                 .build();
         TrajectorySequence stackRight = drive.trajectorySequenceBuilder(rightYellow.end())
                 .splineTo(new Vector2d(2.12, -60.00), Math.toRadians(180.00))
                 .splineTo(new Vector2d(-24.00, -60.00), Math.toRadians(180.00))
                 .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(-50.00, -37.00), Math.toRadians(180.00))
-                .splineTo(new Vector2d(-58.00, -37.00), Math.toRadians(180.00))
+                .splineTo(new Vector2d(-50.00, -36.50), Math.toRadians(180.00))
+                .splineTo(new Vector2d(-58.00, -36.50), Math.toRadians(180.00))
                 .build();
 
         TrajectorySequence backdropSide = drive.trajectorySequenceBuilder(stackMid.end(), 40)
                 .setReversed(true)
                 .splineTo(new Vector2d(-24, -60), Math.toRadians(0.00))
                 .splineTo(new Vector2d(2.12, -60), Math.toRadians(0.00))
-                .splineTo(new Vector2d(52.00, -31.00), Math.toRadians(0.0))
+                .splineTo(new Vector2d(52.00, -32.00), Math.toRadians(0.0))
                 .build();
         TrajectorySequence backdropCenter = drive.trajectorySequenceBuilder(stackLeft.end(), 40)
                 .setReversed(true)
