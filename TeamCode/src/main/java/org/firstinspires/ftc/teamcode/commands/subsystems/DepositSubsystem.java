@@ -16,7 +16,7 @@ public class DepositSubsystem extends SubsystemBase {
     private final DcMotor slides;
     public static Double LOW_LEFT = 0.05, LOW_RIGHT = 0.1;
     private final ServoEx leftLift, rightLift;
-    public static Double HIGH_LEFT = .75, HIGH_RIGHT = .8;
+    public static Double HIGH_LEFT = .825, HIGH_RIGHT = .875;
     private final ServoEx stopperTop, stopperBottom;
     private BooleanSupplier safeToMove = () -> true;
 
@@ -43,7 +43,6 @@ public class DepositSubsystem extends SubsystemBase {
         this.stopperBottom = stopperBottom;
         this.slides = slides;
 
-//        this.rightLift.setInverted(true);
         this.stopperBottom.setInverted(true);
 
         this.stopperTop.turnToAngle(0);

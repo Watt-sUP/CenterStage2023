@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -21,15 +22,15 @@ public class AlignWithAprilTagSample extends LinearOpMode {
 
     public static int TARGET_ID = 2;
     private RobotStates robotState = RobotStates.DRIVE;
-    public static Pose2d TARGET_POSE = new Pose2d(15, 0, 0);
+    public static Pose2d TARGET_POSE = new Pose2d(new Vector2d(20, 0).rotated(Math.toRadians(15)), Math.toRadians(-15));
     private List<Pose2d> tagPoses;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         OdometrySubsystem odometry = new OdometrySubsystem(
-                new SimpleServo(hardwareMap, "odo_left", 0, 300),
-                new SimpleServo(hardwareMap, "odo_right", 0, 300),
+                new SimpleServo(hardwareMap, "odo_left", 0, 180),
+                new SimpleServo(hardwareMap, "odo_right", 0, 180),
                 new SimpleServo(hardwareMap, "odo_back", 0, 1800)
         );
         ApriltagSubsystem apriltagSubsystem = new ApriltagSubsystem(hardwareMap, "Webcam 1", TARGET_ID);
@@ -91,10 +92,6 @@ public class AlignWithAprilTagSample extends LinearOpMode {
 
                 case ALIGN_TO_TAG:
                     if (gamepad1.b) {
-                        // End any ongoing trajectory
-                        if (drive.isBusy())
-                            drive.breakFollowing();
-
                         // Lift the odometry for proper driving
                         odometry.raise();
                         robotState = RobotStates.DRIVE;
@@ -120,11 +117,10 @@ public class AlignWithAprilTagSample extends LinearOpMode {
                             telemetry.addData("Strafe Offset", pose.getY());
                             telemetry.addData("Turn Offset", pose.getHeading());
 
-                            // Heading is positive to the left and forward distance increases as you stray further away,
-                            // leaving strafing to be reversed
                             Pose2d adjustment = pose.minus(TARGET_POSE);
                             drive.setPoseEstimate(new Pose2d(0, 0, 0));
-                            drive.lineToPoseAsync(adjustment);
+                            drive.lineToPose(adjustment);
+                            robotState = RobotStates.DRIVE;
                         }
                     }
                     break;

@@ -22,7 +22,6 @@ import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.TensorflowSubsystem;
-import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.util.PropLocations;
@@ -43,8 +42,9 @@ public class BlueShort extends CommandOpMode {
         telemetry.addLine("Loading trajectories...");
         telemetry.update();
 
-        Pose2d startPose = new Pose2d(12.75, 62.75, Math.toRadians(-90.00));
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+        PathGenerator generator = new PathGenerator(drive);
+        generator.setStartingLocation(AllianceColor.BLUE, StartingPosition.BACKDROP);
 
         OdometrySubsystem odometrySystem = new OdometrySubsystem(
                 new SimpleServo(hardwareMap, "odo_left", 0, 180),
@@ -64,65 +64,46 @@ public class BlueShort extends CommandOpMode {
                 hardwareMap.dcMotor.get("gli_sus")
         );
 
-        drive.setPoseEstimate(startPose);
         tensorflow.setMinConfidence(0.8);
         odometrySystem.lower();
 
-        Trajectory leftPurple = drive.trajectoryBuilder(startPose)
+        Trajectory leftPurple = drive.trajectoryBuilder(generator.getStartingLocation())
                 .splineTo(new Vector2d(23.5, 32)
                         .plus(new Vector2d(0, 13).rotated(Math.toRadians(30))), Math.toRadians(-60))
                 .build();
-        Trajectory middlePurple = drive.trajectoryBuilder(startPose)
+        Trajectory middlePurple = drive.trajectoryBuilder(generator.getStartingLocation())
                 .splineTo(new Vector2d(15.00, 38.00), Math.toRadians(-90.00))
                 .build();
-        Trajectory rightPurple = drive.trajectoryBuilder(startPose)
-                .splineTo(new Vector2d(.5, 35)
-                        .plus(new Vector2d(0, 12).rotated(Math.toRadians(-45))), Math.toRadians(-135))
+        Trajectory rightPurple = drive.trajectoryBuilder(generator.getStartingLocation())
+                .splineTo(new Vector2d(.5, 33)
+                        .plus(new Vector2d(0, 13).rotated(Math.toRadians(-45))), Math.toRadians(-135))
                 .build();
 
         Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end(), true)
                 .splineTo(new Vector2d(31.05, 53.32), Math.toRadians(0.00))
-                .splineTo(new Vector2d(52, 43.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.00, 43.00), Math.toRadians(0.00))
                 .build();
         Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), true)
-                .splineTo(new Vector2d(52.00, 36.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.00, 36.00), Math.toRadians(0.00))
                 .build();
         Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), true)
-                .splineTo(new Vector2d(52.00, 29.50), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.00, 29.50), Math.toRadians(0.00))
                 .build();
 
-        TrajectorySequence stackLeft = drive.trajectorySequenceBuilder(leftYellow.end())
-                .splineTo(new Vector2d(2.12, 60.00), Math.toRadians(180.00))
-                .splineTo(new Vector2d(-24.00, 60.00), Math.toRadians(180.00))
-                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(-50.00, 37.00), Math.toRadians(180.00))
-                .splineTo(new Vector2d(-58.00, 37.00), Math.toRadians(180.00))
-                .build();
-        TrajectorySequence stackMid = drive.trajectorySequenceBuilder(middleYellow.end())
-                .splineTo(new Vector2d(2.12, 60.00), Math.toRadians(180.00))
-                .splineTo(new Vector2d(-24.00, 60.00), Math.toRadians(180.00))
-                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(-50.00, 37.00), Math.toRadians(180.00))
-                .splineTo(new Vector2d(-58.00, 37.00), Math.toRadians(180.00))
-                .build();
-        TrajectorySequence stackRight = drive.trajectorySequenceBuilder(rightYellow.end())
-                .splineTo(new Vector2d(2.55, 60.00), Math.toRadians(180.00))
-                .splineTo(new Vector2d(-24.00, 60.00), Math.toRadians(180.00))
-                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                .splineTo(new Vector2d(-50.00, 13.00), Math.toRadians(180.00))
-                .splineTo(new Vector2d(-58.00, 13.00), Math.toRadians(180.00))
-                .build();
+        TrajectorySequence stackLeft = generator.generateStackPath(leftYellow.end(), Stack.CLOSE);
+        TrajectorySequence stackMid = generator.generateStackPath(middleYellow.end(), Stack.CLOSE);
+        TrajectorySequence stackRight = generator.generateStackPath(rightYellow.end(), Stack.FAR);
 
         TrajectorySequence backdropSide = drive.trajectorySequenceBuilder(stackMid.end(), 40)
                 .setReversed(true)
                 .splineTo(new Vector2d(-24, 60), Math.toRadians(0.00))
                 .splineTo(new Vector2d(2.12, 60), Math.toRadians(0.00))
-                .splineTo(new Vector2d(52.00, 31.00), Math.toRadians(0.0))
+                .splineTo(new Vector2d(50.00, 31.00), Math.toRadians(0.0))
                 .build();
         TrajectorySequence backdropCenter = drive.trajectorySequenceBuilder(stackRight.end(), 40)
                 .setReversed(true)
                 .splineTo(new Vector2d(4.00, 13.00), Math.toRadians(0.00))
-                .splineTo(new Vector2d(52.50, 42.50), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.00, 41.50), Math.toRadians(0.00))
                 .build();
 
 
@@ -135,10 +116,7 @@ public class BlueShort extends CommandOpMode {
 
             if (bestDetection != null) {
                 double x = (bestDetection.getLeft() + bestDetection.getRight()) / 2;
-
-                if (x < 450)
-                    location = PropLocations.MIDDLE;
-                else location = PropLocations.RIGHT;
+                location = x < 450 ? PropLocations.MIDDLE : PropLocations.RIGHT;
             }
 
             telemetry.addData("FPS", tensorflow.portal.getFps());
@@ -175,14 +153,6 @@ public class BlueShort extends CommandOpMode {
                                 new WaitCommand(1500),
                                 new InstantCommand(collectorSystem::toggleClamp)
                         ),
-//                new InstantCommand(() -> {
-//                    if (location == PropLocations.RIGHT) {
-//                        drive.lineToPose(new Pose2d(50, 62.5, Math.toRadians(180)));
-//                        CommandScheduler.getInstance().reset();
-//                        this.terminateOpModeNow();
-//                    }
-//                }),
-                new WaitCommand(5000),
                 new ConditionalCommand(
                         new InstantCommand(() -> drive.followTrajectorySequenceAsync(backdropCenter)),
                         new InstantCommand(() -> drive.followTrajectorySequenceAsync(backdropSide)),
@@ -217,7 +187,8 @@ public class BlueShort extends CommandOpMode {
                         .andThen(new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))),
 
                 new InstantCommand(() -> drive.adjustPose(new Pose2d(-5, 0, 0))),
-                new InstantCommand(() -> drive.lineToPose(new Pose2d(50, 62.5, Math.toRadians(180))))
+                new InstantCommand(() -> drive.lineToPose(new Pose2d(48, 12, Math.toRadians(180)))),
+                new InstantCommand(() -> drive.adjustPose(new Pose2d(10, 0, 0)))
         ));
     }
 }

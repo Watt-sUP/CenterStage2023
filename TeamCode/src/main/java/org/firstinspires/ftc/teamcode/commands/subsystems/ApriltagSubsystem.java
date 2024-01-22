@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 public class ApriltagSubsystem extends SubsystemBase {
 
     private final AprilTagProcessor aprilTagProcessor;
+    private final Vector2d ROBOT_OFFSET = new Vector2d(6, 0);
     public VisionPortal portal;
     private List<Integer> targetsList;
 
@@ -75,7 +76,7 @@ public class ApriltagSubsystem extends SubsystemBase {
                 .map(tag -> {
                     double x = tag.ftcPose.range * Math.cos(tag.ftcPose.bearing);
                     double y = tag.ftcPose.range * Math.sin(tag.ftcPose.bearing);
-                    return new Vector2d(x, y).rotated(-tag.ftcPose.yaw);
+                    return new Vector2d(x, y).plus(ROBOT_OFFSET).rotated(-tag.ftcPose.yaw);
                 }).collect(Collectors.toList());
     }
 
