@@ -1,12 +1,10 @@
-package org.firstinspires.ftc.teamcode.autonomous;
+package org.firstinspires.ftc.teamcode.autonomous.red;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.CommandOpMode;
-import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.RunCommand;
@@ -14,9 +12,16 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
+import com.arcrobotics.ftclib.util.Timing;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.teamcode.autonomous.PathGenerator;
+import org.firstinspires.ftc.teamcode.autonomous.assets.AllianceColor;
+import org.firstinspires.ftc.teamcode.autonomous.assets.BackstageRoute;
+import org.firstinspires.ftc.teamcode.autonomous.assets.PropLocations;
+import org.firstinspires.ftc.teamcode.autonomous.assets.Stack;
+import org.firstinspires.ftc.teamcode.autonomous.assets.StartingPosition;
 import org.firstinspires.ftc.teamcode.commands.RunByCaseCommand;
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
@@ -24,27 +29,31 @@ import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.TensorflowSubsystem;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
-import org.firstinspires.ftc.teamcode.util.PropLocations;
 
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
-@Autonomous(name = "Blue Short")
-public class BlueShort extends CommandOpMode {
+@Autonomous(name = "Red Long", group = "auto")
+public class RedLong extends CommandOpMode {
 
-    private PropLocations location = PropLocations.LEFT;
+    private final Timing.Timer timer = new Timing.Timer(13, TimeUnit.SECONDS);
+    private PropLocations location;
 
     @Override
     public void initialize() {
+
         TensorflowSubsystem tensorflow = new TensorflowSubsystem(hardwareMap, "Webcam 1",
-                "blue_prop.tflite", "Blue Prop");
+                "red_prop.tflite", "Red Prop");
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        telemetry.addLine("Loading trajectories...");
-        telemetry.update();
-
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         PathGenerator generator = new PathGenerator(drive);
-        generator.setStartingLocation(AllianceColor.BLUE, StartingPosition.BACKDROP);
+
+        generator.setStartingLocation(AllianceColor.RED, StartingPosition.AUDIENCE);
+        tensorflow.setMinConfidence(0.8);
+
+        telemetry.addLine("Loading trajectories...");
+        telemetry.update();
 
         OdometrySubsystem odometrySystem = new OdometrySubsystem(
                 new SimpleServo(hardwareMap, "odo_left", 0, 180),
@@ -64,48 +73,49 @@ public class BlueShort extends CommandOpMode {
                 hardwareMap.dcMotor.get("gli_sus")
         );
 
-        tensorflow.setMinConfidence(0.8);
-        odometrySystem.lower();
-
-        Trajectory leftPurple = drive.trajectoryBuilder(generator.getStartingLocation())
-                .splineTo(new Vector2d(23.5, 32)
-                        .plus(new Vector2d(0, 13).rotated(Math.toRadians(30))), Math.toRadians(-60))
+        TrajectorySequence leftPurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
+                .splineTo(new Vector2d(-47.5, -27.5), Math.toRadians(135.00))
+                .back(12)
                 .build();
-        Trajectory middlePurple = drive.trajectoryBuilder(generator.getStartingLocation())
-                .splineTo(new Vector2d(15.00, 38.00), Math.toRadians(-90.00))
-                .build();
-        Trajectory rightPurple = drive.trajectoryBuilder(generator.getStartingLocation())
-                .splineTo(new Vector2d(.5, 33)
-                        .plus(new Vector2d(0, 13).rotated(Math.toRadians(-45))), Math.toRadians(-135))
+        TrajectorySequence leftYellow = drive.trajectorySequenceBuilder(leftPurple.end(), 40)
+                .setReversed(true)
+                .splineTo(new Vector2d(-24.00, -60.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(2.12, -60.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.00, -29.50), Math.toRadians(0.00))
                 .build();
 
-        Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end(), true)
-                .splineTo(new Vector2d(31.05, 53.32), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.00, 43.00), Math.toRadians(0.00))
+
+        TrajectorySequence middlePurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
+                .splineTo(new Vector2d(-37.00, -38.00), Math.toRadians(90.00))
                 .build();
-        Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), true)
-                .splineTo(new Vector2d(50.00, 36.00), Math.toRadians(0.00))
+        TrajectorySequence middleYellow = drive.trajectorySequenceBuilder(middlePurple.end(), 40)
+                .setReversed(true)
+                .splineTo(new Vector2d(-24.00, -60.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(2.12, -60.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.00, -36.00), Math.toRadians(0.00))
                 .build();
-        Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), true)
-                .splineTo(new Vector2d(50.00, 29.50), Math.toRadians(0.00))
+
+
+        TrajectorySequence rightPurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
+                .splineTo(new Vector2d(-24.5, -30)
+                        .plus(new Vector2d(0, -13).rotated(Math.toRadians(-30))), Math.toRadians(60.00))
+                .build();
+        TrajectorySequence rightYellow = drive.trajectorySequenceBuilder(rightPurple.end(), 40)
+                .setReversed(true)
+                .splineTo(new Vector2d(-24.00, -60.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(2.12, -60.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.00, -43.00), Math.toRadians(0.00))
                 .build();
 
         TrajectorySequence stackLeft = generator.generateStackPath(leftYellow.end(), Stack.CLOSE);
         TrajectorySequence stackMid = generator.generateStackPath(middleYellow.end(), Stack.CLOSE);
-        TrajectorySequence stackRight = generator.generateStackPath(rightYellow.end(), Stack.FAR);
+        TrajectorySequence stackRight = generator.generateStackPath(rightYellow.end(), Stack.CLOSE);
 
-        TrajectorySequence backdropSide = drive.trajectorySequenceBuilder(stackMid.end(), 40)
-                .setReversed(true)
-                .splineTo(new Vector2d(-24, 60), Math.toRadians(0.00))
-                .splineTo(new Vector2d(2.12, 60), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.00, 31.00), Math.toRadians(0.0))
-                .build();
-        TrajectorySequence backdropCenter = drive.trajectorySequenceBuilder(stackRight.end(), 40)
-                .setReversed(true)
-                .splineTo(new Vector2d(4.00, 13.00), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.00, 41.50), Math.toRadians(0.00))
-                .build();
+        TrajectorySequence goToBackdrop = generator.generateBackstagePath(stackMid.end(), BackstageRoute.SIDE);
 
+        odometrySystem.lower();
+        telemetry.addLine("Ready!");
+        telemetry.update();
 
         while (!isStarted()) {
             if (isStopRequested())
@@ -125,39 +135,40 @@ public class BlueShort extends CommandOpMode {
             telemetry.update();
         }
 
-
         tensorflow.shutdown();
         schedule(new SequentialCommandGroup(
+                new InstantCommand(timer::start),
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
                 new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, true),
-                new InstantCommand(collectorSystem::toggleLiftLocation)
-                        .andThen(
-                                new WaitCommand(300),
-                                new InstantCommand(() -> {
-                                    collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK);
-                                    depositSystem.toggleBlockers();
-                                    depositSystem.toggleSpike();
-                                })
-                        ),
-                new RunByCaseCommand(location.toString(), drive, leftYellow, middleYellow, rightYellow, true),
-                new InstantCommand(() -> {
-                    depositSystem.toggleBlockers();
-                    depositSystem.toggleBlockers();
-                }).andThen(
-                        new WaitCommand(700),
-                        new InstantCommand(depositSystem::toggleSpike)
+                new InstantCommand(collectorSystem::toggleLiftLocation).andThen(
+                        new WaitCommand(300),
+                        new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK))
                 ),
+                new ParallelCommandGroup(
+                        new WaitUntilCommand(() -> drive.getPoseEstimate().getX() > 0)
+                                .andThen(
+                                        new InstantCommand(() -> {
+                                            depositSystem.toggleSpike();
+                                            depositSystem.toggleBlockers();
+                                        })
+                                ),
+                        new RunByCaseCommand(location.toString(), drive, leftYellow, middleYellow, rightYellow, false)
+                ),
+                new WaitCommand(300),
+                new InstantCommand(depositSystem::toggleBlockers).andThen(
+                        new WaitCommand(300),
+                        new InstantCommand(depositSystem::toggleBlockers)
+                ),
+                new WaitCommand(1000),
+                new InstantCommand(depositSystem::toggleSpike),
+                new WaitCommand(500),
                 new RunByCaseCommand(location.toString(), drive, stackLeft, stackMid, stackRight, true)
                         .andThen(
                                 new InstantCommand(collectorSystem::toggleClamp),
-                                new WaitCommand(1500),
+                                new WaitCommand(1250),
                                 new InstantCommand(collectorSystem::toggleClamp)
                         ),
-                new ConditionalCommand(
-                        new InstantCommand(() -> drive.followTrajectorySequenceAsync(backdropCenter)),
-                        new InstantCommand(() -> drive.followTrajectorySequenceAsync(backdropSide)),
-                        () -> location == PropLocations.RIGHT
-                ),
+                new InstantCommand(() -> drive.followTrajectorySequenceAsync(goToBackdrop)),
                 new ParallelCommandGroup(
                         new RunCommand(drive::update).interruptOn(() -> !drive.isBusy()),
                         new WaitUntilCommand(() -> drive.getPoseEstimate().getX() > 0)
@@ -167,7 +178,9 @@ public class BlueShort extends CommandOpMode {
                                         new InstantCommand(() -> {
                                             depositSystem.toggleBlockers();
                                             depositSystem.toggleSpike();
-                                        })
+                                        }),
+                                        new WaitCommand(300),
+                                        new InstantCommand(() -> depositSystem.setSlidesPosition(1))
                                 )
                 ),
                 new InstantCommand(depositSystem::toggleBlockers)
@@ -184,11 +197,16 @@ public class BlueShort extends CommandOpMode {
                                 new InstantCommand(depositSystem::toggleSpike)
                         ),
                 new WaitCommand(1000)
-                        .andThen(new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))),
+                        .andThen(
+                                new InstantCommand(() -> depositSystem.setSlidesPosition(0)),
+                                new WaitUntilCommand(() -> depositSystem.getSlidesTicks() < 25),
+                                new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
+                        ),
 
                 new InstantCommand(() -> drive.adjustPose(new Pose2d(-5, 0, 0))),
-                new InstantCommand(() -> drive.lineToPose(new Pose2d(48, 12, Math.toRadians(180)))),
-                new InstantCommand(() -> drive.adjustPose(new Pose2d(10, 0, 0)))
+                new InstantCommand(() -> drive.lineToPose(new Pose2d(48, -12, Math.toRadians(180)))),
+                new InstantCommand(() -> drive.adjustPose(new Pose2d(10, 0, 0))),
+                new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
         ));
     }
 }

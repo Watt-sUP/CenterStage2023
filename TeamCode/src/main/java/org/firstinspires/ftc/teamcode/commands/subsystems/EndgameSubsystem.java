@@ -29,7 +29,7 @@ public class EndgameSubsystem extends SubsystemBase {
 
         if (launcher != null) {
             this.launcher.setInverted(true);
-            this.launcher.turnToAngle(35);
+            this.launcher.turnToAngle(50);
         }
     }
 
@@ -98,9 +98,9 @@ public class EndgameSubsystem extends SubsystemBase {
         if (launcher == null || climbState != ClimbState.DRONE)
             return;
 
-        if (Math.round(launcher.getAngle()) == 35)
-            launcher.turnToAngle(120);
-        else launcher.turnToAngle(35);
+        if (Math.round(launcher.getAngle()) == 50)
+            launcher.turnToAngle(20);
+        else launcher.turnToAngle(50);
     }
 
     public boolean isBusy() {

@@ -22,6 +22,7 @@ public class ApriltagSubsystem extends SubsystemBase {
 
     private final AprilTagProcessor aprilTagProcessor;
     private final Vector2d ROBOT_OFFSET = new Vector2d(6, 0);
+    private final Double YAW_OFFSET = Math.toRadians(5.75);
     public VisionPortal portal;
     private List<Integer> targetsList;
 
@@ -102,7 +103,7 @@ public class ApriltagSubsystem extends SubsystemBase {
                 .map(tag -> {
                     double x = tag.ftcPose.range * Math.cos(tag.ftcPose.bearing);
                     double y = tag.ftcPose.range * Math.sin(tag.ftcPose.bearing);
-                    return new Pose2d(new Vector2d(x, y).rotated(-tag.ftcPose.yaw), tag.ftcPose.yaw);
+                    return new Pose2d(new Vector2d(x, y).plus(ROBOT_OFFSET).rotated(-tag.ftcPose.yaw), tag.ftcPose.yaw - YAW_OFFSET);
                 }).collect(Collectors.toList());
     }
 

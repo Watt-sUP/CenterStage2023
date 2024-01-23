@@ -3,57 +3,13 @@ package org.firstinspires.ftc.teamcode.autonomous;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 
+import org.firstinspires.ftc.teamcode.autonomous.assets.AllianceColor;
+import org.firstinspires.ftc.teamcode.autonomous.assets.BackstageRoute;
+import org.firstinspires.ftc.teamcode.autonomous.assets.Stack;
+import org.firstinspires.ftc.teamcode.autonomous.assets.StartingPosition;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
-
-enum AllianceColor {
-    RED(1), BLUE(-1);
-
-    private final int multiplier;
-
-    AllianceColor(int multiplier) {
-        this.multiplier = multiplier;
-    }
-
-    /**
-     * <p>Mirrors a pose based on the robot alliance.</p>
-     * <p>Assumes red as the default alliance.</p>
-     *
-     * @param pose The pose corresponding to the red color
-     * @return The mirrored pose if the alliance color is blue, the same pose otherwise
-     */
-    public Pose2d convertPose(Pose2d pose) {
-        return new Pose2d(pose.getX(), multiplier * pose.getY(), multiplier * pose.getHeading());
-    }
-
-    public Vector2d convertVector(Vector2d vector) {
-        return new Vector2d(vector.getX(), multiplier * vector.getY());
-    }
-}
-
-enum StartingPosition {
-    BACKDROP(new Pose2d(12.75, -62.75, Math.toRadians(90.00))), AUDIENCE(new Pose2d(-34.50, -62.75, Math.toRadians(90.00)));
-
-    private final Pose2d pose;
-
-    StartingPosition(Pose2d pose) {
-        this.pose = pose;
-    }
-
-    /**
-     * Returns the starting position of the robot based on the starting side.
-     *
-     * @return Pose2d object containing the starting position
-     */
-    public Pose2d getValue() {
-        return pose;
-    }
-}
-
-enum Stack {
-    CLOSE, FAR
-}
 
 public class PathGenerator {
 
@@ -73,26 +29,26 @@ public class PathGenerator {
         drive.setPoseEstimate(allianceColor.convertPose(startingPosition.getValue()));
     }
 
-    public Pose2d getStartingLocation() {
+    public Pose2d getStartingPose() {
         return allianceColor.convertPose(startingPosition.getValue());
     }
 
     public TrajectorySequence generateStackPath(Pose2d startPose, Stack targetStack) throws IllegalArgumentException {
         if (targetStack == Stack.FAR)
             return drive.trajectorySequenceBuilder(startPose)
-                    .splineTo(allianceColor.convertVector(new Vector2d(10, -11)), Math.toRadians(180))
-                    .splineTo(allianceColor.convertVector(new Vector2d(-24, -11)), Math.toRadians(180))
+                    .splineTo(allianceColor.convertVector(new Vector2d(10.00, -11.00)), Math.toRadians(180.00))
                     .setConstraints(
-                            SampleMecanumDrive.getVelocityConstraint(20, DriveConstants.MAX_ANG_VEL / 2.0, DriveConstants.TRACK_WIDTH),
-                            SampleMecanumDrive.getAccelerationConstraint(20)
+                            SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                            SampleMecanumDrive.getAccelerationConstraint(30)
                     )
-                    .splineTo(allianceColor.convertVector(new Vector2d(-57.50, -12.5)), Math.toRadians(180))
+                    .splineTo(allianceColor.convertVector(new Vector2d(-24.00, -11.00)), Math.toRadians(180.00))
+                    .splineTo(allianceColor.convertVector(new Vector2d(-57.50, -12.00)), Math.toRadians(180.00))
                     .build();
 
         else if (targetStack == Stack.CLOSE)
             return drive.trajectorySequenceBuilder(startPose)
-                    .splineTo(allianceColor.convertVector(new Vector2d(7, -60)), Math.toRadians(180))
-                    .splineTo(allianceColor.convertVector(new Vector2d(-24, -60)), Math.toRadians(180))
+                    .splineTo(allianceColor.convertVector(new Vector2d(7.00, -60.00)), Math.toRadians(180.00))
+                    .splineTo(allianceColor.convertVector(new Vector2d(-24.00, -60.00)), Math.toRadians(180.00))
                     .setConstraints(
                             SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                             SampleMecanumDrive.getAccelerationConstraint(25)
@@ -102,5 +58,23 @@ public class PathGenerator {
                     .build();
         else
             throw new IllegalArgumentException("An unexpected error occurred generating a stack trajectory");
+    }
+
+    public TrajectorySequence generateBackstagePath(Pose2d startPose, BackstageRoute route) throws IllegalArgumentException {
+        if (route == BackstageRoute.CENTER)
+            return drive.trajectorySequenceBuilder(startPose, 40)
+                    .setReversed(true)
+                    .splineTo(allianceColor.convertVector(new Vector2d(4.00, -13.00)), Math.toRadians(0.00))
+                    .splineTo(allianceColor.convertVector(new Vector2d(50.00, -42.50)), Math.toRadians(0.00))
+                    .build();
+        else if (route == BackstageRoute.SIDE)
+            return drive.trajectorySequenceBuilder(startPose, 40)
+                    .setReversed(true)
+                    .splineTo(allianceColor.convertVector(new Vector2d(-24.00, -60.00)), Math.toRadians(0.00))
+                    .splineTo(allianceColor.convertVector(new Vector2d(2.12, -60.00)), Math.toRadians(0.00))
+                    .splineTo(allianceColor.convertVector(new Vector2d(50.00, -32.00)), Math.toRadians(0.00))
+                    .build();
+        else
+            throw new IllegalArgumentException("An unexpected error occurred generating a backdrop trajectory");
     }
 }

@@ -4,7 +4,6 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -20,9 +19,9 @@ import java.util.List;
 @TeleOp(name = "Vision: AprilTag Preview", group = "Vision")
 public class AlignWithAprilTagSample extends LinearOpMode {
 
-    public static int TARGET_ID = 2;
+    public static int TARGET_ID = 9;
     private RobotStates robotState = RobotStates.DRIVE;
-    public static Pose2d TARGET_POSE = new Pose2d(new Vector2d(20, 0).rotated(Math.toRadians(15)), Math.toRadians(-15));
+    public static Pose2d TARGET_POSE = new Pose2d(15, 0, 0);
     private List<Pose2d> tagPoses;
 
     @Override

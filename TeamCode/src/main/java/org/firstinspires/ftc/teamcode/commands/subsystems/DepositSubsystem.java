@@ -45,7 +45,7 @@ public class DepositSubsystem extends SubsystemBase {
 
         this.stopperBottom.setInverted(true);
 
-        this.stopperTop.turnToAngle(0);
+        this.stopperTop.turnToAngle(90);
         this.stopperBottom.turnToAngle(60);
         this.toggleSpike();
 

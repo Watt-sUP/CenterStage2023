@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 @Config
 public class CollectorSubsystem extends SubsystemBase {
-    public static Double LOWER_LIFT = 0.8, RAISE_LIFT = 0.13, STACK_LIFT = 0.71;
+    public static Double LOWER_LIFT = 0.785, RAISE_LIFT = 0.13, STACK_LIFT = 0.71;
     private final ServoEx liftLeft, liftRight;
     private final ServoEx claw;
     private final InterpLUT rightConverter = new InterpLUT();
@@ -94,6 +94,12 @@ public class CollectorSubsystem extends SubsystemBase {
         }
     }
 
+    public void adjustLiftPosition(Double adjustment) {
+        double new_pos = liftLeft.getPosition() + adjustment;
+        liftLeft.setPosition(new_pos);
+        liftRight.setPosition(rightConverter.get(new_pos));
+    }
+
     public void toggleClamp() {
         switch (clamping) {
             case OPENED:
@@ -105,14 +111,10 @@ public class CollectorSubsystem extends SubsystemBase {
                 break;
             case CLOSED:
                 // Don't open the claw fully when the lift is raised to avoid the belts
-                claw.setPosition(location != LiftState.RAISED ? (140.0 / 270.0) : (165.0 / 270.0));
+                claw.setPosition(location != LiftState.RAISED ? (150.0 / 270.0) : (180.0 / 270.0));
                 clamping = ClampState.OPENED;
                 break;
         }
-    }
-
-    public void setClampPosition(double position) {
-        claw.setPosition(position);
     }
 
     // Periodic check: Automatically raise the claw 275ms after collection

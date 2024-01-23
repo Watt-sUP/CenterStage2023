@@ -100,6 +100,10 @@ public class RobotTeleOp extends CommandOpMode {
                 .whenPressed(() -> depositSystem.adjustSlidesTicks(75));
 
         // Claw commands
+        driver2.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON)
+                .whenPressed(() -> collectorSystem.adjustLiftPosition(0.0175));
+        driver2.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)
+                .whenPressed(() -> collectorSystem.adjustLiftPosition(-0.0175));
         driver2.getGamepadButton(GamepadKeys.Button.X)
                 .whenPressed(collectorSystem::toggleLiftLocation);
         driver2.getGamepadButton(GamepadKeys.Button.A)
