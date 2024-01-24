@@ -178,7 +178,7 @@ public class RedShortSide extends CommandOpMode {
                         ),
 
                 new InstantCommand(() -> drive.adjustPose(new Pose2d(-5, 0, 0))),
-                new InstantCommand(() -> drive.lineToPose(new Pose2d(48, -12, Math.toRadians(180)))),
+                new InstantCommand(() -> drive.lineToPose(new Pose2d(48, -60, Math.toRadians(180)))),
                 new InstantCommand(() -> drive.adjustPose(new Pose2d(10, 0, 0)))
         ));
     }

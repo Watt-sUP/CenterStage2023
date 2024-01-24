@@ -71,7 +71,7 @@ public class RedLong extends CommandOpMode {
         );
 
         TrajectorySequence leftPurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
-                .splineTo(new Vector2d(-47.5, -40), Math.toRadians(90.00))
+                .splineTo(new Vector2d(-47, -36), Math.toRadians(90.00))
                 .build();
         TrajectorySequence leftYellow = drive.trajectorySequenceBuilder(leftPurple.end(), 40)
                 .setReversed(true)
@@ -88,12 +88,12 @@ public class RedLong extends CommandOpMode {
                 .setReversed(true)
                 .splineTo(new Vector2d(-24.00, -60.00), Math.toRadians(0.00))
                 .splineTo(new Vector2d(2.12, -60.00), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.00, -36.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.00, -36.50), Math.toRadians(0.00))
                 .build();
 
 
         TrajectorySequence rightPurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
-                .splineTo(new Vector2d(-24.5, -30)
+                .splineTo(new Vector2d(-24.5, -32)
                         .plus(new Vector2d(0, -13).rotated(Math.toRadians(-30))), Math.toRadians(60.00))
                 .build();
         TrajectorySequence rightYellow = drive.trajectorySequenceBuilder(rightPurple.end(), 40)
@@ -200,8 +200,7 @@ public class RedLong extends CommandOpMode {
 
                 new InstantCommand(() -> drive.adjustPose(new Pose2d(-5, 0, 0))),
                 new InstantCommand(() -> drive.lineToPose(new Pose2d(48, -12, Math.toRadians(180)))),
-                new InstantCommand(() -> drive.adjustPose(new Pose2d(10, 0, 0))),
-                new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
+                new InstantCommand(() -> drive.adjustPose(new Pose2d(10, 0, 0)))
         ));
     }
 }

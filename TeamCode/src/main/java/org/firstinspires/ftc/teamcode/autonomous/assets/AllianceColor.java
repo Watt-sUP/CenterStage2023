@@ -20,7 +20,9 @@ public enum AllianceColor {
      * @return The mirrored pose if the alliance color is blue, the same pose otherwise
      */
     public Pose2d convertPose(Pose2d pose) {
-        return new Pose2d(pose.getX(), multiplier * pose.getY(), multiplier * pose.getHeading());
+        if (pose.getHeading() != Math.toRadians(180))
+            return new Pose2d(pose.getX(), multiplier * pose.getY(), multiplier * pose.getHeading());
+        else return new Pose2d(pose.getX(), multiplier * pose.getY(), Math.toRadians(180));
     }
 
     public Vector2d convertVector(Vector2d vector) {
