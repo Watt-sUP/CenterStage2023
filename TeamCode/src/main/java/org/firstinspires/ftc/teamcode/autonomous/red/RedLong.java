@@ -71,7 +71,8 @@ public class RedLong extends CommandOpMode {
         );
 
         TrajectorySequence leftPurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
-                .splineTo(new Vector2d(-47, -36), Math.toRadians(90.00))
+                .splineTo(new Vector2d(-47.5, -32)
+                        .plus(new Vector2d(0, -13).rotated(30)), Math.toRadians(120.00))
                 .build();
         TrajectorySequence leftYellow = drive.trajectorySequenceBuilder(leftPurple.end(), 40)
                 .setReversed(true)
@@ -93,8 +94,8 @@ public class RedLong extends CommandOpMode {
 
 
         TrajectorySequence rightPurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
-                .splineTo(new Vector2d(-24.5, -32)
-                        .plus(new Vector2d(0, -13).rotated(Math.toRadians(-30))), Math.toRadians(60.00))
+                .splineTo(new Vector2d(-24.5, -35)
+                        .plus(new Vector2d(0, -12).rotated(Math.toRadians(-45))), Math.toRadians(45.00))
                 .build();
         TrajectorySequence rightYellow = drive.trajectorySequenceBuilder(rightPurple.end(), 40)
                 .setReversed(true)

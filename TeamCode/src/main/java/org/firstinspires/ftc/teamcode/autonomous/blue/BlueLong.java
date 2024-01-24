@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.autonomous.blue;
 
-import android.annotation.SuppressLint;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -31,12 +29,13 @@ import org.firstinspires.ftc.teamcode.commands.subsystems.TensorflowSubsystem;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
+import java.util.Locale;
+
 @Autonomous(name = "Blue Long", group = "auto")
 public class BlueLong extends CommandOpMode {
 
     private PropLocations location;
 
-    @SuppressLint("DefaultLocale")
     @Override
     public void initialize() {
 
@@ -72,8 +71,8 @@ public class BlueLong extends CommandOpMode {
         );
 
         TrajectorySequence rightPurple = drive.trajectorySequenceBuilder(generator.getStartingPose(), 40)
-                .splineTo(new Vector2d(-47.25, 42.00), Math.toRadians(-90.00))
-                .forward(5)
+                .splineTo(new Vector2d(-47.5, 32)
+                        .plus(new Vector2d(0, 13).rotated(-30)), Math.toRadians(-120.00))
                 .build();
         TrajectorySequence rightYellow = drive.trajectorySequenceBuilder(rightPurple.end(), 40)
                 .setReversed(true)
@@ -93,8 +92,8 @@ public class BlueLong extends CommandOpMode {
                 .build();
 
         TrajectorySequence leftPurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
-                .splineTo(new Vector2d(-24.5, 32)
-                        .plus(new Vector2d(0, 13).rotated(Math.toRadians(30))), Math.toRadians(-60.00))
+                .splineTo(new Vector2d(-24.5, 35)
+                        .plus(new Vector2d(0, 12).rotated(Math.toRadians(45))), Math.toRadians(-45.00))
                 .build();
         TrajectorySequence leftYellow = drive.trajectorySequenceBuilder(leftPurple.end(), 40)
                 .setReversed(true)
@@ -127,7 +126,7 @@ public class BlueLong extends CommandOpMode {
 
             telemetry.addData("FPS", tensorflow.portal.getFps());
             telemetry.addData("Current Location", location.toString());
-            telemetry.addData("Confidence", String.format("%.2f%%", bestDetection != null ? bestDetection.getConfidence() * 100 : 0));
+            telemetry.addData("Confidence", String.format(Locale.US, "%.2f%%", bestDetection != null ? bestDetection.getConfidence() * 100 : 0));
             telemetry.update();
         }
 
