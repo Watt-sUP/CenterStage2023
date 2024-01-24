@@ -12,7 +12,6 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
-import com.arcrobotics.ftclib.util.Timing;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
@@ -31,12 +30,10 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 @Autonomous(name = "Red Long", group = "auto")
 public class RedLong extends CommandOpMode {
 
-    private final Timing.Timer timer = new Timing.Timer(13, TimeUnit.SECONDS);
     private PropLocations location;
 
     @Override
@@ -74,8 +71,7 @@ public class RedLong extends CommandOpMode {
         );
 
         TrajectorySequence leftPurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
-                .splineTo(new Vector2d(-47.5, -27.5), Math.toRadians(135.00))
-                .back(12)
+                .splineTo(new Vector2d(-47.5, -40), Math.toRadians(90.00))
                 .build();
         TrajectorySequence leftYellow = drive.trajectorySequenceBuilder(leftPurple.end(), 40)
                 .setReversed(true)
@@ -137,7 +133,6 @@ public class RedLong extends CommandOpMode {
 
         tensorflow.shutdown();
         schedule(new SequentialCommandGroup(
-                new InstantCommand(timer::start),
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
                 new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, true),
                 new InstantCommand(collectorSystem::toggleLiftLocation).andThen(
@@ -180,7 +175,7 @@ public class RedLong extends CommandOpMode {
                                             depositSystem.toggleSpike();
                                         }),
                                         new WaitCommand(300),
-                                        new InstantCommand(() -> depositSystem.setSlidesPosition(1))
+                                        new InstantCommand(() -> depositSystem.setSlidesTicks(200))
                                 )
                 ),
                 new InstantCommand(depositSystem::toggleBlockers)

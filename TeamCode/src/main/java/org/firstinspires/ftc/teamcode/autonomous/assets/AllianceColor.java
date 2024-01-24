@@ -26,4 +26,8 @@ public enum AllianceColor {
     public Vector2d convertVector(Vector2d vector) {
         return new Vector2d(vector.getX(), multiplier * vector.getY());
     }
+
+    public PropLocations convertPropLocation(PropLocations location) {
+        return PropLocations.fromId(location.getId() * multiplier);
+    }
 }

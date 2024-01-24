@@ -157,7 +157,7 @@ public class BlueShortDoor extends CommandOpMode {
                                             depositSystem.toggleSpike();
                                         }),
                                         new WaitCommand(300),
-                                        new InstantCommand(() -> depositSystem.setSlidesPosition(1))
+                                        new InstantCommand(() -> depositSystem.setSlidesTicks(200))
                                 )
                 ),
                 new InstantCommand(depositSystem::toggleBlockers)

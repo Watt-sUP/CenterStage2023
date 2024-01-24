@@ -29,6 +29,8 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 import java.util.concurrent.TimeUnit;
 
+// TODO: Mirror the trajectories here
+@Deprecated
 @Autonomous(name = "Blue Long", group = "auto")
 public class BlueLong extends CommandOpMode {
 
