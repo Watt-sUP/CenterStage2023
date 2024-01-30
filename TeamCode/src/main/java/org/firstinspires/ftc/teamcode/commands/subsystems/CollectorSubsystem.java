@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 @Config
 public class CollectorSubsystem extends SubsystemBase {
-    public static Double LOWER_LIFT = 0.785, RAISE_LIFT = 0.13, STACK_LIFT = 0.71;
+    public static Double LOWER_LIFT = 0.765, RAISE_LIFT = 0.1, STACK_LIFT = 0.69;
     private final ServoEx liftLeft, liftRight;
     private final ServoEx claw;
     private final InterpLUT rightConverter = new InterpLUT();
@@ -44,7 +44,7 @@ public class CollectorSubsystem extends SubsystemBase {
         liftRight.setInverted(true);
         claw.setInverted(true);
 
-        claw.setPosition(200.0 / 270.0);
+        claw.setPosition(195.0 / 300.0);
         this.setLiftLocation(LiftState.RAISED);
     }
 
@@ -106,15 +106,20 @@ public class CollectorSubsystem extends SubsystemBase {
                 // The code of the timer resets it every time .start() is called (equivalent to a .reset())
                 if (location != LiftState.RAISED) // Can't collect when raised
                     clampTimer.start();
-                claw.setPosition(200.0 / 270.0);
+                claw.setPosition(195.0 / 300.0);
                 clamping = ClampState.CLOSED;
                 break;
             case CLOSED:
                 // Don't open the claw fully when the lift is raised to avoid the belts
-                claw.setPosition(location != LiftState.RAISED ? (150.0 / 270.0) : (180.0 / 270.0));
+                claw.setPosition(location != LiftState.RAISED ? (120.0 / 300.0) : (162.0 / 300.0));
                 clamping = ClampState.OPENED;
                 break;
         }
+    }
+
+    public void setClampPosition(double angle) {
+        claw.setPosition(angle / 300.0);
+        clamping = (angle <= 162) ? ClampState.OPENED : ClampState.CLOSED;
     }
 
     // Periodic check: Automatically raise the claw 275ms after collection

@@ -73,7 +73,7 @@ public class BlueShortDoor extends CommandOpMode {
 
         Trajectory leftPurple = drive.trajectoryBuilder(generator.getStartingPose())
                 .splineTo(new Vector2d(23.5, 32)
-                        .plus(new Vector2d(0, 13).rotated(Math.toRadians(30))), Math.toRadians(-60))
+                        .plus(new Vector2d(0, 12).rotated(Math.toRadians(30))), Math.toRadians(-60))
                 .build();
         Trajectory middlePurple = drive.trajectoryBuilder(generator.getStartingPose())
                 .splineTo(new Vector2d(15.00, 38.00), Math.toRadians(-90.00))
@@ -118,20 +118,20 @@ public class BlueShortDoor extends CommandOpMode {
             telemetry.update();
         }
 
-
+        generator.setPropLocation(location);
         tensorflow.shutdown();
         schedule(new SequentialCommandGroup(
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
                 new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, true),
-                new InstantCommand(collectorSystem::toggleLiftLocation)
-                        .andThen(
-                                new WaitCommand(300),
-                                new InstantCommand(() -> {
-                                    collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK);
-                                    depositSystem.toggleBlockers();
-                                    depositSystem.toggleSpike();
-                                })
-                        ),
+                new InstantCommand(collectorSystem::toggleLiftLocation).andThen(
+                        new WaitCommand(300),
+                        new InstantCommand(() -> {
+                            collectorSystem.setClampPosition(90);
+                            collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK);
+                            depositSystem.toggleBlockers();
+                            depositSystem.toggleSpike();
+                        })
+                ),
                 new RunByCaseCommand(location.toString(), drive, leftYellow, middleYellow, rightYellow, true),
                 new InstantCommand(depositSystem::toggleBlockers).andThen(
                         new WaitCommand(300),
@@ -160,6 +160,10 @@ public class BlueShortDoor extends CommandOpMode {
                                         new InstantCommand(() -> depositSystem.setSlidesTicks(200))
                                 )
                 ),
+                new InstantCommand(() -> {
+                    if (location == PropLocations.LEFT)
+                        drive.adjustPose(new Pose2d(0, -5, 0));
+                }),
                 new InstantCommand(depositSystem::toggleBlockers)
                         .andThen(
                                 new WaitCommand(600),
