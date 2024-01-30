@@ -7,6 +7,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.kinematics.Kinematics;
 import com.acmerobotics.roadrunner.localization.Localizer;
+import com.qualcomm.robotcore.hardware.IMU;
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.DecompositionSolver;
@@ -25,9 +26,14 @@ abstract class GyroTrackingWheelLocalizer implements Localizer {
     private Pose2d poseEstimate = new Pose2d();
     private Pose2d poseVelocity = null;
     private List<Double> lastWheelPositions = new ArrayList<>();
+    private final IMU gyroscope;
 
-    public GyroTrackingWheelLocalizer(List<Pose2d> wheelPoses) {
+    public GyroTrackingWheelLocalizer(@NonNull List<Pose2d> wheelPoses, @Nullable IMU imu) {
         assert wheelPoses.size() == 3 : "3 wheel positions must be provided";
+        gyroscope = imu;
+
+        if (gyroscope != null)
+            gyroscope.resetYaw();
 
         Array2DRowRealMatrix inverseMatrix = new Array2DRowRealMatrix(3, 3);
         for (int i = 0; i <= 2; i++) {
@@ -91,6 +97,9 @@ abstract class GyroTrackingWheelLocalizer implements Localizer {
     public void setPoseEstimate(@NonNull Pose2d newPose) {
         lastWheelPositions = new ArrayList<>();
         poseEstimate = newPose;
+
+        if (gyroscope != null)
+            gyroscope.resetYaw();
     }
 
     @Nullable
