@@ -117,13 +117,16 @@ public class RedShortDoor extends CommandOpMode {
             telemetry.update();
         }
 
+        generator.setPropLocation(location);
         tensorflow.shutdown();
+
         schedule(new SequentialCommandGroup(
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
                 new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, true),
                 new InstantCommand(collectorSystem::toggleLiftLocation).andThen(
                         new WaitCommand(300),
                         new InstantCommand(() -> {
+                            collectorSystem.setClampPosition(90);
                             collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK);
                             depositSystem.toggleBlockers();
                             depositSystem.toggleSpike();
@@ -157,6 +160,10 @@ public class RedShortDoor extends CommandOpMode {
                                         new InstantCommand(() -> depositSystem.setSlidesTicks(200))
                                 )
                 ),
+                new InstantCommand(() -> {
+                    if (location == PropLocations.RIGHT)
+                        drive.adjustPose(new Pose2d(0, 7.5, 0));
+                }),
                 new InstantCommand(depositSystem::toggleBlockers)
                         .andThen(
                                 new WaitCommand(600),

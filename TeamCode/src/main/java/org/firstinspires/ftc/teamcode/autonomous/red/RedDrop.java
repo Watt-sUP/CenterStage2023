@@ -7,15 +7,17 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
+import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.teamcode.autonomous.PathGenerator;
 import org.firstinspires.ftc.teamcode.autonomous.assets.AllianceColor;
-import org.firstinspires.ftc.teamcode.autonomous.assets.BackstageRoute;
 import org.firstinspires.ftc.teamcode.autonomous.assets.PropLocations;
 import org.firstinspires.ftc.teamcode.autonomous.assets.Stack;
 import org.firstinspires.ftc.teamcode.autonomous.assets.StartingPosition;
@@ -29,8 +31,8 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 import java.util.Locale;
 
-@Autonomous(name = "Red Short (Side)")
-public class RedShortSide extends CommandOpMode {
+@Autonomous(name = "Red Short (pixel drop)")
+public class RedDrop extends CommandOpMode {
     private PropLocations location = PropLocations.LEFT;
 
     @Override
@@ -90,12 +92,24 @@ public class RedShortSide extends CommandOpMode {
                 .splineTo(new Vector2d(50.00, -35.5), Math.toRadians(0.00))
                 .build();
 
-        TrajectorySequence stackLeft = generator.generateStackPath(leftYellow.end(), Stack.FAR);
         TrajectorySequence stackMid = generator.generateStackPath(middleYellow.end(), Stack.CLOSE);
         TrajectorySequence stackRight = generator.generateStackPath(rightYellow.end(), Stack.CLOSE);
 
-        TrajectorySequence backdropSide = generator.generateBackstagePath(stackMid.end(), BackstageRoute.SIDE);
-        TrajectorySequence backdropCenter = generator.generateBackstagePath(stackLeft.end(), BackstageRoute.CENTER);
+        generator.setPropLocation(PropLocations.LEFT);
+        TrajectorySequence stackLeft = generator.generateStackPath(leftYellow.end(), Stack.CLOSE);
+
+        TrajectorySequence backdropSide = drive.trajectorySequenceBuilder(stackMid.end())
+                .setReversed(true)
+                .splineTo(new Vector2d(-27.00, -58.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(2.12, -58.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(61, -60), Math.toRadians(0.00))
+                .build();
+        TrajectorySequence backdropLeft = drive.trajectorySequenceBuilder(stackLeft.end().plus(new Pose2d(0, -5, 0)))
+                .setReversed(true)
+                .splineTo(new Vector2d(-27.00, -58.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(2.12, -58.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(61, -60), Math.toRadians(0.00))
+                .build();
 
         while (!isStarted()) {
             if (isStopRequested())
@@ -137,49 +151,29 @@ public class RedShortSide extends CommandOpMode {
                         new WaitCommand(700),
                         new InstantCommand(depositSystem::toggleSpike)
                 ),
-//                new RunByCaseCommand(location.toString(), drive, stackLeft, stackMid, stackRight, true)
-//                        .andThen(
-//                                new InstantCommand(collectorSystem::toggleClamp),
-//                                new WaitCommand(1250),
-//                                new InstantCommand(collectorSystem::toggleClamp)
-//                        ),
-//                new InstantCommand(() -> drive.followTrajectorySequenceAsync(location != PropLocations.LEFT ? backdropSide : backdropCenter)),
-//                new ParallelCommandGroup(
-//                        new RunCommand(drive::update).interruptOn(() -> !drive.isBusy()),
-//                        new WaitUntilCommand(() -> drive.getPoseEstimate().getX() > 0)
-//                                .andThen(
-//                                        new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
-//                                        new WaitCommand(300),
-//                                        new InstantCommand(() -> {
-//                                            depositSystem.toggleBlockers();
-//                                            depositSystem.toggleSpike();
-//                                        }),
-//                                        new WaitCommand(300),
-//                                        new InstantCommand(() -> depositSystem.setSlidesTicks(200))
-//                                )
-//                ),
-//                new InstantCommand(depositSystem::toggleBlockers)
-//                        .andThen(
-//                                new WaitCommand(600),
-//                                new InstantCommand(depositSystem::toggleSpike),
-//                                new WaitCommand(300),
-//                                new InstantCommand(depositSystem::toggleSpike),
-//                                new WaitCommand(700)
-//                        ),
-//                new InstantCommand(depositSystem::toggleBlockers)
-//                        .andThen(
-//                                new WaitCommand(1000),
-//                                new InstantCommand(depositSystem::toggleSpike)
-//                        ),
-//                new WaitCommand(1000)
-//                        .andThen(
-//                                new InstantCommand(() -> depositSystem.setSlidesPosition(0)),
-//                        ),
+                new RunByCaseCommand(location.toString(), drive, stackLeft, stackMid, stackRight, true)
+                        .andThen(
+                                new InstantCommand(collectorSystem::toggleClamp),
+                                new WaitCommand(500)
+                        ),
+                new InstantCommand(() -> {
+                    if (location == PropLocations.LEFT)
+                        drive.adjustPose(new Pose2d(0, -5, 0));
+                }),
+                new InstantCommand(() -> drive.followTrajectorySequenceAsync(location != PropLocations.LEFT ? backdropSide : backdropLeft)),
+                new ParallelCommandGroup(
+                        new RunCommand(drive::update).interruptOn(() -> !drive.isBusy()),
+                        new WaitUntilCommand(() -> drive.getPoseEstimate().getX() > 0)
+                                .andThen(new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK)))
+                ),
 
-                new InstantCommand(() -> drive.adjustPose(new Pose2d(-5, 0, 0))),
-                new InstantCommand(() -> drive.lineToPose(new Pose2d(48, -60, Math.toRadians(180))))
-                        .andThen(new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))),
-                new InstantCommand(() -> drive.adjustPose(new Pose2d(10, 0, 0)))
+                new InstantCommand(collectorSystem::toggleLiftLocation)
+                        .andThen(
+                                new WaitCommand(500),
+                                new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
+                                new WaitCommand(300),
+                                new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
+                        )
         ));
     }
 }

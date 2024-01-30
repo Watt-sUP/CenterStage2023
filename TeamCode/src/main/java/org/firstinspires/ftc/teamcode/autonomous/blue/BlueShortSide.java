@@ -96,9 +96,12 @@ public class BlueShortSide extends CommandOpMode {
 
         TrajectorySequence stackLeft = generator.generateStackPath(leftYellow.end(), Stack.CLOSE);
         TrajectorySequence stackMid = generator.generateStackPath(middleYellow.end(), Stack.CLOSE);
+
+        generator.setPropLocation(PropLocations.RIGHT);
         TrajectorySequence stackRight = generator.generateStackPath(rightYellow.end(), Stack.CLOSE);
 
-        TrajectorySequence goToBackdrop = generator.generateBackstagePath(stackMid.end(), BackstageRoute.SIDE);
+        TrajectorySequence backdropSide = generator.generateBackstagePath(stackMid.end(), BackstageRoute.SIDE);
+        TrajectorySequence backdropRight = generator.generateBackstagePath(stackRight.end().plus(new Pose2d(0, 5, 0)), BackstageRoute.SIDE);
 
         while (!isStarted()) {
             if (isStopRequested())
@@ -118,20 +121,21 @@ public class BlueShortSide extends CommandOpMode {
             telemetry.update();
         }
 
-
+        generator.setPropLocation(location);
         tensorflow.shutdown();
+
         schedule(new SequentialCommandGroup(
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
                 new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, true),
-                new InstantCommand(collectorSystem::toggleLiftLocation)
-                        .andThen(
-                                new WaitCommand(300),
-                                new InstantCommand(() -> {
-                                    collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK);
-                                    depositSystem.toggleBlockers();
-                                    depositSystem.toggleSpike();
-                                })
-                        ),
+                new InstantCommand(collectorSystem::toggleLiftLocation).andThen(
+                        new WaitCommand(300),
+                        new InstantCommand(() -> {
+                            collectorSystem.setClampPosition(90);
+                            collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK);
+                            depositSystem.toggleBlockers();
+                            depositSystem.toggleSpike();
+                        })
+                ),
                 new RunByCaseCommand(location.toString(), drive, leftYellow, middleYellow, rightYellow, true),
                 new InstantCommand(depositSystem::toggleBlockers).andThen(
                         new WaitCommand(300),
@@ -145,7 +149,11 @@ public class BlueShortSide extends CommandOpMode {
                                 new WaitCommand(1250),
                                 new InstantCommand(collectorSystem::toggleClamp)
                         ),
-                new InstantCommand(() -> drive.followTrajectorySequenceAsync(goToBackdrop)),
+                new InstantCommand(() -> {
+                    if (location == PropLocations.RIGHT)
+                        drive.adjustPose(new Pose2d(0, 5, 0));
+                }),
+                new InstantCommand(() -> drive.followTrajectorySequenceAsync(location != PropLocations.RIGHT ? backdropSide : backdropRight)),
                 new ParallelCommandGroup(
                         new RunCommand(drive::update).interruptOn(() -> !drive.isBusy()),
                         new WaitUntilCommand(() -> drive.getPoseEstimate().getX() > 0)
@@ -160,6 +168,10 @@ public class BlueShortSide extends CommandOpMode {
                                         new InstantCommand(() -> depositSystem.setSlidesTicks(200))
                                 )
                 ),
+                new InstantCommand(() -> {
+                    if (location == PropLocations.RIGHT)
+                        drive.adjustPose(new Pose2d(0, 5, 0));
+                }),
                 new InstantCommand(depositSystem::toggleBlockers)
                         .andThen(
                                 new WaitCommand(600),
@@ -174,14 +186,11 @@ public class BlueShortSide extends CommandOpMode {
                                 new InstantCommand(depositSystem::toggleSpike)
                         ),
                 new WaitCommand(1000)
-                        .andThen(
-                                new InstantCommand(() -> depositSystem.setSlidesPosition(0)),
-                                new WaitUntilCommand(() -> depositSystem.getSlidesTicks() < 25),
-                                new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
-                        ),
+                        .andThen(new InstantCommand(() -> depositSystem.setSlidesPosition(0))),
 
                 new InstantCommand(() -> drive.adjustPose(new Pose2d(-5, 0, 0))),
-                new InstantCommand(() -> drive.lineToPose(new Pose2d(48, 12, Math.toRadians(180)))),
+                new InstantCommand(() -> drive.lineToPose(new Pose2d(48, 60, Math.toRadians(180))))
+                        .andThen(new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))),
                 new InstantCommand(() -> drive.adjustPose(new Pose2d(10, 0, 0)))
         ));
     }
