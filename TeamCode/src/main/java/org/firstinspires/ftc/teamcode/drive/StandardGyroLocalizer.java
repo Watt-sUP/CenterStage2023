@@ -12,19 +12,6 @@ import org.firstinspires.ftc.teamcode.util.Encoder;
 import java.util.Arrays;
 import java.util.List;
 
-/*
- * Sample tracking wheel localizer implementation assuming the standard configuration:
- *
- *    /--------------\
- *    |     ____     |
- *    |     ----     |
- *    | ||        || |
- *    | ||        || |
- *    |              |
- *    |              |
- *    \--------------/
- *
- */
 @Config
 public class StandardGyroLocalizer extends GyroTrackingWheelLocalizer {
     public static double TICKS_PER_REV = 8192;
@@ -38,7 +25,7 @@ public class StandardGyroLocalizer extends GyroTrackingWheelLocalizer {
 
     private final Encoder leftEncoder, rightEncoder, frontEncoder;
 
-    public StandardGyroLocalizer(HardwareMap hardwareMap, List<Integer> lastTrackingEncPositions, List<Integer> lastTrackingEncVels) {
+    public StandardGyroLocalizer(HardwareMap hardwareMap) {
         super(Arrays.asList(
                 new Pose2d(0, LATERAL_DISTANCE / 2, 0), // left
                 new Pose2d(0, -LATERAL_DISTANCE / 2, 0), // right
