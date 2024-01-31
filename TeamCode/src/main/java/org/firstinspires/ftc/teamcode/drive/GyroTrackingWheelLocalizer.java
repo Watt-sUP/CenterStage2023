@@ -72,10 +72,11 @@ abstract class GyroTrackingWheelLocalizer implements Localizer {
     @Override
     public void update() {
         List<Double> wheelPositions = getWheelPositions();
-        if (!wheelPositions.isEmpty()) {
+        if (!lastWheelPositions.isEmpty()) {
             List<Double> wheelDeltas = IntStream.range(0, wheelPositions.size())
                     .mapToObj(i -> wheelPositions.get(i) - lastWheelPositions.get(i))
                     .collect(Collectors.toList());
+
             Pose2d robotPoseDelta = calculatePoseDelta(wheelDeltas);
             poseEstimate = Kinematics.relativeOdometryUpdate(poseEstimate, robotPoseDelta);
         }
