@@ -2,19 +2,7 @@ package org.firstinspires.ftc.teamcode.drive;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-/*
- * Constants shared between multiple drive types.
- *
- * TODO: Tune or adjust the following constants to fit your robot. Note that the non-final
- * fields may also be edited through the dashboard (connect to the robot's WiFi network and
- * navigate to https://192.168.49.1:8080/dash). Make sure to save the values here after you
- * adjust them in the dashboard; **config variable changes don't persist between app restarts**.
- *
- * These are not the only parameters; some are located in the localizer classes, drive base classes,
- * and op modes themselves.
- */
 @Config
 public class DriveConstants {
 
@@ -33,8 +21,6 @@ public class DriveConstants {
      * from DriveVelocityPIDTuner.
      */
     public static final boolean RUN_USING_ENCODER = false;
-    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(0, 0, 0,
-            13.742327262604485);
 
     /*
      * These are physical constants that can be determined from your robot (including the track
