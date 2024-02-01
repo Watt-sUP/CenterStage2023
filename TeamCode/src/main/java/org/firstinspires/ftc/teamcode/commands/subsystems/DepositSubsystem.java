@@ -49,7 +49,7 @@ public class DepositSubsystem extends SubsystemBase {
         this.stopperBottom.turnToAngle(60);
         this.toggleSpike();
 
-        this.slides.setDirection(DcMotorSimple.Direction.REVERSE);
+        this.slides.setDirection(DcMotorSimple.Direction.FORWARD);
         this.slides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 

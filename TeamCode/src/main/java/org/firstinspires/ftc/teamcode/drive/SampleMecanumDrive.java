@@ -33,14 +33,12 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
-import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuilder;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceRunner;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,7 +46,6 @@ import java.util.stream.Collectors;
 @Config
 public class SampleMecanumDrive extends MecanumDrive {
 
-    public static LocalizerTypes localizerType = LocalizerTypes.ODOMETRY_SINGLE;
     private final TrajectorySequenceRunner trajectorySequenceRunner;
     public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(15, 0, 0);
     public static PIDCoefficients HEADING_PID = new PIDCoefficients(15, 0, 0);
@@ -58,11 +55,13 @@ public class SampleMecanumDrive extends MecanumDrive {
     public static double VX_WEIGHT = 1;
     public static double VY_WEIGHT = 1;
     public static double OMEGA_WEIGHT = 1;
+
     private final DcMotorEx leftFront, leftRear, rightRear, rightFront;
+    private final List<DcMotorEx> motors;
 
     private static final TrajectoryVelocityConstraint VEL_CONSTRAINT = getVelocityConstraint(MAX_VEL, MAX_ANG_VEL, TRACK_WIDTH);
     private static final TrajectoryAccelerationConstraint ACCEL_CONSTRAINT = getAccelerationConstraint(MAX_ACCEL);
-    private final List<DcMotorEx> motors;
+
     public SampleMecanumDrive(HardwareMap hardwareMap) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
 
@@ -78,25 +77,12 @@ public class SampleMecanumDrive extends MecanumDrive {
         rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
 
         motors = Arrays.asList(leftFront, leftRear, rightRear, rightFront);
-        motors.forEach(motor -> {
-            MotorConfigurationType motorConfig = motor.getMotorType().clone();
-            motorConfig.setAchieveableMaxRPMFraction(1.0);
-            motor.setMotorType(motorConfig);
-        });
-
         setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
         rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        if (localizerType == LocalizerTypes.ODOMETRY_SINGLE) {
-            List<Integer> lastTrackingEncPositions = new ArrayList<>();
-            List<Integer> lastTrackingEncVels = new ArrayList<>();
-
-            setLocalizer(new StandardTrackingWheelLocalizer(hardwareMap, lastTrackingEncPositions, lastTrackingEncVels));
-        } else if (localizerType == LocalizerTypes.ODOMETRY_GYRO)
-            setLocalizer(new StandardGyroLocalizer(hardwareMap));
-
+        setLocalizer(new StandardGyroLocalizer(hardwareMap));
         trajectorySequenceRunner = new TrajectorySequenceRunner(follower, HEADING_PID, batteryVoltageSensor);
     }
 
@@ -281,11 +267,6 @@ public class SampleMecanumDrive extends MecanumDrive {
         return motors.stream()
                 .map(motor -> encoderTicksToInches(motor.getVelocity()))
                 .collect(Collectors.toList());
-    }
-
-    private enum LocalizerTypes {
-        ODOMETRY_SINGLE,
-        ODOMETRY_GYRO
     }
 
     @Override

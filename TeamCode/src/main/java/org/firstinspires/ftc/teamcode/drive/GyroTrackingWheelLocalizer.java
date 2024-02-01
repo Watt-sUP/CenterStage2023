@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.drive;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.kinematics.Kinematics;
@@ -14,6 +16,8 @@ import org.apache.commons.math3.linear.DecompositionSolver;
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.util.KalmanFilter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,17 +27,23 @@ import java.util.stream.IntStream;
 abstract class GyroTrackingWheelLocalizer implements Localizer {
 
     private final DecompositionSolver forwardSolver;
-    private Pose2d poseEstimate = new Pose2d();
-    private Pose2d poseVelocity = null;
+    private final KalmanFilter filter = new KalmanFilter();
     private List<Double> lastWheelPositions = new ArrayList<>();
     private final IMU gyroscope;
+    private final FtcDashboard dashboard;
+    private Pose2d poseEstimate = new Pose2d(), poseVelocity = null;
+    private double gyroOffset = 0;
 
     public GyroTrackingWheelLocalizer(@NonNull List<Pose2d> wheelPoses, @Nullable IMU imu) {
         assert wheelPoses.size() == 3 : "3 wheel positions must be provided";
+        dashboard = FtcDashboard.getInstance();
         gyroscope = imu;
 
-        if (gyroscope != null)
+        if (gyroscope != null) {
             gyroscope.resetYaw();
+            filter.setIsAngle(true);
+            filter.setCovariances(0.1, 0.4);
+        }
 
         Array2DRowRealMatrix inverseMatrix = new Array2DRowRealMatrix(3, 3);
         for (int i = 0; i <= 2; i++) {
@@ -78,7 +88,24 @@ abstract class GyroTrackingWheelLocalizer implements Localizer {
                     .collect(Collectors.toList());
 
             Pose2d robotPoseDelta = calculatePoseDelta(wheelDeltas);
-            poseEstimate = Kinematics.relativeOdometryUpdate(poseEstimate, robotPoseDelta);
+
+            if (gyroscope == null)
+                poseEstimate = Kinematics.relativeOdometryUpdate(poseEstimate, robotPoseDelta);
+            else {
+                Pose2d odometryEstimate = Kinematics.relativeOdometryUpdate(poseEstimate, robotPoseDelta);
+                double gyroAngle = gyroOffset + gyroscope.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+                double odometryAngle = odometryEstimate.getHeading() - poseEstimate.getHeading();
+
+                double filterAngle = filter.update(odometryAngle, gyroAngle);
+
+                TelemetryPacket packet = new TelemetryPacket();
+                packet.put("heading (odometry)", Math.toDegrees(odometryEstimate.getHeading()));
+                packet.put("heading (gyro)", Math.toDegrees(gyroAngle));
+                packet.put("heading (kalman)", Math.toDegrees(filterAngle));
+                dashboard.sendTelemetryPacket(packet);
+
+                poseEstimate = Kinematics.relativeOdometryUpdate(poseEstimate, new Pose2d(odometryEstimate.vec(), filterAngle));
+            }
         }
 
         List<Double> wheelVelocities = getWheelVelocities();
@@ -99,8 +126,11 @@ abstract class GyroTrackingWheelLocalizer implements Localizer {
         lastWheelPositions = new ArrayList<>();
         poseEstimate = newPose;
 
-        if (gyroscope != null)
+        if (gyroscope != null) {
             gyroscope.resetYaw();
+            gyroOffset = newPose.getHeading();
+            filter.setState(newPose.getHeading());
+        }
     }
 
     @Nullable

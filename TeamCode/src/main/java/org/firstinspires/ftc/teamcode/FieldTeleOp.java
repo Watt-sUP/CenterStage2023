@@ -9,7 +9,6 @@ import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.hardware.bosch.BHI260IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -21,11 +20,12 @@ import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.EndgameSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
+import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 
 import java.util.List;
 import java.util.Locale;
 
-@Disabled
+//@Disabled
 @Config
 @TeleOp(name = "TeleOp (Field Centric)")
 public class FieldTeleOp extends CommandOpMode {
@@ -42,10 +42,11 @@ public class FieldTeleOp extends CommandOpMode {
         BHI260IMU imu = hardwareMap.get(BHI260IMU.class, "imu");
         imu.initialize(new IMU.Parameters(
                 new RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                        RevHubOrientationOnRobot.UsbFacingDirection.RIGHT
+                        DriveConstants.LOGO_FACING_DIR,
+                        DriveConstants.USB_FACING_DIR
                 )
         ));
+        imu.getRobotYawPitchRollAngles();
 
         OdometrySubsystem odometrySystem = new OdometrySubsystem(
                 new SimpleServo(hardwareMap, "odo_left", 0, 180),
@@ -131,11 +132,9 @@ public class FieldTeleOp extends CommandOpMode {
             telemetry.addData("Power Limit", driveSystem.getPowerLimit());
             telemetry.addData("Blocker State", depositSystem.getBlockerState());
 
-            telemetry.addData("Yaw", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
-            telemetry.addData("Pitch", imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.DEGREES));
-            telemetry.addData("Roll", imu.getRobotYawPitchRollAngles().getRoll(AngleUnit.DEGREES));
+            telemetry.addData("Robot Angle", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+            telemetry.addData("Rotation Rate", imu.getRobotAngularVelocity(AngleUnit.DEGREES).toString());
 
-            telemetry.addData("Climb position", String.format(Locale.US, "%.2f", endgameSystem.getClimbAngle(AngleUnit.DEGREES)));
             telemetry.addData("FPS", String.format(Locale.US, "%.2f", 1000. / fps.milliseconds()));
             telemetry.update();
         }));
