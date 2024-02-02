@@ -104,7 +104,7 @@ abstract class GyroTrackingWheelLocalizer implements Localizer {
                 packet.put("heading (kalman)", Math.toDegrees(filterAngle));
                 dashboard.sendTelemetryPacket(packet);
 
-                poseEstimate = Kinematics.relativeOdometryUpdate(poseEstimate, new Pose2d(odometryEstimate.vec(), filterAngle));
+                poseEstimate = new Pose2d(odometryEstimate.vec(), filterAngle);
             }
         }
 
