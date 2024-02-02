@@ -1,18 +1,34 @@
 package org.firstinspires.ftc.teamcode.util;
 
+import androidx.annotation.NonNull;
+
 import com.acmerobotics.roadrunner.util.Angle;
+
+import java.util.Locale;
 
 public class KalmanFilter {
     public double Q = .1, R = .4;
     public double p = 1, K = .5;
-    private boolean isAngle = false;    private double x = 0, last_x = x, last_p = p;
-    public KalmanFilter(double processCovariance, double sensorCovariance) {
-        setCovariances(processCovariance, sensorCovariance);
-    }
+    private boolean isAngle = false;
 
-    public KalmanFilter(double initialState) {
-        setState(initialState);
-    }
+    public double update(double processChange, double sensorMeasurement) {
+        x = last_x + processChange;
+        p = last_p + Q;
+
+        K = p / (p + R);
+
+        if (!isAngle)
+            x = x + K * (sensorMeasurement - x);
+        else
+            x = x + K * (Angle.normDelta(Angle.norm(sensorMeasurement) - Angle.norm(x)));
+
+        p = (1 - K) * p;
+
+        last_x = x;
+        last_p = p;
+
+        return isAngle ? Angle.norm(x) : x;
+    }    private double x = 0, last_x = x, last_p = p;
 
     public KalmanFilter() {
     }
@@ -31,28 +47,10 @@ public class KalmanFilter {
         R = sensor;
     }
 
-    public double update(double processChange, double sensorMeasurement) {
-        x = last_x + processChange;
-        p = last_p + Q;
-
-        K = p / (p + R);
-
-        if (!isAngle)
-            x = x + K * (sensorMeasurement - x);
-        else
-            x = x + K * (normalizeAngleDifference(Angle.norm(sensorMeasurement), Angle.norm(x)));
-
-        p = (1 - K) * p;
-
-        last_x = x;
-        last_p = p;
-
-        return isAngle ? Angle.norm(x) : x;
-    }
-
-    private double normalizeAngleDifference(double angle1, double angle2) {
-        double difference = Math.abs(angle2 - angle1);
-        return Angle.normDelta((difference + Math.PI) % (2 * Math.PI) - Math.PI);
+    @NonNull
+    @Override
+    public String toString() {
+        return String.format(Locale.US, "x: %.2f, kGain: %.4g", x, K);
     }
 
 

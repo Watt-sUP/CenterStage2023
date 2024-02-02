@@ -9,6 +9,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.kinematics.Kinematics;
 import com.acmerobotics.roadrunner.localization.Localizer;
+import com.acmerobotics.roadrunner.util.Angle;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
@@ -94,16 +95,19 @@ abstract class GyroTrackingWheelLocalizer implements Localizer {
             else {
                 Pose2d odometryEstimate = Kinematics.relativeOdometryUpdate(poseEstimate, robotPoseDelta);
                 double gyroAngle = gyroOffset + gyroscope.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-                double odometryAngle = odometryEstimate.getHeading() - poseEstimate.getHeading();
+                double odometryDelta = Angle.normDelta(odometryEstimate.getHeading() - poseEstimate.getHeading());
 
-                double filterAngle = filter.update(odometryAngle, gyroAngle);
+                double filterAngle = filter.update(odometryDelta, gyroAngle);
 
                 TelemetryPacket packet = new TelemetryPacket();
                 packet.put("heading (odometry)", Math.toDegrees(odometryEstimate.getHeading()));
                 packet.put("heading (gyro)", Math.toDegrees(gyroAngle));
                 packet.put("heading (kalman)", Math.toDegrees(filterAngle));
-                dashboard.sendTelemetryPacket(packet);
 
+                packet.put("delta (odometry)", Math.toDegrees(odometryDelta));
+                packet.addLine(filter.toString());
+
+                dashboard.sendTelemetryPacket(packet);
                 poseEstimate = new Pose2d(odometryEstimate.vec(), filterAngle);
             }
         }
