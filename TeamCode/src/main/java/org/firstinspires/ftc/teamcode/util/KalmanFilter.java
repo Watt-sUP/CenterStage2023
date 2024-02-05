@@ -10,7 +10,6 @@ public class KalmanFilter {
     public double Q = .1, R = .4;
     public double p = 1, K = .5;
     private boolean isAngle = false;
-
     public double update(double processChange, double sensorMeasurement) {
         x = last_x + processChange;
         p = last_p + Q;
@@ -29,6 +28,8 @@ public class KalmanFilter {
 
         return isAngle ? Angle.norm(x) : x;
     }    private double x = 0, last_x = x, last_p = p;
+
+
 
     public KalmanFilter() {
     }
@@ -52,6 +53,4 @@ public class KalmanFilter {
     public String toString() {
         return String.format(Locale.US, "x: %.2f, kGain: %.4g", x, K);
     }
-
-
 }

@@ -35,9 +35,7 @@ public class FieldTeleOp extends CommandOpMode {
 
     public void initialize() {
         hubs = hardwareMap.getAll(LynxModule.class);
-
-        for (LynxModule hub : hubs)
-            hub.setBulkCachingMode(bulkMethod);
+        hubs.forEach(hub -> hub.setBulkCachingMode(bulkMethod));
 
         BHI260IMU imu = hardwareMap.get(BHI260IMU.class, "imu");
         imu.initialize(new IMU.Parameters(
@@ -142,9 +140,8 @@ public class FieldTeleOp extends CommandOpMode {
 
     @Override
     public void run() {
-        for (LynxModule hub : hubs)
-            if (hub.getBulkCachingMode() == LynxModule.BulkCachingMode.MANUAL)
-                hub.clearBulkCache();
+        if (bulkMethod == LynxModule.BulkCachingMode.MANUAL)
+            hubs.forEach(LynxModule::clearBulkCache);
 
         fps.reset();
         super.run();

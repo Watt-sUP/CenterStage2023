@@ -29,9 +29,7 @@ public class RobotTeleOp extends CommandOpMode {
 
     public void initialize() {
         hubs = hardwareMap.getAll(LynxModule.class);
-
-        for (LynxModule hub : hubs)
-            hub.setBulkCachingMode(bulkMethod);
+        hubs.forEach(hub -> hub.setBulkCachingMode(bulkMethod));
 
         OdometrySubsystem odometrySystem = new OdometrySubsystem(
                 new SimpleServo(hardwareMap, "odo_left", 0, 180),
@@ -127,9 +125,8 @@ public class RobotTeleOp extends CommandOpMode {
 
     @Override
     public void run() {
-        for (LynxModule hub : hubs)
-            if (hub.getBulkCachingMode() == LynxModule.BulkCachingMode.MANUAL)
-                hub.clearBulkCache();
+        if (bulkMethod == LynxModule.BulkCachingMode.MANUAL)
+            hubs.forEach(LynxModule::clearBulkCache);
 
         fps.reset();
         super.run();

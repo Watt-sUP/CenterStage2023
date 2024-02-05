@@ -101,7 +101,7 @@ abstract class GyroTrackingWheelLocalizer implements Localizer {
 
                 TelemetryPacket packet = new TelemetryPacket();
                 packet.put("heading (odometry)", Math.toDegrees(odometryEstimate.getHeading()));
-                packet.put("heading (gyro)", Math.toDegrees(gyroAngle));
+                packet.put("heading (gyro)", Math.toDegrees(Angle.norm(gyroAngle)));
                 packet.put("heading (kalman)", Math.toDegrees(filterAngle));
 
                 packet.put("delta (odometry)", Math.toDegrees(odometryDelta));
