@@ -44,7 +44,6 @@ public class FieldTeleOp extends CommandOpMode {
                         DriveConstants.USB_FACING_DIR
                 )
         ));
-        imu.getRobotYawPitchRollAngles();
 
         OdometrySubsystem odometrySystem = new OdometrySubsystem(
                 new SimpleServo(hardwareMap, "odo_left", 0, 180),

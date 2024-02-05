@@ -18,7 +18,7 @@ import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.util.KalmanFilter;
+import org.firstinspires.ftc.teamcode.util.CompFilter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,11 +28,11 @@ import java.util.stream.IntStream;
 abstract class GyroTrackingWheelLocalizer implements Localizer {
 
     private final DecompositionSolver forwardSolver;
-    private final KalmanFilter filter = new KalmanFilter();
+    private final CompFilter filter = new CompFilter();
     private List<Double> lastWheelPositions = new ArrayList<>();
     private final IMU gyroscope;
     private final FtcDashboard dashboard;
-    private Pose2d poseEstimate = new Pose2d(), poseVelocity = null;
+    private Pose2d poseEstimate = new Pose2d(), poseVelocity = null, odometryPose = new Pose2d();
     private double gyroOffset = 0;
 
     public GyroTrackingWheelLocalizer(@NonNull List<Pose2d> wheelPoses, @Nullable IMU imu) {
@@ -43,7 +43,7 @@ abstract class GyroTrackingWheelLocalizer implements Localizer {
         if (gyroscope != null) {
             gyroscope.resetYaw();
             filter.setIsAngle(true);
-            filter.setCovariances(0.1, 0.4);
+            filter.setAlpha(.6);
         }
 
         Array2DRowRealMatrix inverseMatrix = new Array2DRowRealMatrix(3, 3);
@@ -89,26 +89,29 @@ abstract class GyroTrackingWheelLocalizer implements Localizer {
                     .collect(Collectors.toList());
 
             Pose2d robotPoseDelta = calculatePoseDelta(wheelDeltas);
+            odometryPose = Kinematics.relativeOdometryUpdate(odometryPose, robotPoseDelta);
 
             if (gyroscope == null)
-                poseEstimate = Kinematics.relativeOdometryUpdate(poseEstimate, robotPoseDelta);
+                poseEstimate = odometryPose;
             else {
-                Pose2d odometryEstimate = Kinematics.relativeOdometryUpdate(poseEstimate, robotPoseDelta);
+                // TODO: Evaluate whether the results of the complementary filter are enough or switch back to Kalman
                 double gyroAngle = gyroOffset + gyroscope.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-                double odometryDelta = Angle.normDelta(odometryEstimate.getHeading() - poseEstimate.getHeading());
-
-                double filterAngle = filter.update(odometryDelta, gyroAngle);
+                double odometryAngle = odometryPose.getHeading();
+                double filterAngle = filter.update(gyroAngle, odometryAngle);
 
                 TelemetryPacket packet = new TelemetryPacket();
-                packet.put("heading (odometry)", Math.toDegrees(odometryEstimate.getHeading()));
+                packet.put("heading (odometry)", Math.toDegrees(odometryAngle));
                 packet.put("heading (gyro)", Math.toDegrees(Angle.norm(gyroAngle)));
-                packet.put("heading (kalman)", Math.toDegrees(filterAngle));
+                packet.put("heading (filter)", Math.toDegrees(filterAngle));
 
-                packet.put("delta (odometry)", Math.toDegrees(odometryDelta));
-                packet.addLine(filter.toString());
+                packet.put("position (odometry)", odometryPose.vec().toString());
+                packet.put("position (filtered)", poseEstimate.vec().toString());
 
                 dashboard.sendTelemetryPacket(packet);
-                poseEstimate = new Pose2d(odometryEstimate.vec(), filterAngle);
+
+                // TODO: Check whether the uncommented or commented version is better
+                // poseEstimate = new Pose2d(odometryPose.vec(), filterAngle);
+                poseEstimate = Kinematics.relativeOdometryUpdate(poseEstimate, new Pose2d(robotPoseDelta.vec(), filterAngle));
             }
         }
 
@@ -133,7 +136,6 @@ abstract class GyroTrackingWheelLocalizer implements Localizer {
         if (gyroscope != null) {
             gyroscope.resetYaw();
             gyroOffset = newPose.getHeading();
-            filter.setState(newPose.getHeading());
         }
     }
 
