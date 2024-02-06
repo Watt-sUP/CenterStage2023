@@ -3,18 +3,17 @@ package org.firstinspires.ftc.teamcode.commands.subsystems;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
-import com.arcrobotics.ftclib.util.MathUtils;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.function.BooleanSupplier;
 
 @Config
 public class DepositSubsystem extends SubsystemBase {
     private final DcMotor slides;
     public static Double LOW_LEFT = 0.05, LOW_RIGHT = 0.1;
+    private final int[] slidesPositions = {0, 400, 700, 1000, 1250};
     private final ServoEx leftLift, rightLift;
     public static Double HIGH_LEFT = .825, HIGH_RIGHT = .875;
     private final ServoEx stopperTop, stopperBottom;
@@ -83,22 +82,19 @@ public class DepositSubsystem extends SubsystemBase {
     }
 
     public void setSlidesPosition(int position) {
-        position = MathUtils.clamp(position, 0, 4);
-        List<Integer> positions = Arrays.asList(0, 400, 700, 1000, 1300);
-
-        this.setSlidesTicks(positions.get(position));
+        this.setSlidesTicks(slidesPositions[position]);
     }
 
     public void raiseSlidesPosition() {
         int ticks = slides.getTargetPosition();
-        int current_pos = Arrays.binarySearch(new int[]{0, 400, 700, 1000, 1300}, ticks);
+        int current_pos = Arrays.binarySearch(slidesPositions, ticks);
 
         this.setSlidesPosition(current_pos < 0 ? -(current_pos + 1) : (current_pos + 1));
     }
 
     public void lowerSlidesPosition() {
         int ticks = slides.getTargetPosition();
-        int current_pos = Arrays.binarySearch(new int[]{0, 400, 700, 1000, 1300}, ticks);
+        int current_pos = Arrays.binarySearch(slidesPositions, ticks);
 
         this.setSlidesPosition(current_pos < 0 ? -(current_pos + 1) - 1 : (current_pos - 1));
     }

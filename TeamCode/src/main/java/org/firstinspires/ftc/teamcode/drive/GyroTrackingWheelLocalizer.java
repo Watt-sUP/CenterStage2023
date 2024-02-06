@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -25,7 +26,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@Config
 abstract class GyroTrackingWheelLocalizer implements Localizer {
+
+    public static double filterAlpha = .75;
 
     private final DecompositionSolver forwardSolver;
     private final CompFilter filter = new CompFilter();
@@ -43,7 +47,7 @@ abstract class GyroTrackingWheelLocalizer implements Localizer {
         if (gyroscope != null) {
             gyroscope.resetYaw();
             filter.setIsAngle(true);
-            filter.setAlpha(.6);
+            filter.setAlpha(filterAlpha);
         }
 
         Array2DRowRealMatrix inverseMatrix = new Array2DRowRealMatrix(3, 3);
@@ -110,8 +114,7 @@ abstract class GyroTrackingWheelLocalizer implements Localizer {
                 dashboard.sendTelemetryPacket(packet);
 
                 // TODO: Check whether the uncommented or commented version is better
-                // poseEstimate = new Pose2d(odometryPose.vec(), filterAngle);
-                poseEstimate = Kinematics.relativeOdometryUpdate(poseEstimate, new Pose2d(robotPoseDelta.vec(), filterAngle));
+                poseEstimate = Kinematics.relativeOdometryUpdate(poseEstimate, new Pose2d(robotPoseDelta.vec(), filter.getDelta()));
             }
         }
 
@@ -131,11 +134,13 @@ abstract class GyroTrackingWheelLocalizer implements Localizer {
     @Override
     public void setPoseEstimate(@NonNull Pose2d newPose) {
         lastWheelPositions = new ArrayList<>();
+        odometryPose = newPose;
         poseEstimate = newPose;
 
         if (gyroscope != null) {
             gyroscope.resetYaw();
             gyroOffset = newPose.getHeading();
+            filter.setEstimate(newPose.getHeading());
         }
     }
 

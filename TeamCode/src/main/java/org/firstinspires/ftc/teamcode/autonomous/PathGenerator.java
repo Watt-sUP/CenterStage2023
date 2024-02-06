@@ -55,14 +55,13 @@ public class PathGenerator {
      */
     public TrajectorySequence generateStackPath(Pose2d startPose, Stack targetStack) throws IllegalArgumentException {
         if (targetStack == Stack.FAR)
-            return drive.trajectorySequenceBuilder(startPose)
+            return drive.trajectorySequenceBuilder(startPose, 45)
                     .splineTo(allianceColor.convertVector(new Vector2d(17, -11)), Math.toRadians(180))
-                    .splineTo(allianceColor.convertVector(new Vector2d(-24, -11)), Math.toRadians(180))
                     .setConstraints(
-                            SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL / 2.0, DriveConstants.TRACK_WIDTH),
-                            SampleMecanumDrive.getAccelerationConstraint(25)
+                            SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                            SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL)
                     )
-                    .splineTo(allianceColor.convertVector(new Vector2d(-57.50, -12)), Math.toRadians(180))
+                    .lineToLinearHeading(allianceColor.convertPose(new Pose2d(-57.50, -12, Math.toRadians(180))))
                     .build();
 
         else if (targetStack == Stack.CLOSE) {
