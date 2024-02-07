@@ -98,7 +98,6 @@ abstract class GyroTrackingWheelLocalizer implements Localizer {
             if (gyroscope == null)
                 poseEstimate = odometryPose;
             else {
-                // TODO: Evaluate whether the results of the complementary filter are enough or switch back to Kalman
                 double gyroAngle = gyroOffset + gyroscope.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
                 double odometryAngle = odometryPose.getHeading();
                 double filterAngle = filter.update(gyroAngle, odometryAngle);
@@ -112,8 +111,6 @@ abstract class GyroTrackingWheelLocalizer implements Localizer {
                 packet.put("position (filtered)", poseEstimate.vec().toString());
 
                 dashboard.sendTelemetryPacket(packet);
-
-                // TODO: Check whether the uncommented or commented version is better
                 poseEstimate = Kinematics.relativeOdometryUpdate(poseEstimate, new Pose2d(robotPoseDelta.vec(), filter.getDelta()));
             }
         }

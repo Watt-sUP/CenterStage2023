@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.commands.subsystems;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
+import com.arcrobotics.ftclib.util.MathUtils;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
@@ -82,6 +83,7 @@ public class DepositSubsystem extends SubsystemBase {
     }
 
     public void setSlidesPosition(int position) {
+        position = MathUtils.clamp(position, 0, 4);
         this.setSlidesTicks(slidesPositions[position]);
     }
 
