@@ -55,13 +55,10 @@ public class PathGenerator {
      */
     public TrajectorySequence generateStackPath(Pose2d startPose, Stack targetStack) throws IllegalArgumentException {
         if (targetStack == Stack.FAR)
-            return drive.trajectorySequenceBuilder(startPose, 45)
+            return drive.trajectorySequenceBuilder(startPose, 50)
                     .splineTo(allianceColor.convertVector(new Vector2d(17, -11)), Math.toRadians(180))
-                    .setConstraints(
-                            SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                            SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL)
-                    )
-                    .lineToLinearHeading(allianceColor.convertPose(new Pose2d(-57.50, -12, Math.toRadians(180))))
+                    .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(45, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
+                    .lineToLinearHeading(allianceColor.convertPose(new Pose2d(-57.00, -11.75, Math.toRadians(180))))
                     .build();
 
         else if (targetStack == Stack.CLOSE) {
@@ -104,10 +101,11 @@ public class PathGenerator {
      */
     public TrajectorySequence generateBackstagePath(Pose2d startPose, BackstageRoute route) throws IllegalArgumentException {
         if (route == BackstageRoute.CENTER)
-            return drive.trajectorySequenceBuilder(startPose, 40)
+            return drive.trajectorySequenceBuilder(startPose)
                     .setReversed(true)
                     .splineTo(allianceColor.convertPose(new Pose2d(24, -11, Math.toRadians(0.00))))
-                    .splineTo(allianceColor.convertVector(new Vector2d(startingPosition == StartingPosition.BACKDROP ? 50.00 : 49.00, -42.50)), Math.toRadians(0.00))
+                    .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(45, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
+                    .splineTo(allianceColor.convertVector(new Vector2d(50.00, -42.50)), Math.toRadians(0.00))
                     .build();
         else if (route == BackstageRoute.SIDE)
             return drive.trajectorySequenceBuilder(startPose, 45)

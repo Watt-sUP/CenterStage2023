@@ -71,12 +71,12 @@ public class RedShortSide extends CommandOpMode {
                 .splineTo(new Vector2d(15, -38), Math.toRadians(90.00))
                 .build();
         Trajectory leftPurple = drive.trajectoryBuilder(generator.getStartingPose())
-                .splineTo(new Vector2d(.5, -35)
-                        .plus(new Vector2d(0, -12).rotated(Math.toRadians(45))), Math.toRadians(135.00))
+                .splineTo(new Vector2d(.5, -33)
+                        .minus(Vector2d.polar(12, Math.toRadians(135))), Math.toRadians(135.00))
                 .build();
         Trajectory rightPurple = drive.trajectoryBuilder(generator.getStartingPose())
                 .splineTo(new Vector2d(23.5, -32)
-                        .plus(new Vector2d(0, -13).rotated(Math.toRadians(-30))), Math.toRadians(60.00))
+                        .minus(Vector2d.polar(13, Math.toRadians(60))), Math.toRadians(60.00))
                 .build();
 
         Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), true)
