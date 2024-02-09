@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.roadrunner.opmode;
 
 import static org.firstinspires.ftc.teamcode.roadrunner.DriveConstants.MAX_RPM;
-import static org.firstinspires.ftc.teamcode.roadrunner.DriveConstants.RUN_USING_ENCODER;
 import static org.firstinspires.ftc.teamcode.roadrunner.DriveConstants.rpmToVelocity;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -9,15 +8,12 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.util.NanoClock;
-import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
-import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
-import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
+import org.firstinspires.ftc.teamcode.Mugurel;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.util.LoggingUtil;
 import org.firstinspires.ftc.teamcode.util.RegressionUtil;
@@ -44,29 +40,11 @@ public class AutomaticFeedforwardTuner extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        OdometrySubsystem odometrySystem = new OdometrySubsystem(
-                new SimpleServo(hardwareMap, "odo_left", 0, 180),
-                new SimpleServo(hardwareMap, "odo_right", 0, 180),
-                new SimpleServo(hardwareMap, "odo_back", 0, 1800)
-        );
-        odometrySystem.lower();
-        CollectorSubsystem collectorSystem = new CollectorSubsystem(
-                new SimpleServo(hardwareMap, "v4b_left", 0, 180),
-                new SimpleServo(hardwareMap, "v4b_right", 0, 180),
-                new SimpleServo(hardwareMap, "claw", 0, 300)
-        );
-
-        if (RUN_USING_ENCODER) {
-            RobotLog.setGlobalErrorMsg("Feedforward constants usually don't need to be tuned " +
-                    "when using the built-in drive motor velocity PID.");
-        }
-
+        Mugurel robot = new Mugurel(hardwareMap, Mugurel.OpModeType.TUNING);
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
-
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         NanoClock clock = NanoClock.system();
-
         telemetry.addLine("Press play to begin the feedforward tuning routine");
         telemetry.update();
 
@@ -172,7 +150,7 @@ public class AutomaticFeedforwardTuner extends LinearOpMode {
                 while (!isStopRequested() && gamepad1.b) {
                     idle();
                 }
-                break;
+                terminateOpModeNow();
             }
             idle();
         }

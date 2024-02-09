@@ -16,15 +16,13 @@ import com.acmerobotics.roadrunner.profile.MotionProfile;
 import com.acmerobotics.roadrunner.profile.MotionProfileGenerator;
 import com.acmerobotics.roadrunner.profile.MotionState;
 import com.acmerobotics.roadrunner.util.NanoClock;
-import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
-import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
+import org.firstinspires.ftc.teamcode.Mugurel;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 
 import java.util.Objects;
@@ -49,16 +47,12 @@ import java.util.Objects;
 public class ManualFeedforwardTuner extends LinearOpMode {
     public static double DISTANCE = 72; // in
 
-    private FtcDashboard dashboard = FtcDashboard.getInstance();
-
-    private SampleMecanumDrive drive;
+    private final FtcDashboard dashboard = FtcDashboard.getInstance();
 
     enum Mode {
         DRIVER_MODE,
         TUNING_MODE
     }
-
-    private Mode mode;
 
     private static MotionProfile generateProfile(boolean movingForward) {
         MotionState start = new MotionState(movingForward ? 0 : DISTANCE, 0, 0, 0);
@@ -74,22 +68,12 @@ public class ManualFeedforwardTuner extends LinearOpMode {
         }
 
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, dashboard.getTelemetry());
-        OdometrySubsystem odometrySystem = new OdometrySubsystem(
-                new SimpleServo(hardwareMap, "odo_left", 0, 180),
-                new SimpleServo(hardwareMap, "odo_right", 0, 180),
-                new SimpleServo(hardwareMap, "odo_back", 0, 1800)
-        );
-        odometrySystem.lower();
-        CollectorSubsystem collectorSystem = new CollectorSubsystem(
-                new SimpleServo(hardwareMap, "v4b_left", 0, 180),
-                new SimpleServo(hardwareMap, "v4b_right", 0, 180),
-                new SimpleServo(hardwareMap, "claw", 0, 300)
-        );
-        drive = new SampleMecanumDrive(hardwareMap);
+        Mugurel robot = new Mugurel(hardwareMap, Mugurel.OpModeType.TUNING);
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         final VoltageSensor voltageSensor = hardwareMap.voltageSensor.iterator().next();
 
-        mode = Mode.TUNING_MODE;
+        Mode mode = Mode.TUNING_MODE;
 
         NanoClock clock = NanoClock.system();
 

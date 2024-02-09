@@ -4,15 +4,13 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
-import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
+import org.firstinspires.ftc.teamcode.Mugurel;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 
 import java.util.Objects;
@@ -47,18 +45,7 @@ public class MaxAngularVeloTuner extends LinearOpMode {
         telemetry.addLine("Press start when ready.");
         telemetry.update();
 
-        OdometrySubsystem odometrySystem = new OdometrySubsystem(
-                new SimpleServo(hardwareMap, "odo_left", 0, 180),
-                new SimpleServo(hardwareMap, "odo_right", 0, 180),
-                new SimpleServo(hardwareMap, "odo_back", 0, 1800)
-        );
-        odometrySystem.lower();
-        CollectorSubsystem collectorSystem = new CollectorSubsystem(
-                new SimpleServo(hardwareMap, "v4b_left", 0, 180),
-                new SimpleServo(hardwareMap, "v4b_right", 0, 180),
-                new SimpleServo(hardwareMap, "claw", 0, 300)
-        );
-
+        Mugurel robot = new Mugurel(hardwareMap, Mugurel.OpModeType.TUNING);
         waitForStart();
 
         telemetry.clearAll();

@@ -17,8 +17,7 @@ public class PathGenerator {
     private final SampleMecanumDrive drive;
     private AllianceColor allianceColor;
     private StartingPosition startingPosition;
-    private PropLocations propLocation = null;
-
+    private PropLocations propLocation;
 
     public PathGenerator(SampleMecanumDrive drive) {
         this.drive = drive;

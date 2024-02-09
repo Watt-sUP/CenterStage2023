@@ -3,13 +3,11 @@ package org.firstinspires.ftc.teamcode.roadrunner.opmode;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.util.Angle;
-import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.RobotLog;
 
-import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
-import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
+import org.firstinspires.ftc.teamcode.Mugurel;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.roadrunner.StandardGyroLocalizer;
 
@@ -72,17 +70,7 @@ public class TrackingWheelLateralDistanceTuner extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        OdometrySubsystem odometrySystem = new OdometrySubsystem(
-                new SimpleServo(hardwareMap, "odo_left", 0, 180),
-                new SimpleServo(hardwareMap, "odo_right", 0, 180),
-                new SimpleServo(hardwareMap, "odo_back", 0, 1800)
-        );
-        odometrySystem.lower();
-        CollectorSubsystem collectorSystem = new CollectorSubsystem(
-                new SimpleServo(hardwareMap, "v4b_left", 0, 180),
-                new SimpleServo(hardwareMap, "v4b_right", 0, 180),
-                new SimpleServo(hardwareMap, "claw", 0, 300)
-        );
+        Mugurel robot = new Mugurel(hardwareMap, Mugurel.OpModeType.TUNING);
         if (!(drive.getLocalizer() instanceof StandardGyroLocalizer))
             RobotLog.setGlobalErrorMsg("StandardGyroLocalizer is not being set in the drive class.");
 

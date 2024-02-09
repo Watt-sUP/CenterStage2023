@@ -12,7 +12,6 @@ import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.EndgameSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
-import org.firstinspires.ftc.teamcode.commands.subsystems.TensorflowSubsystem;
 
 import java.lang.reflect.Field;
 import java.util.Objects;
@@ -22,7 +21,6 @@ public class Mugurel extends Robot {
     private final CollectorSubsystem intake;
     private final OdometrySubsystem odometry;
     private final OpModeType opModeType;
-    private TensorflowSubsystem tensorflow;
     private DepositSubsystem outtake;
     private EndgameSubsystem endgame;
     private DriveSubsystem driverControl;
