@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode;
+package org.firstinspires.ftc.teamcode.roadrunner.opmode;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 
 /*
  * This is a simple routine to test turning capabilities.

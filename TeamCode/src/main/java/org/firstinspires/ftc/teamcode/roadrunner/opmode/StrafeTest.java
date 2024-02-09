@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode;
+package org.firstinspires.ftc.teamcode.roadrunner.opmode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 /*
@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
  */
 @Config
 @Autonomous(group = "drive")
-public class StraightTest extends LinearOpMode {
+public class StrafeTest extends LinearOpMode {
     public static double DISTANCE = 60; // in
     public static int SPEED = 25;
 
@@ -40,7 +40,7 @@ public class StraightTest extends LinearOpMode {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         TrajectorySequence trajectory = drive.trajectorySequenceBuilder(new Pose2d(), SPEED)
-                .forward(DISTANCE)
+                .strafeRight(DISTANCE)
                 .resetConstraints()
                 .build();
 

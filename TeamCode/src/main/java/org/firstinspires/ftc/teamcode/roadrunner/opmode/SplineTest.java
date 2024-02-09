@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode;
+package org.firstinspires.ftc.teamcode.roadrunner.opmode;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 
 /*
  * This is an example of a more complex path to really test the tuning.

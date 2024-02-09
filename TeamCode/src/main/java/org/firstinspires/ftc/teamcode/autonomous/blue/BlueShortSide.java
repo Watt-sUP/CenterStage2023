@@ -27,7 +27,7 @@ import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.TensorflowSubsystem;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 import java.util.Locale;
@@ -108,11 +108,11 @@ public class BlueShortSide extends CommandOpMode {
                 return;
 
             Recognition bestDetection = tensorflow.getBestDetection();
-            location = PropLocations.LEFT;
+            location = PropLocations.RIGHT;
 
             if (bestDetection != null) {
-                double x = (bestDetection.getLeft() + bestDetection.getRight()) / 2;
-                location = x < 450 ? PropLocations.MIDDLE : PropLocations.RIGHT;
+                double x = (bestDetection.getLeft() + bestDetection.getRight()) / 2.0;
+                location = x < (bestDetection.getImageWidth() / 2.0) ? PropLocations.LEFT : PropLocations.MIDDLE;
             }
 
             telemetry.addData("FPS", tensorflow.portal.getFps());

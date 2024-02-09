@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.commands;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.CommandBase;
 
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 import java.security.InvalidParameterException;

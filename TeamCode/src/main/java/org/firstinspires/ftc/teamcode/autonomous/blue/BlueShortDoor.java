@@ -27,7 +27,7 @@ import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.TensorflowSubsystem;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 import java.util.Locale;
@@ -48,7 +48,6 @@ public class BlueShortDoor extends CommandOpMode {
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         PathGenerator generator = new PathGenerator(drive);
-        generator.setStartingLocation(AllianceColor.BLUE, StartingPosition.BACKDROP);
 
         OdometrySubsystem odometrySystem = new OdometrySubsystem(
                 new SimpleServo(hardwareMap, "odo_left", 0, 180),
@@ -68,19 +67,20 @@ public class BlueShortDoor extends CommandOpMode {
                 hardwareMap.dcMotor.get("gli_sus")
         );
 
+        generator.setStartingLocation(AllianceColor.BLUE, StartingPosition.BACKDROP);
         tensorflow.setMinConfidence(0.8);
         odometrySystem.lower();
 
         Trajectory leftPurple = drive.trajectoryBuilder(generator.getStartingPose())
                 .splineTo(new Vector2d(23.5, 32)
-                        .plus(new Vector2d(0, 12).rotated(Math.toRadians(30))), Math.toRadians(-60))
+                        .minus(Vector2d.polar(13, Math.toRadians(-60))), Math.toRadians(-60))
                 .build();
         Trajectory middlePurple = drive.trajectoryBuilder(generator.getStartingPose())
                 .splineTo(new Vector2d(15.00, 38.00), Math.toRadians(-90.00))
                 .build();
         Trajectory rightPurple = drive.trajectoryBuilder(generator.getStartingPose())
                 .splineTo(new Vector2d(.5, 33)
-                        .plus(new Vector2d(0, 13).rotated(Math.toRadians(-45))), Math.toRadians(-135))
+                        .minus(Vector2d.polar(12, Math.toRadians(-135))), Math.toRadians(-135))
                 .build();
 
         Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end(), true)
@@ -88,7 +88,7 @@ public class BlueShortDoor extends CommandOpMode {
                 .splineTo(new Vector2d(50.00, 43.00), Math.toRadians(0.00))
                 .build();
         Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), true)
-                .splineTo(new Vector2d(50.00, 36.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.00, 35.50), Math.toRadians(0.00))
                 .build();
         Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), true)
                 .splineTo(new Vector2d(50.00, 29.50), Math.toRadians(0.00))
@@ -105,11 +105,11 @@ public class BlueShortDoor extends CommandOpMode {
                 return;
 
             Recognition bestDetection = tensorflow.getBestDetection();
-            location = PropLocations.LEFT;
+            location = PropLocations.RIGHT;
 
             if (bestDetection != null) {
-                double x = (bestDetection.getLeft() + bestDetection.getRight()) / 2;
-                location = x < 450 ? PropLocations.MIDDLE : PropLocations.RIGHT;
+                double x = (bestDetection.getLeft() + bestDetection.getRight()) / 2.0;
+                location = x < (bestDetection.getImageWidth() / 2.0) ? PropLocations.LEFT : PropLocations.MIDDLE;
             }
 
             telemetry.addData("FPS", tensorflow.portal.getFps());

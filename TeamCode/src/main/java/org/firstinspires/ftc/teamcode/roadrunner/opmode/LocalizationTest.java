@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode;
+package org.firstinspires.ftc.teamcode.roadrunner.opmode;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 
 /**
  * This is a simple teleop routine for testing localization. Drive the robot around like a normal

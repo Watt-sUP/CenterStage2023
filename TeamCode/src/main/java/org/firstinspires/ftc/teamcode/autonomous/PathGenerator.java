@@ -8,8 +8,8 @@ import org.firstinspires.ftc.teamcode.autonomous.assets.BackstageRoute;
 import org.firstinspires.ftc.teamcode.autonomous.assets.PropLocations;
 import org.firstinspires.ftc.teamcode.autonomous.assets.Stack;
 import org.firstinspires.ftc.teamcode.autonomous.assets.StartingPosition;
-import org.firstinspires.ftc.teamcode.drive.DriveConstants;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.roadrunner.DriveConstants;
+import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 public class PathGenerator {

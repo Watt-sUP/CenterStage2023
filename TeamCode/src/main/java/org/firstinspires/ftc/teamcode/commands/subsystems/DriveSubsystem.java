@@ -6,10 +6,22 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.util.MathUtils;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import java.util.Arrays;
+import java.util.function.DoubleSupplier;
+
 public class DriveSubsystem extends SubsystemBase {
 
     private double powerLimit = 1.0;
     private final MecanumDrive drive;
+    private DoubleSupplier forward, strafe, rotation;
+
+    @Override
+    public void periodic() {
+        if (Arrays.asList(forward, strafe, rotation).contains(null))
+            return;
+
+        updateSpeeds(forward.getAsDouble(), strafe.getAsDouble(), rotation.getAsDouble());
+    }
 
     public DriveSubsystem(HardwareMap hardwareMap, String leftFront, String rightFront, String leftBack, String rightBack) {
         drive = new MecanumDrive(
@@ -20,8 +32,14 @@ public class DriveSubsystem extends SubsystemBase {
         );
     }
 
-    public void updateSpeeds(double fwd, double st, double rot, double heading) {
-        drive.driveFieldCentric(st, fwd, rot, heading);
+    public void setAxes(DoubleSupplier forward, DoubleSupplier strafe, DoubleSupplier rotation) {
+        this.forward = forward;
+        this.strafe = strafe;
+        this.rotation = rotation;
+    }
+
+    public void updateSpeeds(double fwd, double st, double rot) {
+        drive.driveRobotCentric(st, fwd, rot);
     }
 
     public double getPowerLimit() {
