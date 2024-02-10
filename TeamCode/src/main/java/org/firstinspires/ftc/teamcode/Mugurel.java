@@ -48,8 +48,10 @@ public class Mugurel extends Robot {
             case AUTO:
                 odometry.lower();
                 initAuto(hardwareMap);
+                break;
             case TUNING:
                 odometry.lower();
+                break;
             default:
                 throw new IllegalStateException("Couldn't start robot. Unknown OpMode type running.");
         }

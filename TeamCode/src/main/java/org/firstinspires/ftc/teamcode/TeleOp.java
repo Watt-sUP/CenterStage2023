@@ -38,8 +38,15 @@ public class TeleOp extends CommandOpMode {
                 .whenReleased(() -> driveControl.setPowerLimit(1.0));
 
         // Endgame specific controls
-        driver1.getGamepadButton(GamepadKeys.Button.B)
-                .whenPressed(endgame::toggleClimb);
+        driver1.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
+                .whenPressed(() -> endgame.setClimbState(EndgameSubsystem.ClimbState.DOWN));
+        driver1.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
+                .whenPressed(() -> endgame.setClimbState(EndgameSubsystem.ClimbState.DRONE));
+        driver1.getGamepadButton(GamepadKeys.Button.DPAD_UP)
+                .whenPressed(() -> endgame.setClimbState(EndgameSubsystem.ClimbState.HOOKING));
+        driver1.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
+                .whenPressed(() -> endgame.setClimbState(EndgameSubsystem.ClimbState.HANGING));
+
         driver1.getGamepadButton(GamepadKeys.Button.Y)
                 .whenPressed(endgame::launchPlane);
 

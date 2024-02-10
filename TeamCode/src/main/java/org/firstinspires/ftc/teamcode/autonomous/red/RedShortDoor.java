@@ -68,13 +68,13 @@ public class RedShortDoor extends CommandOpMode {
 
         Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), true)
                 .splineTo(new Vector2d(31.05, -53.32), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.00, -43.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.50, -43.00), Math.toRadians(0.00))
                 .build();
         Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end(), true)
-                .splineTo(new Vector2d(50.00, -29.50), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.50, -29.50), Math.toRadians(0.00))
                 .build();
         Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), true)
-                .splineTo(new Vector2d(50.00, -35.5), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.50, -35.5), Math.toRadians(0.00))
                 .build();
 
         TrajectorySequence stackLeft = generator.generateStackPath(leftYellow.end(), Stack.FAR);
@@ -82,6 +82,7 @@ public class RedShortDoor extends CommandOpMode {
         TrajectorySequence stackRight = generator.generateStackPath(rightYellow.end(), Stack.FAR);
 
         TrajectorySequence goToBackdrop = generator.generateBackstagePath(stackLeft.end(), BackstageRoute.CENTER);
+        TrajectorySequence stackTwo = generator.generateStackPath(goToBackdrop.end(), Stack.FAR);
 
         while (!isStarted()) {
             if (isStopRequested())
@@ -147,8 +148,8 @@ public class RedShortDoor extends CommandOpMode {
                                 )
                 ),
                 new InstantCommand(() -> {
-                    if (location == PropLocations.RIGHT)
-                        drive.adjustPose(new Pose2d(0, 7.5, 0));
+                    if (location == PropLocations.MIDDLE)
+                        drive.adjustPose(new Pose2d(0, 5, 0));
                 }),
                 new InstantCommand(outtake::toggleBlockers)
                         .andThen(
@@ -165,7 +166,7 @@ public class RedShortDoor extends CommandOpMode {
                         ),
                 new WaitCommand(500)
                         .andThen(new InstantCommand(() -> outtake.setSlidesPosition(0))),
-                new RunByCaseCommand(location.toString(), drive, stackLeft, stackMid, stackRight, true)
+                new InstantCommand(() -> drive.followTrajectorySequence(stackTwo))
                         .andThen(
                                 new InstantCommand(intake::toggleClamp),
                                 new WaitCommand(500)
@@ -202,14 +203,7 @@ public class RedShortDoor extends CommandOpMode {
                                 new InstantCommand(outtake::toggleSpike)
                         ),
                 new WaitCommand(500)
-                        .andThen(
-                                new InstantCommand(() -> outtake.setSlidesPosition(0))
-//                                new WaitUntilCommand(() -> depositSystem.getSlidesTicks() < 25),
-//                                new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK))
-                        )
-//                new InstantCommand(() -> drive.adjustPose(new Pose2d(-5, 0, 0))),
-//                new InstantCommand(() -> drive.lineToPose(new Pose2d(48, -12, Math.toRadians(180)))),
-//                new InstantCommand(() -> drive.adjustPose(new Pose2d(10, 0, 0)))
+                        .andThen(new InstantCommand(() -> outtake.setSlidesPosition(0)))
         ));
     }
 }

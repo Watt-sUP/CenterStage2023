@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.commands.subsystems;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,10 +8,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import javax.annotation.Nullable;
 
-@Config
 public class EndgameSubsystem extends SubsystemBase {
 
-    public static double HOOK_ANGLE = 105, DRONE_ANGLE = 60, HANGING_ANGLE = 45;
     private final double TICKS_PER_REV = 537.7, GEAR_RATIO = 28.0;
     private final DcMotor leftPull, rightPull;
     private final ServoEx launcher;
@@ -44,22 +41,23 @@ public class EndgameSubsystem extends SubsystemBase {
     public void toggleClimb() {
         switch (climbState) {
             case DOWN:
-                this.setClimbToAngle(DRONE_ANGLE);
-                climbState = ClimbState.DRONE;
+                setClimbState(ClimbState.DRONE);
                 break;
             case DRONE:
-                this.setClimbToAngle(HOOK_ANGLE);
-                climbState = ClimbState.HOOKING;
+                setClimbState(ClimbState.HOOKING);
                 break;
             case HOOKING:
-                this.setClimbToAngle(HANGING_ANGLE);
-                climbState = ClimbState.HANGING;
+                setClimbState(ClimbState.HANGING);
                 break;
             case HANGING:
-                this.setClimbToAngle(0);
-                climbState = ClimbState.DOWN;
+                setClimbState(ClimbState.DOWN);
                 break;
         }
+    }
+
+    public void setClimbState(ClimbState state) {
+        climbState = state;
+        setClimbToAngle(climbState.getAngle());
     }
 
     private void setClimbToTicks(int ticks) {
@@ -79,7 +77,7 @@ public class EndgameSubsystem extends SubsystemBase {
      * @param unit  The unit the angle is in
      */
     public void setClimbToAngle(double angle, AngleUnit unit) {
-        this.setClimbToTicks(this.angleToTicks(angle, unit));
+        setClimbToTicks(angleToTicks(angle, unit));
     }
 
     /**
@@ -88,7 +86,7 @@ public class EndgameSubsystem extends SubsystemBase {
      * @param angle The angle to move to
      */
     public void setClimbToAngle(double angle) {
-        this.setClimbToAngle(angle, AngleUnit.DEGREES);
+        setClimbToAngle(angle, AngleUnit.DEGREES);
     }
 
     /**
@@ -122,10 +120,17 @@ public class EndgameSubsystem extends SubsystemBase {
         return ticksToAngle(avg, unit);
     }
 
-    private enum ClimbState {
-        HOOKING,
-        DRONE,
-        HANGING,
-        DOWN
+    public enum ClimbState {
+        HOOKING(105), DRONE(60), HANGING(45), DOWN(0);
+
+        private final double angle;
+
+        ClimbState(double angle) {
+            this.angle = angle;
+        }
+
+        public double getAngle() {
+            return angle;
+        }
     }
 }

@@ -12,6 +12,8 @@ import org.firstinspires.ftc.teamcode.roadrunner.DriveConstants;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
+import java.util.Map;
+
 public class PathGenerator {
 
     private final SampleMecanumDrive drive;
@@ -57,15 +59,15 @@ public class PathGenerator {
             return drive.trajectorySequenceBuilder(startPose, 50)
                     .splineTo(allianceColor.convertVector(new Vector2d(17, -11)), Math.toRadians(180))
                     .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(45, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                    .lineToLinearHeading(allianceColor.convertPose(new Pose2d(-57.00, -11.75, Math.toRadians(180))))
+                    .lineToLinearHeading(allianceColor.convertPose(new Pose2d(-57.50, -11.50, Math.toRadians(180))))
                     .build();
 
         else if (targetStack == Stack.CLOSE) {
             if (propLocation == PropLocations.LEFT)
                 return drive.trajectorySequenceBuilder(startPose)
                         .setConstraints(
-                                SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                                SampleMecanumDrive.getAccelerationConstraint(30)
+                                SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                                SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL)
                         )
                         .splineTo(allianceColor.convertVector(new Vector2d(7.00, -60.00)), Math.toRadians(180.00))
                         .setConstraints(
@@ -73,18 +75,18 @@ public class PathGenerator {
                                 SampleMecanumDrive.getAccelerationConstraint(45)
                         )
                         .lineToLinearHeading(allianceColor.convertPose(new Pose2d(-30.00, -60.00, Math.toRadians(180.00))))
-                        .lineToLinearHeading(allianceColor.convertPose(new Pose2d(-57.00, -34.50, Math.toRadians(180.00))))
+                        .lineToLinearHeading(allianceColor.convertPose(new Pose2d(-57.00, -35.50, Math.toRadians(180.00))))
                         .build();
             else
                 return drive.trajectorySequenceBuilder(startPose, 40)
                         .splineTo(allianceColor.convertVector(new Vector2d(7.00, -58.00)), Math.toRadians(180.00))
                         .splineTo(allianceColor.convertPose(new Pose2d(-24.00, -58.00, Math.toRadians(180.00))))
-                        .splineTo(allianceColor.convertVector(new Vector2d(-50.00, -34.50)), Math.toRadians(180.00))
+                        .splineTo(allianceColor.convertVector(new Vector2d(-50.00, -35.50)), Math.toRadians(180.00))
                         .setConstraints(
                                 SampleMecanumDrive.getVelocityConstraint(35, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                                 SampleMecanumDrive.getAccelerationConstraint(35)
                         )
-                        .splineTo(allianceColor.convertPose(new Pose2d(-57.00, -34.50, Math.toRadians(180.00))))
+                        .splineTo(allianceColor.convertPose(new Pose2d(-57.00, -35.50, Math.toRadians(180.00))))
                         .build();
         } else
             throw new IllegalArgumentException("An unexpected error occurred generating a stack trajectory");
@@ -104,16 +106,20 @@ public class PathGenerator {
                     .setReversed(true)
                     .splineTo(allianceColor.convertPose(new Pose2d(24, -11, Math.toRadians(0.00))))
                     .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(45, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                    .splineTo(allianceColor.convertVector(new Vector2d(50.00, -42.50)), Math.toRadians(0.00))
+                    .splineTo(allianceColor.convertVector(new Vector2d(50.50, -35.50)), Math.toRadians(0.00))
                     .build();
         else if (route == BackstageRoute.SIDE)
             return drive.trajectorySequenceBuilder(startPose, 45)
                     .setReversed(true)
                     .splineTo(allianceColor.convertVector(new Vector2d(-24.00, -60.00)), Math.toRadians(0.00))
                     .splineTo(allianceColor.convertVector(new Vector2d(2.12, -60.00)), Math.toRadians(0.00))
-                    .splineTo(allianceColor.convertVector(new Vector2d(50.00, -32.00)), Math.toRadians(0.00))
+                    .splineTo(allianceColor.convertVector(new Vector2d(50.50, -32.00)), Math.toRadians(0.00))
                     .build();
         else
             throw new IllegalArgumentException("An unexpected error occurred generating a backdrop trajectory");
+    }
+
+    public Map<PropLocations, TrajectorySequence> generatePurpleCases() {
+        return null;
     }
 }

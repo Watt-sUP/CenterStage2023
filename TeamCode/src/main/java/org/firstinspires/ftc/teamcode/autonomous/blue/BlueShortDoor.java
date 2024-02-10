@@ -69,13 +69,13 @@ public class BlueShortDoor extends CommandOpMode {
 
         Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end(), true)
                 .splineTo(new Vector2d(31.05, 53.32), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.00, 43.00), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.50, 43.00), Math.toRadians(0.00))
                 .build();
         Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), true)
-                .splineTo(new Vector2d(50.00, 35.50), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.50, 35.50), Math.toRadians(0.00))
                 .build();
         Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), true)
-                .splineTo(new Vector2d(50.00, 29.50), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.50, 29.50), Math.toRadians(0.00))
                 .build();
 
         TrajectorySequence stackLeft = generator.generateStackPath(leftYellow.end(), Stack.FAR);
@@ -148,8 +148,8 @@ public class BlueShortDoor extends CommandOpMode {
                                 )
                 ),
                 new InstantCommand(() -> {
-                    if (location == PropLocations.LEFT)
-                        drive.adjustPose(new Pose2d(0, -7.5, 0));
+                    if (location == PropLocations.MIDDLE)
+                        drive.adjustPose(new Pose2d(0, -5, 0));
                 }),
                 new InstantCommand(outtake::toggleBlockers)
                         .andThen(

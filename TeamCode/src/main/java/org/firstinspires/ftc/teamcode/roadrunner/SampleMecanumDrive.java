@@ -48,7 +48,7 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     private final TrajectorySequenceRunner trajectorySequenceRunner;
     public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(15, 0, 0);
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(10, 0, 0);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(15, 0, 0.2);
 
     public static double LATERAL_MULTIPLIER = 1.6464780776820855705607043230744;
 
@@ -66,7 +66,7 @@ public class SampleMecanumDrive extends MecanumDrive {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
 
         TrajectoryFollower follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
-                new Pose2d(.5, .5, Math.toRadians(1.5)), 0.75);
+                new Pose2d(.5, .5, Math.toRadians(1.0)), 0.75);
 
         VoltageSensor batteryVoltageSensor = hardwareMap.voltageSensor.iterator().next();
         hardwareMap.getAll(LynxModule.class).forEach(module -> module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO));

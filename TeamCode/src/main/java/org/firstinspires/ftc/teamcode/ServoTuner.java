@@ -25,7 +25,6 @@ public class ServoTuner extends LinearOpMode {
                 MIN_DEGREE, MAX_DEGREE, AngleUnit.DEGREES);
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        servo.setInverted(INVERT);
         waitForStart();
 
         while (opModeIsActive()) {
