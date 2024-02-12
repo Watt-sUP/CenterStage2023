@@ -26,12 +26,12 @@ public class DepositSubsystem extends SubsystemBase {
         FREE
     }
 
-    private enum Spike {
-        RAISED,
-        LOWERED
-    }
+    public Spike spikeState = Spike.RAISED;
 
-    private Spike spikeState = Spike.RAISED;
+    public void setSpikePosition(double position) {
+        leftLift.setPosition(MathUtils.clamp(position - 0.05, 0, 1));
+        rightLift.setPosition(MathUtils.clamp(position, 0, 1));
+    }
 
     private Blocker blockerState = Blocker.FREE;
     private boolean raisingSlides = false;
@@ -103,6 +103,11 @@ public class DepositSubsystem extends SubsystemBase {
 
     public void adjustSlidesTicks(int ticks) {
         this.setSlidesTicks(this.slides.getTargetPosition() + ticks);
+    }
+
+    public enum Spike {
+        RAISED,
+        LOWERED
     }
 
     public boolean slidesBusy() {

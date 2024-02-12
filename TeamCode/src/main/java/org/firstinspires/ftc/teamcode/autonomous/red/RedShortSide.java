@@ -112,7 +112,6 @@ public class RedShortSide extends CommandOpMode {
                         new InstantCommand(() -> {
                             intake.setClampPosition(90);
                             intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
-                            intake.adjustLiftPosition(0.0175);
                             outtake.toggleBlockers();
                             outtake.toggleSpike();
                         })

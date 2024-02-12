@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.RunCommand;
+import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
@@ -28,6 +29,7 @@ public class TeleOp extends CommandOpMode {
         GamepadEx driver2 = new GamepadEx(gamepad2);
 
         driveControl.setAxes(driver1::getLeftY, driver1::getLeftX, driver1::getRightX);
+        Trigger rightTrigger = new Trigger(() -> gamepad2.right_trigger > .3 && outtake.spikeState == DepositSubsystem.Spike.RAISED);
 
         // Brakes
         driver1.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
@@ -38,15 +40,8 @@ public class TeleOp extends CommandOpMode {
                 .whenReleased(() -> driveControl.setPowerLimit(1.0));
 
         // Endgame specific controls
-        driver1.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
-                .whenPressed(() -> endgame.setClimbState(EndgameSubsystem.ClimbState.DOWN));
-        driver1.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
-                .whenPressed(() -> endgame.setClimbState(EndgameSubsystem.ClimbState.DRONE));
-        driver1.getGamepadButton(GamepadKeys.Button.DPAD_UP)
-                .whenPressed(() -> endgame.setClimbState(EndgameSubsystem.ClimbState.HOOKING));
-        driver1.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-                .whenPressed(() -> endgame.setClimbState(EndgameSubsystem.ClimbState.HANGING));
-
+        driver1.getGamepadButton(GamepadKeys.Button.B)
+                .whenPressed(endgame::toggleClimb);
         driver1.getGamepadButton(GamepadKeys.Button.Y)
                 .whenPressed(endgame::launchPlane);
 
@@ -81,6 +76,10 @@ public class TeleOp extends CommandOpMode {
                 .whenPressed(outtake::toggleSpike);
         driver2.getGamepadButton(GamepadKeys.Button.B)
                 .whenPressed(outtake::toggleBlockers);
+        rightTrigger.toggleWhenActive(
+                () -> outtake.setSpikePosition(.975),
+                () -> outtake.setSpikePosition(DepositSubsystem.HIGH_RIGHT)
+        );
 
         schedule(new RunCommand(() -> {
             telemetry.addData("Blocker State", outtake.getBlockerState());

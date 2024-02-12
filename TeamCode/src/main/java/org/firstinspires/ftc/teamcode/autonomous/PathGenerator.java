@@ -64,18 +64,16 @@ public class PathGenerator {
 
         else if (targetStack == Stack.CLOSE) {
             if (propLocation == PropLocations.LEFT)
-                return drive.trajectorySequenceBuilder(startPose)
-                        .setConstraints(
-                                SampleMecanumDrive.getVelocityConstraint(40, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                                SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL)
-                        )
+                return drive.trajectorySequenceBuilder(startPose, 50)
                         .splineTo(allianceColor.convertVector(new Vector2d(7.00, -60.00)), Math.toRadians(180.00))
+                        .splineTo(allianceColor.convertVector(new Vector2d(-35.00, -60.00)), Math.toRadians(180.00))
                         .setConstraints(
-                                SampleMecanumDrive.getVelocityConstraint(45, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                                SampleMecanumDrive.getAccelerationConstraint(45)
+                                SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                                SampleMecanumDrive.getAccelerationConstraint(20)
                         )
-                        .lineToLinearHeading(allianceColor.convertPose(new Pose2d(-30.00, -60.00, Math.toRadians(180.00))))
-                        .lineToLinearHeading(allianceColor.convertPose(new Pose2d(-57.00, -35.50, Math.toRadians(180.00))))
+                        .splineToLinearHeading(allianceColor.convertPose(new Pose2d(-50.00, -35.75, Math.toRadians(180))), Math.toRadians(180.00))
+                        .waitSeconds(.25)
+                        .lineToLinearHeading(allianceColor.convertPose(new Pose2d(-57.50, -35.75, Math.toRadians(180))))
                         .build();
             else
                 return drive.trajectorySequenceBuilder(startPose, 40)
