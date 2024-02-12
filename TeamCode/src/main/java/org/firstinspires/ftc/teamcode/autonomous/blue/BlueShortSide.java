@@ -12,10 +12,10 @@ import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
-import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.teamcode.Mugurel;
 import org.firstinspires.ftc.teamcode.autonomous.PathGenerator;
 import org.firstinspires.ftc.teamcode.autonomous.assets.AllianceColor;
 import org.firstinspires.ftc.teamcode.autonomous.assets.BackstageRoute;
@@ -25,7 +25,6 @@ import org.firstinspires.ftc.teamcode.autonomous.assets.StartingPosition;
 import org.firstinspires.ftc.teamcode.commands.RunByCaseCommand;
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
-import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.TensorflowSubsystem;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
@@ -50,26 +49,11 @@ public class BlueShortSide extends CommandOpMode {
         PathGenerator generator = new PathGenerator(drive);
         generator.setStartingLocation(AllianceColor.BLUE, StartingPosition.BACKDROP);
 
-        OdometrySubsystem odometrySystem = new OdometrySubsystem(
-                new SimpleServo(hardwareMap, "odo_left", 0, 180),
-                new SimpleServo(hardwareMap, "odo_right", 0, 180),
-                new SimpleServo(hardwareMap, "odo_back", 0, 1800)
-        );
-        CollectorSubsystem collectorSystem = new CollectorSubsystem(
-                new SimpleServo(hardwareMap, "v4b_left", 0, 180),
-                new SimpleServo(hardwareMap, "v4b_right", 0, 180),
-                new SimpleServo(hardwareMap, "claw", 0, 300)
-        );
-        DepositSubsystem depositSystem = new DepositSubsystem(
-                new SimpleServo(hardwareMap, "depo_left", 0, 220),
-                new SimpleServo(hardwareMap, "depo_right", 0, 220),
-                new SimpleServo(hardwareMap, "stopper_top", 0, 300),
-                new SimpleServo(hardwareMap, "stopper_bottom", 0, 300),
-                hardwareMap.dcMotor.get("gli_sus")
-        );
+        Mugurel robot = new Mugurel(hardwareMap, Mugurel.OpModeType.AUTO);
+        CollectorSubsystem collectorSystem = robot.getSubsystem(CollectorSubsystem.class);
+        DepositSubsystem depositSystem = robot.getSubsystem(DepositSubsystem.class);
 
         tensorflow.setMinConfidence(0.8);
-        odometrySystem.lower();
 
         Trajectory leftPurple = drive.trajectoryBuilder(generator.getStartingPose())
                 .splineTo(new Vector2d(23.5, 32)
@@ -96,8 +80,6 @@ public class BlueShortSide extends CommandOpMode {
 
         TrajectorySequence stackLeft = generator.generateStackPath(leftYellow.end(), Stack.CLOSE);
         TrajectorySequence stackMid = generator.generateStackPath(middleYellow.end(), Stack.CLOSE);
-
-        generator.setPropLocation(PropLocations.RIGHT);
         TrajectorySequence stackRight = generator.generateStackPath(rightYellow.end(), Stack.CLOSE);
 
         TrajectorySequence backdropSide = generator.generateBackstagePath(stackMid.end(), BackstageRoute.SIDE);
@@ -121,9 +103,7 @@ public class BlueShortSide extends CommandOpMode {
             telemetry.update();
         }
 
-        generator.setPropLocation(location);
         tensorflow.shutdown();
-
         schedule(new SequentialCommandGroup(
                 new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
                 new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, true),

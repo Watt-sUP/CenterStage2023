@@ -10,7 +10,7 @@ import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 
 public class MeepMeepTesting {
     public static void main(String[] args) {
-        MeepMeep meepMeep = new MeepMeep(640, 60);
+        MeepMeep meepMeep = new MeepMeep(480, 144);
 
         RoadRunnerBotEntity newBot = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
@@ -19,8 +19,8 @@ public class MeepMeepTesting {
                 .setConstraints(53, 53, Math.toRadians(180), Math.toRadians(180), 11.5)
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(50.50, -29.50, Math.toRadians(180.00)))
-                                .splineTo(new Vector2d(7.00, -60.00), Math.toRadians(180.00))
-                                .splineTo(new Vector2d(-35.00, -60.00), Math.toRadians(180.00))
+                                .splineTo(new Vector2d(7.00, -58.00), Math.toRadians(180.00))
+                                .splineTo(new Vector2d(-35.00, -58.00), Math.toRadians(180.00))
                                 .splineToConstantHeading(new Vector2d(-50.00, -35.50), Math.toRadians(180))
                                 .splineTo(new Vector2d(-57.00, -35.50), Math.toRadians(180.00))
                                 .build()
@@ -38,11 +38,25 @@ public class MeepMeepTesting {
                                 .build()
                 );
 
-        meepMeep.setBackground(MeepMeep.Background.FIELD_CENTERSTAGE_OFFICIAL)
+        RoadRunnerBotEntity otherCases = new DefaultBotBuilder(meepMeep)
+                .setDimensions(13, 15.19)
+                .setConstraints(53, 53, Math.toRadians(180), Math.toRadians(180), 11.5)
+                .setColorScheme(new ColorSchemeRedDark())
+                .followTrajectorySequence(drive ->
+                        drive.trajectorySequenceBuilder(new Pose2d(50.50, 29.50, Math.toRadians(180.00)))
+                                .splineTo(new Vector2d(7.00, 58.00), Math.toRadians(180.00))
+                                .splineTo(new Vector2d(-24.00, 58.00), Math.toRadians(180.00))
+                                .splineTo(new Vector2d(-50.00, 35.50), Math.toRadians(180.00))
+                                .splineTo(new Vector2d(-57.00, 35.50), Math.toRadians(180.00))
+                                .build()
+                );
+
+        meepMeep.setBackground(MeepMeep.Background.FIELD_CENTERSTAGE_JUICE_DARK)
                 .setDarkMode(true)
                 .setBackgroundAlpha(0.95f)
                 .addEntity(newBot)
                 .addEntity(currentBot)
+                .addEntity(otherCases)
                 .start();
     }
 }

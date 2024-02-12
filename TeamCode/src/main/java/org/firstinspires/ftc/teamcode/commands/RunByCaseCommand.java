@@ -3,11 +3,13 @@ package org.firstinspires.ftc.teamcode.commands;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.CommandBase;
 
+import org.firstinspires.ftc.teamcode.autonomous.assets.PropLocations;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 import java.security.InvalidParameterException;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Creates a command that runs a RoadRunner path based on a certain case.
@@ -15,7 +17,8 @@ import java.util.Locale;
  */
 public class RunByCaseCommand extends CommandBase {
     private final SampleMecanumDrive drive;
-    private final Object left, middle, right;
+    private Map<PropLocations, TrajectorySequence> cases;
+    private Object left, middle, right;
     private final String targetCase;
     private final boolean blocking;
 
@@ -40,6 +43,14 @@ public class RunByCaseCommand extends CommandBase {
         targetCase = location;
     }
 
+    public RunByCaseCommand(PropLocations location, Map<PropLocations, TrajectorySequence> cases,
+                            SampleMecanumDrive drive, boolean blocking) {
+        this.drive = drive;
+        this.blocking = blocking;
+
+        targetCase = location.name();
+    }
+
     /**
      * Picks the path based on the provided case.
      *
@@ -47,15 +58,19 @@ public class RunByCaseCommand extends CommandBase {
      */
     @Override
     public void initialize() throws InvalidParameterException {
+
+        if (!cases.isEmpty())
+            followPath(cases.get(PropLocations.valueOf(targetCase)));
+
         switch (targetCase.toUpperCase(Locale.ROOT)) {
             case "LEFT":
-                this.followPath(left);
+                followPath(left);
                 break;
             case "RIGHT":
-                this.followPath(right);
+                followPath(right);
                 break;
             case "MIDDLE":
-                this.followPath(middle);
+                followPath(middle);
                 break;
             default:
                 throw new InvalidParameterException("Invalid detection case: " + targetCase.toUpperCase(Locale.ROOT));

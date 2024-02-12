@@ -107,7 +107,37 @@ public class Mugurel extends Robot {
     }
 
     public enum OpModeType {
-        AUTO, TELEOP, TUNING;
+        /**
+         * <p>Loads subsystems related to the autonomous.</p>
+         * Modules included:
+         * <ul>
+         *  <li>Odometry</li>
+         *  <li>Intake</li>
+         *  <li>Outtake</li>
+         * </ul>
+         */
+        AUTO,
+        /**
+         * <p>Loads subsystems related to the TeleOp period.</p>
+         * Modules included:
+         * <ul>
+         *  <li>Odometry (for raising the pods)</li>
+         *  <li>Intake</li>
+         *  <li>Outtake</li>
+         *  <li>Drivetrain control</li>
+         *  <li>Endgame (ascension and drone)</li>
+         * </ul>
+         */
+        TELEOP,
+        /**
+         * <p>Loads subsystems that aid in autonomous tuning.</p>
+         * Modules included:
+         * <ul>
+         *  <li>Odometry (for lowering the pods)</li>
+         *  <li>Intake (for keeping in place)</li>
+         * </ul>
+         */
+        TUNING;
 
         @NonNull
         @Override

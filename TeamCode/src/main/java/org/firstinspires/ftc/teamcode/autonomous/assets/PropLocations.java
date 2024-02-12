@@ -14,7 +14,7 @@ public enum PropLocations {
             if (location.id == id)
                 return location;
 
-        throw new IllegalArgumentException("No matching location for ID: " + id);
+        throw new IllegalArgumentException("No matching prop location for ID " + id);
     }
 
     public int getId() {

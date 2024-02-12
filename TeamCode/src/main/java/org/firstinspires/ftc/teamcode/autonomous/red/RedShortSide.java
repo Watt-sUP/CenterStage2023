@@ -79,9 +79,8 @@ public class RedShortSide extends CommandOpMode {
 
         TrajectorySequence stackMid = generator.generateStackPath(middleYellow.end(), Stack.CLOSE);
         TrajectorySequence stackRight = generator.generateStackPath(rightYellow.end(), Stack.CLOSE);
-
-        generator.setPropLocation(PropLocations.LEFT);
         TrajectorySequence stackLeft = generator.generateStackPath(leftYellow.end(), Stack.CLOSE);
+
         TrajectorySequence backdropSide = generator.generateBackstagePath(stackMid.end(), BackstageRoute.SIDE);
 
         while (!isStarted()) {
@@ -102,9 +101,7 @@ public class RedShortSide extends CommandOpMode {
             telemetry.update();
         }
 
-        generator.setPropLocation(location);
         tensorflow.shutdown();
-
         schedule(new SequentialCommandGroup(
                 new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
                 new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, true),

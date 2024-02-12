@@ -102,9 +102,7 @@ public class BlueShortDoor extends CommandOpMode {
             telemetry.update();
         }
 
-        generator.setPropLocation(location);
         tensorflow.shutdown();
-
         schedule(new SequentialCommandGroup(
                 new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
                 new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, true),

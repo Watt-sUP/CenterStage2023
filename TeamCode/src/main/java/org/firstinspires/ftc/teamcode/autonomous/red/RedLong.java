@@ -10,11 +10,11 @@ import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
-import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.util.Timing;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.teamcode.Mugurel;
 import org.firstinspires.ftc.teamcode.autonomous.PathGenerator;
 import org.firstinspires.ftc.teamcode.autonomous.assets.AllianceColor;
 import org.firstinspires.ftc.teamcode.autonomous.assets.BackstageRoute;
@@ -24,7 +24,6 @@ import org.firstinspires.ftc.teamcode.autonomous.assets.StartingPosition;
 import org.firstinspires.ftc.teamcode.commands.RunByCaseCommand;
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
-import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.TensorflowSubsystem;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
@@ -54,23 +53,9 @@ public class RedLong extends CommandOpMode {
         telemetry.addLine("Loading trajectories...");
         telemetry.update();
 
-        OdometrySubsystem odometrySystem = new OdometrySubsystem(
-                new SimpleServo(hardwareMap, "odo_left", 0, 180),
-                new SimpleServo(hardwareMap, "odo_right", 0, 180),
-                new SimpleServo(hardwareMap, "odo_back", 0, 1800)
-        );
-        CollectorSubsystem collectorSystem = new CollectorSubsystem(
-                new SimpleServo(hardwareMap, "v4b_left", 0, 180),
-                new SimpleServo(hardwareMap, "v4b_right", 0, 180),
-                new SimpleServo(hardwareMap, "claw", 0, 300)
-        );
-        DepositSubsystem depositSystem = new DepositSubsystem(
-                new SimpleServo(hardwareMap, "depo_left", 0, 220),
-                new SimpleServo(hardwareMap, "depo_right", 0, 220),
-                new SimpleServo(hardwareMap, "stopper_top", 0, 300),
-                new SimpleServo(hardwareMap, "stopper_bottom", 0, 300),
-                hardwareMap.dcMotor.get("gli_sus")
-        );
+        Mugurel robot = new Mugurel(hardwareMap, Mugurel.OpModeType.AUTO);
+        CollectorSubsystem collectorSystem = robot.getSubsystem(CollectorSubsystem.class);
+        DepositSubsystem depositSystem = robot.getSubsystem(DepositSubsystem.class);
 
         TrajectorySequence leftPurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
                 .splineTo(new Vector2d(-47.5, -32)
@@ -113,7 +98,6 @@ public class RedLong extends CommandOpMode {
         TrajectorySequence backdropSide = generator.generateBackstagePath(stackMid.end(), BackstageRoute.SIDE);
         TrajectorySequence backdropCenter = generator.generateBackstagePath(stackLeft.end(), BackstageRoute.CENTER);
 
-        odometrySystem.lower();
         telemetry.addLine("Ready!");
         telemetry.update();
 
