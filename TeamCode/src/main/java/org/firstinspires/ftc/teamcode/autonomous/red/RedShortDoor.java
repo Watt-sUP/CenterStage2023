@@ -66,15 +66,14 @@ public class RedShortDoor extends CommandOpMode {
                         .minus(Vector2d.polar(13, Math.toRadians(60))), Math.toRadians(60.00))
                 .build();
 
-        Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), true)
-                .splineTo(new Vector2d(31.05, -53.32), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.50, -43.00), Math.toRadians(0.00))
+        Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(50.50, -43.00, Math.toRadians(180.00)), Math.toRadians(0))
                 .build();
-        Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end(), true)
-                .splineTo(new Vector2d(50.50, -29.50), Math.toRadians(0.00))
+        Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end(), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(50.50, -29.50, Math.toRadians(180.00)), Math.toRadians(0))
                 .build();
-        Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), true)
-                .splineTo(new Vector2d(50.50, -35.5), Math.toRadians(0.00))
+        Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(50.50, -35.5, Math.toRadians(180.00)), Math.toRadians(0))
                 .build();
 
         TrajectorySequence stackLeft = generator.generateStackPath(leftYellow.end(), Stack.FAR);

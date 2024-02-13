@@ -98,6 +98,10 @@ public class SampleMecanumDrive extends MecanumDrive {
         return new TrajectoryBuilder(startPose, reversed, VEL_CONSTRAINT, ACCEL_CONSTRAINT);
     }
 
+    public TrajectoryBuilder trajectoryBuilder(Pose2d startPose, double startTangent) {
+        return new TrajectoryBuilder(startPose, startTangent, VEL_CONSTRAINT, ACCEL_CONSTRAINT);
+    }
+
     public TrajectorySequenceBuilder trajectorySequenceBuilder(Pose2d startPose) {
         return new TrajectorySequenceBuilder(
                 startPose,
@@ -131,6 +135,14 @@ public class SampleMecanumDrive extends MecanumDrive {
     public void lineToPoseAsync(Pose2d targetPose) {
         trajectorySequenceRunner.followTrajectorySequenceAsync(
                 trajectorySequenceBuilder(getPoseEstimate())
+                        .lineToLinearHeading(targetPose)
+                        .build()
+        );
+    }
+
+    public void lineToPoseAsync(Pose2d targetPose, double speedLimit) {
+        trajectorySequenceRunner.followTrajectorySequenceAsync(
+                trajectorySequenceBuilder(getPoseEstimate(), speedLimit)
                         .lineToLinearHeading(targetPose)
                         .build()
         );
@@ -180,6 +192,11 @@ public class SampleMecanumDrive extends MecanumDrive {
      */
     public void lineToPose(Pose2d targetPose) {
         lineToPoseAsync(targetPose);
+        waitForIdle();
+    }
+
+    public void lineToPose(Pose2d targetPose, double speedLimit) {
+        lineToPoseAsync(targetPose, speedLimit);
         waitForIdle();
     }
 

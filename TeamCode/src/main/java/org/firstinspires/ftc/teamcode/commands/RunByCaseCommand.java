@@ -47,6 +47,7 @@ public class RunByCaseCommand extends CommandBase {
                             SampleMecanumDrive drive, boolean blocking) {
         this.drive = drive;
         this.blocking = blocking;
+        this.cases = cases;
 
         targetCase = location.name();
     }
@@ -59,22 +60,23 @@ public class RunByCaseCommand extends CommandBase {
     @Override
     public void initialize() throws InvalidParameterException {
 
-        if (!cases.isEmpty())
+        if (cases != null)
             followPath(cases.get(PropLocations.valueOf(targetCase)));
 
-        switch (targetCase.toUpperCase(Locale.ROOT)) {
-            case "LEFT":
-                followPath(left);
-                break;
-            case "RIGHT":
-                followPath(right);
-                break;
-            case "MIDDLE":
-                followPath(middle);
-                break;
-            default:
-                throw new InvalidParameterException("Invalid detection case: " + targetCase.toUpperCase(Locale.ROOT));
-        }
+        else
+            switch (targetCase.toUpperCase(Locale.ROOT)) {
+                case "LEFT":
+                    followPath(left);
+                    break;
+                case "RIGHT":
+                    followPath(right);
+                    break;
+                case "MIDDLE":
+                    followPath(middle);
+                    break;
+                default:
+                    throw new InvalidParameterException("Invalid detection case: " + targetCase.toUpperCase(Locale.ROOT));
+            }
     }
 
     @Override

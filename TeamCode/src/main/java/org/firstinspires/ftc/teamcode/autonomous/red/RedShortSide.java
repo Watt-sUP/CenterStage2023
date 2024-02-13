@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.autonomous.red;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
@@ -30,6 +29,7 @@ import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 import java.util.Locale;
+import java.util.Map;
 
 @Autonomous(name = "Red Short (Side)")
 public class RedShortSide extends CommandOpMode {
@@ -54,27 +54,15 @@ public class RedShortSide extends CommandOpMode {
         generator.setStartingLocation(AllianceColor.RED, StartingPosition.BACKDROP);
         tensorflow.setMinConfidence(0.8);
 
-        Trajectory middlePurple = drive.trajectoryBuilder(generator.getStartingPose())
-                .splineTo(new Vector2d(15, -38), Math.toRadians(90.00))
+        Map<PropLocations, TrajectorySequence> purpleCases = generator.generatePurpleCases();
+        Trajectory rightYellow = drive.trajectoryBuilder(purpleCases.get(PropLocations.RIGHT).end(), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(50.50, -43.00, Math.toRadians(180.00)), Math.toRadians(0))
                 .build();
-        Trajectory leftPurple = drive.trajectoryBuilder(generator.getStartingPose())
-                .splineTo(new Vector2d(.5, -33)
-                        .minus(Vector2d.polar(12, Math.toRadians(135))), Math.toRadians(135.00))
+        Trajectory leftYellow = drive.trajectoryBuilder(purpleCases.get(PropLocations.LEFT).end(), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(50.50, -29.50, Math.toRadians(180.00)), Math.toRadians(0))
                 .build();
-        Trajectory rightPurple = drive.trajectoryBuilder(generator.getStartingPose())
-                .splineTo(new Vector2d(23.5, -32)
-                        .minus(Vector2d.polar(13, Math.toRadians(60))), Math.toRadians(60.00))
-                .build();
-
-        Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), true)
-                .splineTo(new Vector2d(31.05, -53.32), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.50, -43.00), Math.toRadians(0.00))
-                .build();
-        Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end(), true)
-                .splineTo(new Vector2d(50.50, -29.50), Math.toRadians(0.00))
-                .build();
-        Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), true)
-                .splineTo(new Vector2d(50.50, -35.5), Math.toRadians(0.00))
+        Trajectory middleYellow = drive.trajectoryBuilder(purpleCases.get(PropLocations.MIDDLE).end(), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(50.50, -35.5, Math.toRadians(180.00)), Math.toRadians(0))
                 .build();
 
         TrajectorySequence stackMid = generator.generateStackPath(middleYellow.end(), Stack.CLOSE);
@@ -104,7 +92,7 @@ public class RedShortSide extends CommandOpMode {
         tensorflow.shutdown();
         schedule(new SequentialCommandGroup(
                 new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
-                new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, true),
+                new RunByCaseCommand(location, purpleCases, drive, true),
                 new InstantCommand(intake::toggleLiftLocation).andThen(
                         new InstantCommand(() -> {
                             intake.setClampPosition(90);

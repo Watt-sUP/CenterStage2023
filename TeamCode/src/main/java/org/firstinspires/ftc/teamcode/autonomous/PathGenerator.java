@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.autonomous;
 
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -98,13 +98,13 @@ public class PathGenerator {
                     .setReversed(true)
                     .splineTo(allianceColor.convertVector(new Vector2d(-24.00, -59.00)), Math.toRadians(0.00))
                     .splineTo(allianceColor.convertVector(new Vector2d(2.12, -59.00)), Math.toRadians(0.00))
-                    .splineTo(allianceColor.convertVector(new Vector2d(50.50, -32.00)), Math.toRadians(0.00))
+                    .splineTo(allianceColor.convertVector(new Vector2d(50.50, -35.50)), Math.toRadians(0.00))
                     .build();
         else
             throw new IllegalArgumentException("An unexpected error occurred generating a backdrop trajectory");
     }
 
-    @Nullable
+    @NonNull
     public Map<PropLocations, TrajectorySequence> generatePurpleCases() {
         Map<PropLocations, TrajectorySequence> cases = new HashMap<>();
 
@@ -138,6 +138,8 @@ public class PathGenerator {
                 cases.put(location, sequence);
             }
 
-        return cases.size() != 3 ? null : cases;
+        assert cases.size() == 3 : "An invalid number of cases was generated." +
+                " Expected: 3, Generated: " + cases.size();
+        return cases;
     }
 }
