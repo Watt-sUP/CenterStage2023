@@ -63,9 +63,9 @@ public class TeleOp extends CommandOpMode {
 
         // Intake commands
         driver2.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON)
-                .whenPressed(() -> intake.adjustLiftPosition(0.0175));
+                .whenPressed(() -> intake.adjustLiftPosition(0.02));
         driver2.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)
-                .whenPressed(() -> intake.adjustLiftPosition(-0.0175));
+                .whenPressed(() -> intake.adjustLiftPosition(-0.02));
         driver2.getGamepadButton(GamepadKeys.Button.X)
                 .whenPressed(intake::toggleLiftLocation);
         driver2.getGamepadButton(GamepadKeys.Button.A)

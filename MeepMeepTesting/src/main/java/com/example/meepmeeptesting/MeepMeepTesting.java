@@ -20,8 +20,8 @@ public class MeepMeepTesting {
 
     public static void main(String[] args) {
         MeepMeep meepMeep = new MeepMeep(640, 144);
-        Vector2d startPosition = new Vector2d(-24.5, -33).minus(Vector2d.polar(12, Math.toRadians(45)));
-        double startHeading = Math.toRadians(45);
+        Vector2d startPosition = new Vector2d(-56.50, -35.75);
+        double startHeading = Math.toRadians(180);
 
         RoadRunnerBotEntity currentBot = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
@@ -30,19 +30,23 @@ public class MeepMeepTesting {
                 .setConstraints(53, 53, Math.toRadians(270), Math.toRadians(270), 11.5)
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(startPosition, startHeading))
-                                .setTangent(Math.toRadians(180))
-                                .splineToLinearHeading(new Pose2d(-55.0, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
+                                .setReversed(true)
+                                .splineTo(new Vector2d(-24.00, -59.00), Math.toRadians(0.00))
+                                .splineTo(new Vector2d(24.00, -59.00), Math.toRadians(0.00))
+                                .splineToLinearHeading(new Pose2d(50.00, -34.00, Math.toRadians(180)), Math.toRadians(0.00))
                                 .build()
                 );
 
         RoadRunnerBotEntity newBot = new DefaultBotBuilder(meepMeep)
                 .setDimensions(13, 15.19)
                 .setColorScheme(new ColorSchemeBlueDark())
-                .setConstraints(53, 53, Math.toRadians(180), Math.toRadians(180), 11.5)
+                .setConstraints(53, 53, Math.toRadians(270), Math.toRadians(270), 11.5)
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(mirrorPose(new Pose2d(startPosition, startHeading)))
-                                .setTangent(0)
-                                .splineToSplineHeading(new Pose2d(50.50, 43.00, Math.toRadians(180.00)), Math.toRadians(0))
+                                .setReversed(true)
+                                .splineTo(new Vector2d(-24.00, 59.00), Math.toRadians(0.00))
+                                .splineTo(new Vector2d(24.00, 59.00), Math.toRadians(0.00))
+                                .splineToLinearHeading(new Pose2d(50.00, 34.00, Math.toRadians(180)), Math.toRadians(0.00))
                                 .build()
                 );
 

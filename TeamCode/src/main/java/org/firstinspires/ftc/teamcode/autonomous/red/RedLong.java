@@ -6,8 +6,11 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
+import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.util.Timing;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
@@ -52,8 +55,8 @@ public class RedLong extends CommandOpMode {
         telemetry.update();
 
         Mugurel robot = new Mugurel(hardwareMap, Mugurel.OpModeType.AUTO);
-        CollectorSubsystem collectorSystem = robot.getSubsystem(CollectorSubsystem.class);
-        DepositSubsystem depositSystem = robot.getSubsystem(DepositSubsystem.class);
+        CollectorSubsystem intake = robot.getSubsystem(CollectorSubsystem.class);
+        DepositSubsystem outtake = robot.getSubsystem(DepositSubsystem.class);
 
         TrajectorySequence leftPurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
                 .splineTo(new Vector2d(-47.5, -32)
@@ -120,13 +123,13 @@ public class RedLong extends CommandOpMode {
         tensorflow.shutdown();
         schedule(new SequentialCommandGroup(
                 new InstantCommand(() -> {
-                    collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK);
+                    intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
                     teammate.start();
                 }),
                 new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, true),
-                new InstantCommand(collectorSystem::toggleLiftLocation).andThen(
+                new InstantCommand(intake::toggleLiftLocation).andThen(
                         new WaitCommand(300),
-                        new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
+                        new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
                 ),
                 new InstantCommand(() -> drive.followTrajectorySequence(
                         drive.trajectorySequenceBuilder(rightPurple.end())
@@ -134,80 +137,57 @@ public class RedLong extends CommandOpMode {
                                 .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
                                 .build()
                 )),
-                new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK)).andThen(
+                new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.STACK)).andThen(
                         new WaitCommand(300),
                         new InstantCommand(() -> {
-                            collectorSystem.setClampPosition(90);
-                            collectorSystem.adjustLiftPosition(-0.0175);
-                        }),
-                        new InstantCommand(() -> drive.lineToPose(new Pose2d(-56.50, -35.75, Math.toRadians(180.00)), 30))
+                            intake.setClampPosition(90);
+                            intake.adjustLiftPosition(-0.0175);
+                        })
                 ),
-                new InstantCommand(collectorSystem::toggleClamp)
-//                new WaitUntilCommand(teammate::done),
-//                new ParallelCommandGroup(
-//                        new WaitUntilCommand(() -> drive.getPoseEstimate().getX() > 0)
-//                                .andThen(
-//                                        new InstantCommand(() -> {
-//                                            depositSystem.toggleSpike();
-//                                            depositSystem.toggleBlockers();
-//                                        }),
-//                                        new WaitCommand(300),
-//                                        new InstantCommand(() -> depositSystem.setSlidesTicks(50))
-//                                ),
-//                        new RunByCaseCommand(location.toString(), drive, leftYellow, middleYellow, rightYellow, false)
-//                ),
-//                new WaitCommand(300),
-//                new InstantCommand(depositSystem::toggleBlockers).andThen(
-//                        new WaitCommand(300),
-//                        new InstantCommand(depositSystem::toggleBlockers)
-//                ),
-//                new WaitCommand(1000),
-//                new InstantCommand(depositSystem::toggleSpike),
-//                new WaitCommand(500),
-//                new RunByCaseCommand(location.toString(), drive, stackLeft, stackMid, stackRight, true)
-//                        .andThen(
-//                                new InstantCommand(collectorSystem::toggleClamp),
-//                                new WaitCommand(1250),
-//                                new InstantCommand(collectorSystem::toggleClamp)
-//                        ),
-//                new InstantCommand(() -> drive.followTrajectorySequenceAsync(location == PropLocations.LEFT ? backdropCenter : backdropSide)),
-//                new ParallelCommandGroup(
-//                        new RunCommand(drive::update).interruptOn(() -> !drive.isBusy()),
-//                        new WaitUntilCommand(() -> drive.getPoseEstimate().getX() > 0)
-//                                .andThen(
-//                                        new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
-//                                        new WaitCommand(300),
-//                                        new InstantCommand(() -> {
-//                                            depositSystem.toggleBlockers();
-//                                            depositSystem.toggleSpike();
-//                                        }),
-//                                        new WaitCommand(300),
-//                                        new InstantCommand(() -> depositSystem.setSlidesTicks(200))
-//                                )
-//                ),
-//                new InstantCommand(depositSystem::toggleBlockers)
-//                        .andThen(
-//                                new WaitCommand(600),
-//                                new InstantCommand(depositSystem::toggleSpike),
-//                                new WaitCommand(300),
-//                                new InstantCommand(depositSystem::toggleSpike),
-//                                new WaitCommand(700)
-//                        ),
-//                new InstantCommand(depositSystem::toggleBlockers)
-//                        .andThen(
-//                                new WaitCommand(1000),
-//                                new InstantCommand(depositSystem::toggleSpike)
-//                        ),
-//                new WaitCommand(1000)
-//                        .andThen(
-//                                new InstantCommand(() -> depositSystem.setSlidesPosition(0)),
-//                                new WaitUntilCommand(() -> depositSystem.getSlidesTicks() < 25),
-//                                new InstantCommand(() -> collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
-//                        ),
-//
-//                new InstantCommand(() -> drive.adjustPose(new Pose2d(-5, 0, 0))),
-//                new InstantCommand(() -> drive.lineToPose(new Pose2d(48, -12, Math.toRadians(180)))),
-//                new InstantCommand(() -> drive.adjustPose(new Pose2d(10, 0, 0)))
+                new InstantCommand(() -> drive.lineToPose(new Pose2d(-56.50, -35.75, Math.toRadians(180.00)), 30))
+                        .andThen(
+                                new InstantCommand(intake::toggleClamp),
+                                new WaitCommand(500)
+                        ),
+                new InstantCommand(() ->
+                        drive.followTrajectorySequenceAsync(drive.trajectorySequenceBuilder(new Pose2d(-56.50, -35.75, Math.toRadians(180.00)), 45)
+                                .setReversed(true)
+                                .splineTo(new Vector2d(-24.00, -59.00), Math.toRadians(0.00))
+                                .splineTo(new Vector2d(24.00, -59.00), Math.toRadians(0.00))
+                                .splineToLinearHeading(new Pose2d(50.50, -34.00, Math.toRadians(180)), Math.toRadians(0.00))
+                                .build()
+                        )
+                ),
+                new ParallelCommandGroup(
+                        new RunCommand(drive::update).interruptOn(() -> !drive.isBusy()),
+                        new WaitCommand(700).andThen(new InstantCommand(intake::toggleClamp)),
+                        new WaitUntilCommand(() -> drive.getPoseEstimate().getX() > 0)
+                                .andThen(
+                                        new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
+                                        new WaitCommand(300),
+                                        new InstantCommand(() -> {
+                                            intake.setClampPosition(90);
+                                            intake.adjustLiftPosition(-0.0175);
+                                            outtake.toggleBlockers();
+                                            outtake.toggleSpike();
+                                            outtake.setSlidesTicks(200);
+                                        })
+                                )
+                ),
+                new InstantCommand(outtake::toggleBlockers).andThen(
+                        new WaitCommand(500),
+                        new InstantCommand(outtake::toggleSpike),
+                        new WaitCommand(300),
+                        new InstantCommand(outtake::toggleSpike)
+                ),
+                new InstantCommand(() -> drive.lineToPose(new Pose2d(50.50, -43.00, Math.toRadians(180.00))))
+                        .andThen(
+                                new InstantCommand(outtake::toggleBlockers),
+                                new WaitCommand(500),
+                                new InstantCommand(outtake::toggleSpike),
+                                new WaitCommand(300),
+                                new InstantCommand(() -> outtake.setSlidesPosition(0))
+                        )
         ));
     }
 }
