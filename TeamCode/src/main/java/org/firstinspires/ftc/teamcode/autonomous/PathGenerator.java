@@ -100,9 +100,9 @@ public class PathGenerator {
         else if (route == BackstageRoute.SIDE)
             return drive.trajectorySequenceBuilder(startPose, 45)
                     .setReversed(true)
-                    .splineToLinearHeading(allianceColor.convertPose(new Pose2d(-24.00, -59.00, Math.toRadians(180))), Math.toRadians(0.00))
-                    .splineTo(allianceColor.convertVector(new Vector2d(24.00, -59.00)), Math.toRadians(0.00))
-                    .splineToLinearHeading(new Pose2d(endPosition, Math.toRadians(180)), Math.toRadians(0.00))
+                    .splineTo(allianceColor.convertVector(new Vector2d(-24.00, -59.00)), Math.toRadians(0.00))
+                    .splineTo(allianceColor.convertVector(new Vector2d(2.12, -59.00)), Math.toRadians(0.00))
+                    .splineTo(allianceColor.convertVector(endPosition), Math.toRadians(0.00))
                     .build();
         else
             throw new IllegalArgumentException("An unexpected error occurred generating a backdrop trajectory");

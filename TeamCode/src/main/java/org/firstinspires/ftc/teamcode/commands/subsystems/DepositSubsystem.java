@@ -75,6 +75,9 @@ public class DepositSubsystem extends SubsystemBase {
     }
 
     public void setSlidesTicks(int ticks) {
+        if (!safeToMove.getAsBoolean())
+            return;
+
         raisingSlides = slides.getTargetPosition() < 100 && ticks > 100;
 
         slides.setTargetPosition(ticks);

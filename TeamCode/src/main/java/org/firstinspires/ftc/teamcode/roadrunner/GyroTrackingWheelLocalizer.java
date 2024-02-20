@@ -27,7 +27,7 @@ import java.util.stream.IntStream;
 
 abstract class GyroTrackingWheelLocalizer implements Localizer {
 
-    public static double filterAlpha = .75;
+    private double gyroConfidence = .75;
 
     private final DecompositionSolver forwardSolver;
     private final CompFilter filter = new CompFilter();
@@ -45,7 +45,7 @@ abstract class GyroTrackingWheelLocalizer implements Localizer {
         if (gyroscope != null) {
             gyroscope.resetYaw();
             filter.setIsAngle(true);
-            filter.setAlpha(filterAlpha);
+            filter.setAlpha(gyroConfidence);
         }
 
         Array2DRowRealMatrix inverseMatrix = new Array2DRowRealMatrix(3, 3);
@@ -150,5 +150,9 @@ abstract class GyroTrackingWheelLocalizer implements Localizer {
     @Nullable
     public List<Double> getWheelVelocities() {
         return null;
+    }
+
+    public final void setGyroConfidence(double confidence) {
+        gyroConfidence = confidence;
     }
 }

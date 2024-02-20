@@ -23,7 +23,8 @@ public class StandardGyroLocalizer extends GyroTrackingWheelLocalizer {
 
     public static double LATERAL_DISTANCE = 9.91425457057; // in; distance between the left and right wheels
     public static double FORWARD_OFFSET = -5.5; // in; offset of the lateral wheel
-    public static boolean ENABLE_IMU = true;
+    public static boolean ENABLE_IMU = true, ENABLE_MULTITHREAD = false;
+    public static double GYRO_TRUST = .75;
 
     private final Encoder leftEncoder, rightEncoder, frontEncoder;
 
@@ -33,6 +34,7 @@ public class StandardGyroLocalizer extends GyroTrackingWheelLocalizer {
                 new Pose2d(0, -LATERAL_DISTANCE / 2, 0), // right
                 new Pose2d(FORWARD_OFFSET, 0, Math.toRadians(90)) // front
         ), ENABLE_IMU ? hardwareMap.get(IMU.class, "imu_stable") : null);
+        setGyroConfidence(GYRO_TRUST);
 
         leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "rightBack"));
         rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "leftFront"));
