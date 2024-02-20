@@ -15,7 +15,6 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
 import org.firstinspires.ftc.teamcode.Mugurel;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.util.LoggingUtil;
 import org.firstinspires.ftc.teamcode.util.RegressionUtil;
 
 import java.util.ArrayList;
@@ -121,9 +120,7 @@ public class AutomaticFeedforwardTuner extends LinearOpMode {
         drive.setDrivePower(new Pose2d(0.0, 0.0, 0.0));
 
         RegressionUtil.RampResult rampResult = RegressionUtil.fitRampData(
-                timeSamples, positionSamples, powerSamples, fitIntercept,
-                LoggingUtil.getLogFile(Misc.formatInvariant(
-                        "DriveRampRegression-%d.csv", System.currentTimeMillis())));
+                timeSamples, positionSamples, powerSamples, fitIntercept);
 
         telemetry.clearAll();
         telemetry.addLine("Quasi-static ramp up test complete");
@@ -197,9 +194,7 @@ public class AutomaticFeedforwardTuner extends LinearOpMode {
             drive.setDrivePower(new Pose2d(0.0, 0.0, 0.0));
 
             RegressionUtil.AccelResult accelResult = RegressionUtil.fitAccelData(
-                    timeSamples, positionSamples, powerSamples, rampResult,
-                    LoggingUtil.getLogFile(Misc.formatInvariant(
-                            "DriveAccelRegression-%d.csv", System.currentTimeMillis())));
+                    timeSamples, positionSamples, powerSamples, rampResult);
 
             telemetry.clearAll();
             telemetry.addLine("Constant power test complete");

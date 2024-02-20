@@ -86,19 +86,23 @@ public class PathGenerator {
      * @throws IllegalArgumentException If the route argument isn't defined properly
      */
     public TrajectorySequence generateBackstagePath(Pose2d startPose, BackstageRoute route) throws IllegalArgumentException {
+        return generateBackstagePath(startPose, allianceColor.convertVector(new Vector2d(50.50, -35.50)), route);
+    }
+
+    public TrajectorySequence generateBackstagePath(Pose2d startPose, Vector2d endPosition, BackstageRoute route) throws IllegalArgumentException {
         if (route == BackstageRoute.CENTER)
             return drive.trajectorySequenceBuilder(startPose)
                     .setReversed(true)
                     .splineTo(allianceColor.convertPose(new Pose2d(24, -11, Math.toRadians(0.00))))
                     .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(45, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                    .splineTo(allianceColor.convertVector(new Vector2d(50.50, -35.50)), Math.toRadians(0.00))
+                    .splineTo(endPosition, Math.toRadians(0.00))
                     .build();
         else if (route == BackstageRoute.SIDE)
             return drive.trajectorySequenceBuilder(startPose, 45)
                     .setReversed(true)
-                    .splineTo(allianceColor.convertVector(new Vector2d(-24.00, -59.00)), Math.toRadians(0.00))
-                    .splineTo(allianceColor.convertVector(new Vector2d(2.12, -59.00)), Math.toRadians(0.00))
-                    .splineTo(allianceColor.convertVector(new Vector2d(50.50, -35.50)), Math.toRadians(0.00))
+                    .splineToLinearHeading(allianceColor.convertPose(new Pose2d(-24.00, -59.00, Math.toRadians(180))), Math.toRadians(0.00))
+                    .splineTo(allianceColor.convertVector(new Vector2d(24.00, -59.00)), Math.toRadians(0.00))
+                    .splineToLinearHeading(new Pose2d(endPosition, Math.toRadians(180)), Math.toRadians(0.00))
                     .build();
         else
             throw new IllegalArgumentException("An unexpected error occurred generating a backdrop trajectory");

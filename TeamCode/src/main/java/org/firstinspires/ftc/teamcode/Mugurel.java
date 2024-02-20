@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import androidx.annotation.NonNull;
 
+import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.Robot;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.hardware.lynx.LynxModule;
@@ -26,7 +27,9 @@ public class Mugurel extends Robot {
     private DriveSubsystem driverControl;
 
     public Mugurel(HardwareMap hardwareMap, OpModeType opModeType) throws IllegalStateException {
+        CommandScheduler.getInstance().reset();
         hardwareMap.getAll(LynxModule.class).forEach(hub -> hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO));
+
         odometry = new OdometrySubsystem(
                 new SimpleServo(hardwareMap, "odo_left", 0, 180),
                 new SimpleServo(hardwareMap, "odo_right", 0, 180),
@@ -86,8 +89,9 @@ public class Mugurel extends Robot {
         );
     }
 
+    @NonNull
     public <T> T getSubsystem(Class<T> subsystemType) {
-        Field[] fields = getClass().getDeclaredFields();
+        Field[] fields = this.getClass().getDeclaredFields();
 
         for (Field field : fields)
             if (field.getType().equals(subsystemType)) {

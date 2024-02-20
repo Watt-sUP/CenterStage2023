@@ -1,14 +1,9 @@
 package org.firstinspires.ftc.teamcode.util;
 
-import androidx.annotation.Nullable;
-
 import com.acmerobotics.roadrunner.kinematics.Kinematics;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,24 +71,9 @@ public class RegressionUtil {
      * @param positionSamples position samples
      * @param powerSamples power samples
      * @param fitStatic fit kStatic
-     * @param file log file
      */
     public static RampResult fitRampData(List<Double> timeSamples, List<Double> positionSamples,
-                                         List<Double> powerSamples, boolean fitStatic,
-                                         @Nullable File file) {
-        if (file != null) {
-            try (PrintWriter pw = new PrintWriter(file)) {
-                pw.println("time,position,power");
-                for (int i = 0; i < timeSamples.size(); i++) {
-                    double time = timeSamples.get(i);
-                    double pos = positionSamples.get(i);
-                    double power = powerSamples.get(i);
-                    pw.println(time + "," + pos + "," + power);
-                }
-            } catch (FileNotFoundException e) {
-                // ignore
-            }
-        }
+                                         List<Double> powerSamples, boolean fitStatic) {
 
         List<Double> velSamples = numericalDerivative(timeSamples, positionSamples);
 
@@ -112,28 +92,13 @@ public class RegressionUtil {
     /**
      * Run regression to compute acceleration feedforward.
      *
-     * @param timeSamples time samples
+     * @param timeSamples     time samples
      * @param positionSamples position samples
-     * @param powerSamples power samples
-     * @param rampResult ramp result
-     * @param file log file
+     * @param powerSamples    power samples
+     * @param rampResult      ramp result
      */
     public static AccelResult fitAccelData(List<Double> timeSamples, List<Double> positionSamples,
-                                           List<Double> powerSamples, RampResult rampResult,
-                                           @Nullable File file) {
-        if (file != null) {
-            try (PrintWriter pw = new PrintWriter(file)) {
-                pw.println("time,position,power");
-                for (int i = 0; i < timeSamples.size(); i++) {
-                    double time = timeSamples.get(i);
-                    double pos = positionSamples.get(i);
-                    double power = powerSamples.get(i);
-                    pw.println(time + "," + pos + "," + power);
-                }
-            } catch (FileNotFoundException e) {
-                // ignore
-            }
-        }
+                                           List<Double> powerSamples, RampResult rampResult) {
 
         List<Double> velSamples = numericalDerivative(timeSamples, positionSamples);
         List<Double> accelSamples = numericalDerivative(timeSamples, velSamples);
