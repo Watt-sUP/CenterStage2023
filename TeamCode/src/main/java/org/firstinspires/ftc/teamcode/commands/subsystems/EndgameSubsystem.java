@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 
 public class EndgameSubsystem extends SubsystemBase {
 
-    private final double TICKS_PER_REV = 537.7, GEAR_RATIO = 28.0;
+    private final double TICKS_PER_REV = 384.5, GEAR_RATIO = 28.0;
     private final DcMotor leftPull, rightPull;
     private final ServoEx launcher;
 

@@ -59,8 +59,10 @@ public class RedLong extends CommandOpMode {
         DepositSubsystem outtake = robot.getSubsystem(DepositSubsystem.class);
 
         TrajectorySequence leftPurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
-                .splineTo(new Vector2d(-47.5, -32)
-                        .minus(Vector2d.polar(13, Math.toRadians(120))), Math.toRadians(120.00))
+                .splineToSplineHeading(new Pose2d(
+                        new Vector2d(-47.5, -33).minus(Vector2d.polar(13, Math.toRadians(180))),
+                        Math.toRadians(180)
+                ), Math.toRadians(90.00))
                 .build();
 
         TrajectorySequence middlePurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
@@ -116,14 +118,51 @@ public class RedLong extends CommandOpMode {
                 .waitSeconds(0.5)
                 .build();
 
+        TrajectorySequence whiteLeft = drive.trajectorySequenceBuilder(leftPurple.end())
+                .setTangent(Math.toRadians(90))
+                .splineToLinearHeading(new Pose2d(-48, -16, Math.toRadians(180)), Math.toRadians(180))
+                .splineToLinearHeading(new Pose2d(-52.5, -23.5, Math.toRadians(180)), Math.toRadians(-90))
+                .addTemporalMarker(() -> {
+                    intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
+                    intake.adjustLiftPosition(-0.02);
+                })
+                .waitSeconds(0.3)
+                .addTemporalMarker(() -> {
+                    if (intake.clamping != CollectorSubsystem.ClampState.OPENED)
+                        intake.toggleClamp();
+                })
+                .setConstraints(
+                        SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(30)
+                )
+                .lineToLinearHeading(new Pose2d(-56.50, -23.5, Math.toRadians(180.00)))
+                .addTemporalMarker(intake::toggleClamp)
+                .waitSeconds(0.5)
+                .build();
+
         Map<PropLocations, TrajectorySequence> backdrops = new HashMap<PropLocations, TrajectorySequence>() {{
+            put(PropLocations.LEFT,
+                    drive.trajectorySequenceBuilder(whiteLeft.end())
+                            .lineToLinearHeading(new Pose2d(-36, -23.5, Math.toRadians(180)))
+                            .setTangent(Math.toRadians(-90))
+                            .setConstraints(
+                                    SampleMecanumDrive.getVelocityConstraint(45, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                                    SampleMecanumDrive.getAccelerationConstraint(45)
+                            )
+                            .splineToSplineHeading(new Pose2d(-24, -59, Math.toRadians(180)), Math.toRadians(0))
+                            .splineTo(new Vector2d(2.12, -59.00), Math.toRadians(0.00))
+                            .splineTo(new Vector2d(50.50, -35.50), Math.toRadians(0.00))
+                            .build()
+            );
             put(PropLocations.MIDDLE, generator.generateBackstagePath(whiteMiddle.end(), new Vector2d(50.50, -42.50), BackstageRoute.SIDE));
             put(PropLocations.RIGHT, generator.generateBackstagePath(whiteRight.end(), BackstageRoute.SIDE));
         }};
         Map<PropLocations, Vector2d> yellowLocation = new HashMap<PropLocations, Vector2d>() {{
+            put(PropLocations.LEFT, new Vector2d(50.50, -29.00));
             put(PropLocations.MIDDLE, new Vector2d(50.50, -37.00));
             put(PropLocations.RIGHT, new Vector2d(50.50, -44.00));
         }};
+        TrajectorySequence stackLeft = generator.generateStackPath(new Pose2d(yellowLocation.get(PropLocations.LEFT), Math.toRadians(180)), Stack.CLOSE);
         TrajectorySequence stackRight = generator.generateStackPath(new Pose2d(yellowLocation.get(PropLocations.RIGHT), Math.toRadians(180.00)), Stack.CLOSE);
         TrajectorySequence stackMiddle = generator.generateStackPath(new Pose2d(yellowLocation.get(PropLocations.MIDDLE), Math.toRadians(180.00)), Stack.CLOSE);
 
@@ -156,7 +195,7 @@ public class RedLong extends CommandOpMode {
                         new WaitCommand(300),
                         new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
                 ),
-                new RunByCaseCommand(location.toString(), drive, null, whiteMiddle, whiteRight, true),
+                new RunByCaseCommand(location.toString(), drive, whiteLeft, whiteMiddle, whiteRight, true),
                 new InstantCommand(() -> drive.followTrajectorySequenceAsync(backdrops.get(location))),
                 new ParallelCommandGroup(
                         new RunCommand(drive::update).interruptOn(() -> !drive.isBusy()),
@@ -187,7 +226,7 @@ public class RedLong extends CommandOpMode {
                                 new WaitCommand(300),
                                 new InstantCommand(() -> outtake.setSlidesPosition(0))
                         ),
-                new RunByCaseCommand(location.toString(), drive, null, stackMiddle, stackRight, true)
+                new RunByCaseCommand(location.toString(), drive, stackLeft, stackMiddle, stackRight, true)
                         .andThen(
                                 new InstantCommand(intake::toggleClamp),
                                 new WaitCommand(500)
