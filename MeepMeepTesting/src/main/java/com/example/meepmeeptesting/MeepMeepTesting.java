@@ -27,27 +27,17 @@ public class MeepMeepTesting {
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setDimensions(13, 15.19)
                 .setColorScheme(new ColorSchemeRedDark())
-                .setConstraints(65, 65, Math.toRadians(360), Math.toRadians(360), 11.5)
+                .setConstraints(53, 53, Math.toRadians(240), Math.toRadians(240), 11.5)
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(startPosition, startHeading))
-                                .splineToSplineHeading(new Pose2d(
-                                        new Vector2d(-47.5, -33).minus(Vector2d.polar(13, Math.toRadians(180))),
-                                        Math.toRadians(180)
-                                ), Math.toRadians(90.00))
-                                .addTemporalMarker(() -> {
-                                })
-                                .setTangent(Math.toRadians(90))
-                                .splineToLinearHeading(new Pose2d(-48, -16, Math.toRadians(180)), Math.toRadians(180))
-                                .splineToLinearHeading(new Pose2d(-52.5, -23.5, Math.toRadians(180)), Math.toRadians(-90))
-                                .addTemporalMarker(() -> {
-                                })
-                                .waitSeconds(.3)
-                                .addTemporalMarker(() -> {
-                                })
-                                .lineToLinearHeading(new Pose2d(-56.50, -23.5, Math.toRadians(180.00)))
-                                .lineToLinearHeading(new Pose2d(-36, -23.5, Math.toRadians(180)))
-                                .setTangent(Math.toRadians(-90))
-                                .splineToSplineHeading(new Pose2d(-24, -59, Math.toRadians(180)), Math.toRadians(0))
+                                .splineTo(
+                                        new Vector2d(-46, -39),
+                                        Math.toRadians(90.00)
+                                )
+                                .setTangent(Math.toRadians(180))
+                                .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
+                                .setReversed(true)
+                                .splineTo(new Vector2d(-24, -59), Math.toRadians(0))
                                 .splineTo(new Vector2d(2.12, -59.00), Math.toRadians(0.00))
                                 .splineTo(new Vector2d(50.50, -35.50), Math.toRadians(0.00))
                                 .build()
@@ -78,7 +68,7 @@ public class MeepMeepTesting {
                 .setDarkMode(true)
                 .setBackgroundAlpha(0.95f)
                 .addEntity(currentBot)
-                .addEntity(newBot)
+//                .addEntity(newBot)
                 .start();
     }
 }

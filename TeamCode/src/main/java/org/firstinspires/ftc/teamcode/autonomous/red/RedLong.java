@@ -59,10 +59,7 @@ public class RedLong extends CommandOpMode {
         DepositSubsystem outtake = robot.getSubsystem(DepositSubsystem.class);
 
         TrajectorySequence leftPurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
-                .splineToSplineHeading(new Pose2d(
-                        new Vector2d(-47.5, -33).minus(Vector2d.polar(13, Math.toRadians(180))),
-                        Math.toRadians(180)
-                ), Math.toRadians(90.00))
+                .splineTo(new Vector2d(-46, -39), Math.toRadians(90.00))
                 .build();
 
         TrajectorySequence middlePurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
@@ -74,7 +71,7 @@ public class RedLong extends CommandOpMode {
                         .minus(Vector2d.polar(11, Math.toRadians(30))), Math.toRadians(30.00))
                 .build();
 
-        TrajectorySequence whiteRight = drive.trajectorySequenceBuilder(rightPurple.end())
+        TrajectorySequence whiteRight = drive.trajectorySequenceBuilder(rightPurple.end(), 40)
                 .setTangent(Math.toRadians(180))
                 .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
                 .addTemporalMarker(() ->
@@ -96,7 +93,7 @@ public class RedLong extends CommandOpMode {
                 .waitSeconds(0.5)
                 .build();
 
-        TrajectorySequence whiteMiddle = drive.trajectorySequenceBuilder(middlePurple.end())
+        TrajectorySequence whiteMiddle = drive.trajectorySequenceBuilder(middlePurple.end(), 40)
                 .setTangent(Math.toRadians(180))
                 .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
                 .addTemporalMarker(() ->
@@ -118,10 +115,9 @@ public class RedLong extends CommandOpMode {
                 .waitSeconds(0.5)
                 .build();
 
-        TrajectorySequence whiteLeft = drive.trajectorySequenceBuilder(leftPurple.end())
-                .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-48, -16, Math.toRadians(180)), Math.toRadians(180))
-                .splineToLinearHeading(new Pose2d(-52.5, -23.5, Math.toRadians(180)), Math.toRadians(-90))
+        TrajectorySequence whiteLeft = drive.trajectorySequenceBuilder(leftPurple.end(), 40)
+                .setTangent(Math.toRadians(180))
+                .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
                 .addTemporalMarker(() -> {
                     intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
                     intake.adjustLiftPosition(-0.02);
@@ -135,30 +131,18 @@ public class RedLong extends CommandOpMode {
                         SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(30)
                 )
-                .lineToLinearHeading(new Pose2d(-56.50, -23.5, Math.toRadians(180.00)))
+                .lineToLinearHeading(new Pose2d(-56.50, -35.75, Math.toRadians(180.00)))
                 .addTemporalMarker(intake::toggleClamp)
                 .waitSeconds(0.5)
                 .build();
 
         Map<PropLocations, TrajectorySequence> backdrops = new HashMap<PropLocations, TrajectorySequence>() {{
-            put(PropLocations.LEFT,
-                    drive.trajectorySequenceBuilder(whiteLeft.end())
-                            .lineToLinearHeading(new Pose2d(-36, -23.5, Math.toRadians(180)))
-                            .setTangent(Math.toRadians(-90))
-                            .setConstraints(
-                                    SampleMecanumDrive.getVelocityConstraint(45, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                                    SampleMecanumDrive.getAccelerationConstraint(45)
-                            )
-                            .splineToSplineHeading(new Pose2d(-24, -59, Math.toRadians(180)), Math.toRadians(0))
-                            .splineTo(new Vector2d(2.12, -59.00), Math.toRadians(0.00))
-                            .splineTo(new Vector2d(50.50, -35.50), Math.toRadians(0.00))
-                            .build()
-            );
+            put(PropLocations.LEFT, generator.generateBackstagePath(whiteLeft.end(), BackstageRoute.SIDE));
             put(PropLocations.MIDDLE, generator.generateBackstagePath(whiteMiddle.end(), new Vector2d(50.50, -42.50), BackstageRoute.SIDE));
             put(PropLocations.RIGHT, generator.generateBackstagePath(whiteRight.end(), BackstageRoute.SIDE));
         }};
         Map<PropLocations, Vector2d> yellowLocation = new HashMap<PropLocations, Vector2d>() {{
-            put(PropLocations.LEFT, new Vector2d(50.50, -29.00));
+            put(PropLocations.LEFT, new Vector2d(50.50, -29.50));
             put(PropLocations.MIDDLE, new Vector2d(50.50, -37.00));
             put(PropLocations.RIGHT, new Vector2d(50.50, -44.00));
         }};
