@@ -1,15 +1,20 @@
 package org.firstinspires.ftc.teamcode.commands.subsystems;
 
+import androidx.annotation.NonNull;
+
 import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
+import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.util.InterpLUT;
 import com.arcrobotics.ftclib.util.Timing;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.teamcode.util.RobotSubsystem;
 
 import java.util.concurrent.TimeUnit;
 
 @Config
-public class CollectorSubsystem extends SubsystemBase {
+public class CollectorSubsystem extends RobotSubsystem {
     public static Double LOWER_LIFT = 0.74, RAISE_LIFT = 0.075, STACK_LIFT = 0.665;
     private final ServoEx liftLeft, liftRight;
     private final ServoEx claw;
@@ -44,12 +49,20 @@ public class CollectorSubsystem extends SubsystemBase {
         liftRight.setInverted(true);
         claw.setInverted(true);
 
-        claw.setPosition(195.0 / 300.0);
+        claw.turnToAngle(195);
         this.setLiftLocation(LiftState.RAISED);
     }
 
-    public void setLiftLocation(LiftState target) {
+    @NonNull
+    public static CollectorSubsystem createWithDefaults(final HardwareMap hardwareMap) {
+        return new CollectorSubsystem(
+                new SimpleServo(hardwareMap, "v4b_left", 0, 180),
+                new SimpleServo(hardwareMap, "v4b_right", 0, 180),
+                new SimpleServo(hardwareMap, "claw", 0, 300)
+        );
+    }
 
+    public void setLiftLocation(LiftState target) {
         if (target == location)
             return;
 
@@ -106,19 +119,20 @@ public class CollectorSubsystem extends SubsystemBase {
                 // The code of the timer resets it every time .start() is called (equivalent to a .reset())
                 if (location != LiftState.RAISED) // Can't collect when raised
                     clampTimer.start();
-                claw.setPosition(195.0 / 300.0);
+
+                claw.turnToAngle(195);
                 clamping = ClampState.CLOSED;
                 break;
             case CLOSED:
                 // Don't open the claw fully when the lift is raised to avoid the belts
-                claw.setPosition(location != LiftState.RAISED ? (120.0 / 300.0) : (162.0 / 300.0));
+                claw.turnToAngle(location != LiftState.RAISED ? 120 : 162);
                 clamping = ClampState.OPENED;
                 break;
         }
     }
 
     public void setClampPosition(double angle) {
-        claw.setPosition(angle / 300.0);
+        claw.turnToAngle(angle);
         clamping = (angle <= 162) ? ClampState.OPENED : ClampState.CLOSED;
     }
 

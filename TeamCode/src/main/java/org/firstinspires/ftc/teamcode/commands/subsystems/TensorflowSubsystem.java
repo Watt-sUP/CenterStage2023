@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.commands.subsystems;
 
 import android.os.Environment;
 
+import androidx.annotation.Nullable;
+
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -12,12 +14,10 @@ import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 
 public class TensorflowSubsystem extends SubsystemBase {
 
     private final TfodProcessor tensorflowProcessor;
-    private int frameCount = 0;
     public VisionPortal portal;
 
     public TensorflowSubsystem(VisionPortal portal, TfodProcessor processor) {
@@ -50,14 +50,11 @@ public class TensorflowSubsystem extends SubsystemBase {
         tensorflowProcessor.setMinResultConfidence((float) confidence);
     }
 
-    public void screenshot() {
-        portal.saveNextFrameRaw(String.format(Locale.US, "TensorflowDebugFrame-%06d", frameCount++));
-    }
-
     public List<Recognition> getDetections() {
         return tensorflowProcessor.getRecognitions();
     }
 
+    @Nullable
     public Recognition getBestDetection() {
         List<Recognition> detections = tensorflowProcessor.getRecognitions();
         return detections.stream()

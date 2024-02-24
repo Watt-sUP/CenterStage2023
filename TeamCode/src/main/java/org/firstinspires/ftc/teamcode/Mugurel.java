@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.Robot;
-import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -13,14 +12,17 @@ import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.EndgameSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
+import org.firstinspires.ftc.teamcode.util.RobotSubsystem;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Objects;
 
 public class Mugurel extends Robot {
 
-    private final CollectorSubsystem intake;
-    private final OdometrySubsystem odometry;
+    private CollectorSubsystem intake;
+    private OdometrySubsystem odometry;
     private final OpModeType opModeType;
     private DepositSubsystem outtake;
     private EndgameSubsystem endgame;
@@ -29,28 +31,20 @@ public class Mugurel extends Robot {
     public Mugurel(HardwareMap hardwareMap, OpModeType opModeType) throws IllegalStateException {
         CommandScheduler.getInstance().reset();
         hardwareMap.getAll(LynxModule.class).forEach(hub -> hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO));
-
-        odometry = new OdometrySubsystem(
-                new SimpleServo(hardwareMap, "odo_left", 0, 180),
-                new SimpleServo(hardwareMap, "odo_right", 0, 180),
-                new SimpleServo(hardwareMap, "odo_back", 0, 1800)
-        );
-        intake = new CollectorSubsystem(
-                new SimpleServo(hardwareMap, "v4b_left", 0, 180),
-                new SimpleServo(hardwareMap, "v4b_right", 0, 180),
-                new SimpleServo(hardwareMap, "claw", 0, 300)
-        );
+        loadSubsystems(hardwareMap, CollectorSubsystem.class, RobotSubsystem.class);
 
         this.opModeType = opModeType;
         switch (opModeType) {
             case TELEOP:
+                loadSubsystems(hardwareMap, DepositSubsystem.class, EndgameSubsystem.class, DriveSubsystem.class);
+
                 odometry.raise();
-                initTeleOp(hardwareMap);
                 outtake.setSafeguard(() -> intake.location != CollectorSubsystem.LiftState.RAISED);
+                register(driverControl, outtake, intake);
                 break;
             case AUTO:
                 odometry.lower();
-                initAuto(hardwareMap);
+                loadSubsystems(hardwareMap, DepositSubsystem.class);
                 break;
             case TUNING:
                 odometry.lower();
@@ -60,37 +54,38 @@ public class Mugurel extends Robot {
         }
     }
 
-    private void initTeleOp(HardwareMap hardwareMap) {
-        outtake = new DepositSubsystem(
-                new SimpleServo(hardwareMap, "depo_left", 0, 220),
-                new SimpleServo(hardwareMap, "depo_right", 0, 220),
-                new SimpleServo(hardwareMap, "stopper_top", 0, 300),
-                new SimpleServo(hardwareMap, "stopper_bottom", 0, 300),
-                hardwareMap.dcMotor.get("gli_sus")
-        );
-        endgame = new EndgameSubsystem(
-                hardwareMap.dcMotor.get("pullup_left"),
-                hardwareMap.dcMotor.get("pullup_right"),
-                new SimpleServo(hardwareMap, "drone", -900, 900)
-        );
-        driverControl = new DriveSubsystem(hardwareMap, "leftFront", "rightFront",
-                "leftBack", "rightBack");
-
-        register(driverControl, outtake, intake);
+    public static Mugurel getInstance() {
+        // TODO: Finish the stuff before this
+        return null;
     }
 
-    private void initAuto(HardwareMap hardwareMap) {
-        outtake = new DepositSubsystem(
-                new SimpleServo(hardwareMap, "depo_left", 0, 220),
-                new SimpleServo(hardwareMap, "depo_right", 0, 220),
-                new SimpleServo(hardwareMap, "stopper_top", 0, 300),
-                new SimpleServo(hardwareMap, "stopper_bottom", 0, 300),
-                hardwareMap.dcMotor.get("gli_sus")
-        );
+    @SafeVarargs
+    private final void loadSubsystems(final HardwareMap hardwareMap, Class<? extends RobotSubsystem>... subsystems) {
+        Field[] fields = this.getClass().getDeclaredFields();
+
+        for (Class<? extends RobotSubsystem> subsystem : subsystems)
+            for (Field field : fields)
+                if (field.getType().equals(subsystem))
+                    try {
+                        // Get the value of the field
+                        field.setAccessible(true);
+                        Object value = subsystem.cast(field.get(this));
+
+                        // If it's not initialized, do so with default settings
+                        if (value == null) {
+                            Method subsystemCreator = subsystem.getMethod("createWithDefaults", HardwareMap.class);
+                            field.set(this, subsystemCreator.invoke(null, hardwareMap));
+                        }
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        throw new IllegalStateException("Error accessing field: " + field.getName(), e);
+                    } catch (NoSuchMethodException e) {
+                        throw new IllegalStateException("Unable to initialize subsystem. " +
+                                subsystem.getSimpleName() + " is missing the 'createWithDefaults' method.", e);
+                    }
     }
 
     @NonNull
-    public <T> T getSubsystem(Class<T> subsystemType) {
+    public final <T extends RobotSubsystem> T getSubsystem(Class<T> subsystemType) {
         Field[] fields = this.getClass().getDeclaredFields();
 
         for (Field field : fields)
@@ -111,36 +106,8 @@ public class Mugurel extends Robot {
     }
 
     public enum OpModeType {
-        /**
-         * <p>Loads subsystems related to the autonomous.</p>
-         * Modules included:
-         * <ul>
-         *  <li>Odometry</li>
-         *  <li>Intake</li>
-         *  <li>Outtake</li>
-         * </ul>
-         */
         AUTO,
-        /**
-         * <p>Loads subsystems related to the TeleOp period.</p>
-         * Modules included:
-         * <ul>
-         *  <li>Odometry (for raising the pods)</li>
-         *  <li>Intake</li>
-         *  <li>Outtake</li>
-         *  <li>Drivetrain control</li>
-         *  <li>Endgame (ascension and drone)</li>
-         * </ul>
-         */
         TELEOP,
-        /**
-         * <p>Loads subsystems that aid in autonomous tuning.</p>
-         * Modules included:
-         * <ul>
-         *  <li>Odometry (for lowering the pods)</li>
-         *  <li>Intake (for keeping in place)</li>
-         * </ul>
-         */
         TUNING;
 
         @NonNull

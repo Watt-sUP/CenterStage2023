@@ -1,20 +1,33 @@
 package org.firstinspires.ftc.teamcode.commands.subsystems;
 
-import com.arcrobotics.ftclib.command.SubsystemBase;
+import androidx.annotation.NonNull;
+
 import com.arcrobotics.ftclib.hardware.ServoEx;
+import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.util.RobotSubsystem;
 
 import javax.annotation.Nullable;
 
-public class EndgameSubsystem extends SubsystemBase {
+public class EndgameSubsystem extends RobotSubsystem {
 
     private final double TICKS_PER_REV = 384.5, GEAR_RATIO = 28.0;
     private final DcMotor leftPull, rightPull;
     private final ServoEx launcher;
 
     private ClimbState climbState = ClimbState.DOWN;
+
+    @NonNull
+    public static EndgameSubsystem createWithDefaults(final HardwareMap hardwareMap) {
+        return new EndgameSubsystem(
+                hardwareMap.dcMotor.get("pullup_left"),
+                hardwareMap.dcMotor.get("pullup_right"),
+                new SimpleServo(hardwareMap, "drone", -900, 900)
+        );
+    }
 
     public EndgameSubsystem(DcMotor leftPull, DcMotor rightPull, @Nullable ServoEx launcher) {
         this.leftPull = leftPull;

@@ -1,19 +1,28 @@
 package org.firstinspires.ftc.teamcode.commands.subsystems;
 
-import com.arcrobotics.ftclib.command.SubsystemBase;
+import androidx.annotation.NonNull;
+
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.util.MathUtils;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.util.RobotSubsystem;
+
 import java.util.Arrays;
 import java.util.function.DoubleSupplier;
 
-public class DriveSubsystem extends SubsystemBase {
+public class DriveSubsystem extends RobotSubsystem {
 
     private double powerLimit = 1.0;
     private final MecanumDrive drive;
     private DoubleSupplier forward, strafe, rotation;
+
+    @NonNull
+    public static DriveSubsystem createWithDefaults(final HardwareMap hardwareMap) {
+        return new DriveSubsystem(hardwareMap, "leftFront", "rightFront",
+                "leftBack", "rightBack");
+    }
 
     @Override
     public void periodic() {
