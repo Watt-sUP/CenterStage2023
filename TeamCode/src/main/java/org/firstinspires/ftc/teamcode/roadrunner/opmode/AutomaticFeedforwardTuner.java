@@ -13,7 +13,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
-import org.firstinspires.ftc.teamcode.Mugurel;
+import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
+import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.util.RegressionUtil;
 
@@ -39,39 +40,16 @@ public class AutomaticFeedforwardTuner extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        Mugurel robot = new Mugurel(hardwareMap, Mugurel.OpModeType.TUNING);
+        OdometrySubsystem odometry = new OdometrySubsystem(this);
+        CollectorSubsystem intake = new CollectorSubsystem(hardwareMap);
+
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         NanoClock clock = NanoClock.system();
-        telemetry.addLine("Press play to begin the feedforward tuning routine");
-        telemetry.update();
-
         waitForStart();
 
         if (isStopRequested()) return;
-
-        telemetry.clearAll();
-        telemetry.addLine("Would you like to fit kStatic?");
-        telemetry.addLine("Press (Y/Δ) for yes, (B/O) for no");
-        telemetry.update();
-
-        boolean fitIntercept = false;
-        while (!isStopRequested()) {
-            if (gamepad1.y) {
-                fitIntercept = true;
-                while (!isStopRequested() && gamepad1.y) {
-                    idle();
-                }
-                break;
-            } else if (gamepad1.b) {
-                while (!isStopRequested() && gamepad1.b) {
-                    idle();
-                }
-                break;
-            }
-            idle();
-        }
 
         telemetry.clearAll();
         telemetry.addLine(Misc.formatInvariant(
@@ -120,88 +98,12 @@ public class AutomaticFeedforwardTuner extends LinearOpMode {
         drive.setDrivePower(new Pose2d(0.0, 0.0, 0.0));
 
         RegressionUtil.RampResult rampResult = RegressionUtil.fitRampData(
-                timeSamples, positionSamples, powerSamples, fitIntercept);
+                timeSamples, positionSamples, powerSamples, true);
 
         telemetry.clearAll();
         telemetry.addLine("Quasi-static ramp up test complete");
-        if (fitIntercept) {
-            telemetry.addLine(Misc.formatInvariant("kV = %.5f, kStatic = %.5f (R^2 = %.2f)",
-                    rampResult.kV, rampResult.kStatic, rampResult.rSquare));
-        } else {
-            telemetry.addLine(Misc.formatInvariant("kV = %.5f (R^2 = %.2f)",
-                    rampResult.kStatic, rampResult.rSquare));
-        }
-        telemetry.addLine("Would you like to fit kA?");
-        telemetry.addLine("Press (Y/Δ) for yes, (B/O) for no");
-        telemetry.update();
-
-        boolean fitAccelFF = false;
-        while (!isStopRequested()) {
-            if (gamepad1.y) {
-                fitAccelFF = true;
-                while (!isStopRequested() && gamepad1.y) {
-                    idle();
-                }
-                break;
-            } else if (gamepad1.b) {
-                while (!isStopRequested() && gamepad1.b) {
-                    idle();
-                }
-                terminateOpModeNow();
-            }
-            idle();
-        }
-
-        if (fitAccelFF) {
-            telemetry.clearAll();
-            telemetry.addLine("Place the robot back in its starting position");
-            telemetry.addLine("Press (Y/Δ) to continue");
-            telemetry.update();
-
-            while (!isStopRequested() && !gamepad1.y) {
-                idle();
-            }
-            while (!isStopRequested() && gamepad1.y) {
-                idle();
-            }
-
-            telemetry.clearAll();
-            telemetry.addLine("Running...");
-            telemetry.update();
-
-            double maxPowerTime = DISTANCE / maxVel;
-
-            timeSamples.clear();
-            positionSamples.clear();
-            powerSamples.clear();
-
-            drive.setPoseEstimate(new Pose2d());
-            drive.setDrivePower(new Pose2d(MAX_POWER, 0.0, 0.0));
-
-            startTime = clock.seconds();
-            while (!isStopRequested()) {
-                double elapsedTime = clock.seconds() - startTime;
-                if (elapsedTime > maxPowerTime) {
-                    break;
-                }
-
-                timeSamples.add(elapsedTime);
-                positionSamples.add(drive.getPoseEstimate().getX());
-                powerSamples.add(MAX_POWER);
-
-                drive.updatePoseEstimate();
-            }
-            drive.setDrivePower(new Pose2d(0.0, 0.0, 0.0));
-
-            RegressionUtil.AccelResult accelResult = RegressionUtil.fitAccelData(
-                    timeSamples, positionSamples, powerSamples, rampResult);
-
-            telemetry.clearAll();
-            telemetry.addLine("Constant power test complete");
-            telemetry.addLine(Misc.formatInvariant("kA = %.5f (R^2 = %.2f)",
-                    accelResult.kA, accelResult.rSquare));
-            telemetry.update();
-        }
+        telemetry.addLine(Misc.formatInvariant("kV = %.5f, kStatic = %.5f (R^2 = %.2f)",
+                rampResult.kV, rampResult.kStatic, rampResult.rSquare));
 
         while (!isStopRequested()) {
             idle();

@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.util;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.acmerobotics.roadrunner.util.Angle;
@@ -15,12 +14,12 @@ public class CompFilter {
     public double alpha = 0.5;
     private double x, last_x;
     private boolean isAngle = false;
-    private DoubleSupplier a = null, b = null;
+    private DoubleSupplier a, b;
 
     public CompFilter() {
     }
 
-    public CompFilter(@NonNull DoubleSupplier a, @NonNull DoubleSupplier b) {
+    public CompFilter(DoubleSupplier a, DoubleSupplier b) {
         this.a = a;
         this.b = b;
     }

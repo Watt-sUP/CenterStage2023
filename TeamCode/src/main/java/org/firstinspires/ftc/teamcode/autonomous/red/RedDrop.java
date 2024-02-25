@@ -16,7 +16,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
-import org.firstinspires.ftc.teamcode.Mugurel;
 import org.firstinspires.ftc.teamcode.autonomous.PathGenerator;
 import org.firstinspires.ftc.teamcode.autonomous.assets.AllianceColor;
 import org.firstinspires.ftc.teamcode.autonomous.assets.PropLocations;
@@ -25,6 +24,7 @@ import org.firstinspires.ftc.teamcode.autonomous.assets.StartingPosition;
 import org.firstinspires.ftc.teamcode.commands.RunByCaseCommand;
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
+import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.TensorflowSubsystem;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
@@ -48,9 +48,9 @@ public class RedDrop extends CommandOpMode {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         PathGenerator generator = new PathGenerator(drive);
 
-        Mugurel robot = new Mugurel(hardwareMap, Mugurel.OpModeType.AUTO);
-        CollectorSubsystem collectorSystem = robot.getSubsystem(CollectorSubsystem.class);
-        DepositSubsystem depositSystem = robot.getSubsystem(DepositSubsystem.class);
+        OdometrySubsystem odometry = new OdometrySubsystem(this);
+        CollectorSubsystem collectorSystem = new CollectorSubsystem(hardwareMap);
+        DepositSubsystem depositSystem = new DepositSubsystem(hardwareMap);
 
         generator.setStartingLocation(AllianceColor.RED, StartingPosition.BACKDROP);
         tensorflow.setMinConfidence(0.8);

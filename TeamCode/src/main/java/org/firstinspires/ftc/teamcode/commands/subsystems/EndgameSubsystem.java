@@ -1,18 +1,13 @@
 package org.firstinspires.ftc.teamcode.commands.subsystems;
 
-import androidx.annotation.NonNull;
-
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.util.RobotSubsystem;
 
-import javax.annotation.Nullable;
-
-public class EndgameSubsystem extends RobotSubsystem {
+public class EndgameSubsystem {
 
     private final double TICKS_PER_REV = 384.5, GEAR_RATIO = 28.0;
     private final DcMotor leftPull, rightPull;
@@ -20,16 +15,15 @@ public class EndgameSubsystem extends RobotSubsystem {
 
     private ClimbState climbState = ClimbState.DOWN;
 
-    @NonNull
-    public static EndgameSubsystem createWithDefaults(final HardwareMap hardwareMap) {
-        return new EndgameSubsystem(
+    public EndgameSubsystem(final HardwareMap hardwareMap) {
+        this(
                 hardwareMap.dcMotor.get("pullup_left"),
                 hardwareMap.dcMotor.get("pullup_right"),
                 new SimpleServo(hardwareMap, "drone", -900, 900)
         );
     }
 
-    public EndgameSubsystem(DcMotor leftPull, DcMotor rightPull, @Nullable ServoEx launcher) {
+    private EndgameSubsystem(DcMotor leftPull, DcMotor rightPull, ServoEx launcher) {
         this.leftPull = leftPull;
         this.rightPull = rightPull;
         this.launcher = launcher;
@@ -37,10 +31,8 @@ public class EndgameSubsystem extends RobotSubsystem {
         this.leftPull.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.rightPull.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        if (launcher != null) {
-            this.launcher.setInverted(true);
-            this.launcher.turnToAngle(50);
-        }
+        this.launcher.setInverted(true);
+        this.launcher.turnToAngle(50);
     }
 
     private int angleToTicks(double angle, AngleUnit unit) {
@@ -106,7 +98,7 @@ public class EndgameSubsystem extends RobotSubsystem {
      * Toggles the servomotor of the drone launcher. Only works if in position.
      */
     public void launchPlane() {
-        if (launcher == null || climbState != ClimbState.DRONE)
+        if (climbState != ClimbState.DRONE)
             return;
 
         if (Math.round(launcher.getAngle()) == 50)

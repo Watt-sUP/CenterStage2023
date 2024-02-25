@@ -6,38 +6,46 @@ import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.qualcomm.hardware.lynx.LynxModule;
 
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.EndgameSubsystem;
+import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
+
+import java.util.List;
 
 @Config
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp (Tomoiu + Vulpoiu)")
 public class TeleOp extends CommandOpMode {
+    private List<LynxModule> hubs;
 
     public void initialize() {
 
-        Mugurel robot = new Mugurel(hardwareMap, Mugurel.OpModeType.TELEOP);
+        hubs = hardwareMap.getAll(LynxModule.class);
+        hubs.forEach(hub -> hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL));
 
-        DriveSubsystem driveControl = robot.getSubsystem(DriveSubsystem.class);
-        CollectorSubsystem intake = robot.getSubsystem(CollectorSubsystem.class);
-        DepositSubsystem outtake = robot.getSubsystem(DepositSubsystem.class);
-        EndgameSubsystem endgame = robot.getSubsystem(EndgameSubsystem.class);
+        OdometrySubsystem odometry = new OdometrySubsystem(this);
+        CollectorSubsystem intake = new CollectorSubsystem(hardwareMap);
+        DriveSubsystem chassis = new DriveSubsystem(hardwareMap);
+        DepositSubsystem outtake = new DepositSubsystem(hardwareMap);
+        EndgameSubsystem endgame = new EndgameSubsystem(hardwareMap);
 
         GamepadEx driver1 = new GamepadEx(gamepad1);
         GamepadEx driver2 = new GamepadEx(gamepad2);
 
-        driveControl.setAxes(driver1::getLeftY, driver1::getLeftX, driver1::getRightX);
+        chassis.setAxes(driver1::getLeftY, driver1::getLeftX, driver1::getRightX);
+        outtake.setSafeguard(() -> intake.location != CollectorSubsystem.LiftState.RAISED);
         Trigger rightTrigger = new Trigger(() -> gamepad2.right_trigger > .3 && outtake.spikeState == DepositSubsystem.Spike.RAISED);
 
         // Brakes
         driver1.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
-                .whileHeld(() -> driveControl.setPowerLimit(0.5))
-                .whenReleased(() -> driveControl.setPowerLimit(1.0));
+                .whileHeld(() -> chassis.setPowerLimit(0.5))
+                .whenReleased(() -> chassis.setPowerLimit(1.0));
         driver1.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
-                .whileHeld(() -> driveControl.setPowerLimit(0.33))
-                .whenReleased(() -> driveControl.setPowerLimit(1.0));
+                .whileHeld(() -> chassis.setPowerLimit(0.33))
+                .whenReleased(() -> chassis.setPowerLimit(1.0));
 
         // Endgame specific controls
         driver1.getGamepadButton(GamepadKeys.Button.B)
@@ -86,5 +94,11 @@ public class TeleOp extends CommandOpMode {
             telemetry.addData("Climb Position", endgame.getClimbState());
             telemetry.update();
         }));
+    }
+
+    @Override
+    public void run() {
+        super.run();
+        hubs.forEach(LynxModule::clearBulkCache);
     }
 }

@@ -1,8 +1,7 @@
 package org.firstinspires.ftc.teamcode.commands.subsystems;
 
-import androidx.annotation.NonNull;
-
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.util.MathUtils;
@@ -10,13 +9,11 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.util.RobotSubsystem;
-
 import java.util.Arrays;
 import java.util.function.BooleanSupplier;
 
 @Config
-public class DepositSubsystem extends RobotSubsystem {
+public class DepositSubsystem extends SubsystemBase {
     private final DcMotor slides;
     public static Double LOW_LEFT = 0.05, LOW_RIGHT = 0.1;
     private final int[] slidesPositions = {0, 400, 700, 1000, 1250};
@@ -41,9 +38,8 @@ public class DepositSubsystem extends RobotSubsystem {
     private Blocker blockerState = Blocker.FREE;
     private boolean raisingSlides = false;
 
-    @NonNull
-    public static DepositSubsystem createWithDefaults(final HardwareMap hardwareMap) {
-        return new DepositSubsystem(
+    public DepositSubsystem(final HardwareMap hardwareMap) {
+        this(
                 new SimpleServo(hardwareMap, "depo_left", 0, 220),
                 new SimpleServo(hardwareMap, "depo_right", 0, 220),
                 new SimpleServo(hardwareMap, "stopper_top", 0, 300),
@@ -52,7 +48,7 @@ public class DepositSubsystem extends RobotSubsystem {
         );
     }
 
-    public DepositSubsystem(ServoEx leftLift, ServoEx rightLift, ServoEx stopperTop, ServoEx stopperBottom, DcMotor slides) {
+    private DepositSubsystem(ServoEx leftLift, ServoEx rightLift, ServoEx stopperTop, ServoEx stopperBottom, DcMotor slides) {
         this.leftLift = leftLift;
         this.rightLift = rightLift;
         this.stopperTop = stopperTop;

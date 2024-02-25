@@ -1,20 +1,17 @@
 package org.firstinspires.ftc.teamcode.commands.subsystems;
 
-import androidx.annotation.NonNull;
-
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.util.InterpLUT;
 import com.arcrobotics.ftclib.util.Timing;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.util.RobotSubsystem;
-
 import java.util.concurrent.TimeUnit;
 
 @Config
-public class CollectorSubsystem extends RobotSubsystem {
+public class CollectorSubsystem extends SubsystemBase {
     public static Double LOWER_LIFT = 0.74, RAISE_LIFT = 0.075, STACK_LIFT = 0.665;
     private final ServoEx liftLeft, liftRight;
     private final ServoEx claw;
@@ -36,7 +33,15 @@ public class CollectorSubsystem extends RobotSubsystem {
     public ClampState clamping = ClampState.CLOSED;
     public LiftState location = LiftState.STACK;
 
-    public CollectorSubsystem(ServoEx liftL, ServoEx liftR, ServoEx clamp) {
+    public CollectorSubsystem(final HardwareMap hardwareMap) {
+        this(
+                new SimpleServo(hardwareMap, "v4b_left", 0, 180),
+                new SimpleServo(hardwareMap, "v4b_right", 0, 180),
+                new SimpleServo(hardwareMap, "claw", 0, 300)
+        );
+    }
+
+    private CollectorSubsystem(ServoEx liftL, ServoEx liftR, ServoEx clamp) {
         liftLeft = liftL;
         liftRight = liftR;
         claw = clamp;
@@ -51,15 +56,6 @@ public class CollectorSubsystem extends RobotSubsystem {
 
         claw.turnToAngle(195);
         this.setLiftLocation(LiftState.RAISED);
-    }
-
-    @NonNull
-    public static CollectorSubsystem createWithDefaults(final HardwareMap hardwareMap) {
-        return new CollectorSubsystem(
-                new SimpleServo(hardwareMap, "v4b_left", 0, 180),
-                new SimpleServo(hardwareMap, "v4b_right", 0, 180),
-                new SimpleServo(hardwareMap, "claw", 0, 300)
-        );
     }
 
     public void setLiftLocation(LiftState target) {

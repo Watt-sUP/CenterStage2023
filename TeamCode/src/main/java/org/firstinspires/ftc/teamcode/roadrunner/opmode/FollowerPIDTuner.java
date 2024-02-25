@@ -5,7 +5,8 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.Mugurel;
+import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
+import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
@@ -30,29 +31,27 @@ public class FollowerPIDTuner extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        Mugurel robot = new Mugurel(hardwareMap, Mugurel.OpModeType.TUNING);
-
+        OdometrySubsystem odometry = new OdometrySubsystem(this);
+        CollectorSubsystem intake = new CollectorSubsystem(hardwareMap);
 
         Pose2d startPose = new Pose2d(-DISTANCE / 2, -DISTANCE / 2, 0);
-
         drive.setPoseEstimate(startPose);
 
-        waitForStart();
+        TrajectorySequence trajSeq = drive.trajectorySequenceBuilder(startPose)
+                .forward(DISTANCE)
+                .turn(Math.toRadians(90))
+                .forward(DISTANCE)
+                .turn(Math.toRadians(90))
+                .forward(DISTANCE)
+                .turn(Math.toRadians(90))
+                .forward(DISTANCE)
+                .turn(Math.toRadians(90))
+                .build();
 
+        waitForStart();
         if (isStopRequested()) return;
 
-        while (!isStopRequested()) {
-            TrajectorySequence trajSeq = drive.trajectorySequenceBuilder(startPose)
-                    .forward(DISTANCE)
-                    .turn(Math.toRadians(90))
-                    .forward(DISTANCE)
-                    .turn(Math.toRadians(90))
-                    .forward(DISTANCE)
-                    .turn(Math.toRadians(90))
-                    .forward(DISTANCE)
-                    .turn(Math.toRadians(90))
-                    .build();
+        while (!isStopRequested())
             drive.followTrajectorySequence(trajSeq);
-        }
     }
 }

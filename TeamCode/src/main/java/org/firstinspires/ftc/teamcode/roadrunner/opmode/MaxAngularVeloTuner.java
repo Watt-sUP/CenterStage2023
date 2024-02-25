@@ -10,7 +10,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.Mugurel;
+import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
+import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 
 import java.util.Objects;
@@ -34,7 +35,6 @@ public class MaxAngularVeloTuner extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -45,7 +45,8 @@ public class MaxAngularVeloTuner extends LinearOpMode {
         telemetry.addLine("Press start when ready.");
         telemetry.update();
 
-        Mugurel robot = new Mugurel(hardwareMap, Mugurel.OpModeType.TUNING);
+        OdometrySubsystem odometry = new OdometrySubsystem(this);
+        CollectorSubsystem intake = new CollectorSubsystem(hardwareMap);
         waitForStart();
 
         telemetry.clearAll();

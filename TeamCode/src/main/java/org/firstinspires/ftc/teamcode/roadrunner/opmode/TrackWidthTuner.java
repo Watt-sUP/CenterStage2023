@@ -11,7 +11,8 @@ import com.qualcomm.robotcore.util.MovingStatistics;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
-import org.firstinspires.ftc.teamcode.Mugurel;
+import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
+import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.roadrunner.DriveConstants;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 
@@ -34,18 +35,13 @@ public class TrackWidthTuner extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
-        Mugurel robot = new Mugurel(hardwareMap, Mugurel.OpModeType.TUNING);
+        OdometrySubsystem odometry = new OdometrySubsystem(this);
+        CollectorSubsystem intake = new CollectorSubsystem(hardwareMap);
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
-        telemetry.addLine("Press play to begin the track width tuner routine");
-        telemetry.addLine("Make sure your robot has enough clearance to turn smoothly");
-        telemetry.update();
-
         waitForStart();
-
         if (isStopRequested()) return;
 
-        telemetry.clearAll();
         telemetry.addLine("Running...");
         telemetry.update();
 

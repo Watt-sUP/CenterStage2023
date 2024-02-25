@@ -1,17 +1,14 @@
 package org.firstinspires.ftc.teamcode.commands.subsystems;
 
-import androidx.annotation.NonNull;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.util.InterpLUT;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import org.firstinspires.ftc.teamcode.util.RobotSubsystem;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @Config
-public class OdometrySubsystem extends RobotSubsystem {
+public class OdometrySubsystem {
 
     public static double PARALLEL_UP = 0, PARALLEL_DOWN = 1;
     public static double PERPENDICULAR_UP = 0, PERPENDICULAR_DOWN = 1;
@@ -21,16 +18,19 @@ public class OdometrySubsystem extends RobotSubsystem {
     private final InterpLUT backTable = new InterpLUT();
     private final InterpLUT rightTable = new InterpLUT();
 
-    @NonNull
-    public static OdometrySubsystem createWithDefaults(final HardwareMap hardwareMap) {
-        return new OdometrySubsystem(
-                new SimpleServo(hardwareMap, "odo_left", 0, 180),
-                new SimpleServo(hardwareMap, "odo_right", 0, 180),
-                new SimpleServo(hardwareMap, "odo_back", 0, 1800)
+    public OdometrySubsystem(final OpMode opMode) {
+        this(
+                new SimpleServo(opMode.hardwareMap, "odo_left", 0, 180),
+                new SimpleServo(opMode.hardwareMap, "odo_right", 0, 180),
+                new SimpleServo(opMode.hardwareMap, "odo_back", 0, 1800)
         );
+
+        if (opMode.getClass().isAnnotationPresent(TeleOp.class))
+            raise();
+        else lower();
     }
 
-    public OdometrySubsystem(ServoEx left, ServoEx right, ServoEx back) {
+    private OdometrySubsystem(ServoEx left, ServoEx right, ServoEx back) {
         this.left = left;
         this.right = right;
         this.back = back;

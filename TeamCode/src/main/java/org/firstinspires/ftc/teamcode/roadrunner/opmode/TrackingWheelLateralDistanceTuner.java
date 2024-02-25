@@ -7,7 +7,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.RobotLog;
 
-import org.firstinspires.ftc.teamcode.Mugurel;
+import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
+import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.roadrunner.StandardGyroLocalizer;
 
@@ -70,19 +71,14 @@ public class TrackingWheelLateralDistanceTuner extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        Mugurel robot = new Mugurel(hardwareMap, Mugurel.OpModeType.TUNING);
+        OdometrySubsystem odometry = new OdometrySubsystem(this);
+        CollectorSubsystem intake = new CollectorSubsystem(hardwareMap);
+
         if (!(drive.getLocalizer() instanceof StandardGyroLocalizer))
             RobotLog.setGlobalErrorMsg("StandardGyroLocalizer is not being set in the drive class.");
 
-        telemetry.addLine("Prior to beginning the routine, please read the directions "
-                + "located in the comments of the opmode file.");
-        telemetry.addLine("Press play to begin the tuning routine.");
-        telemetry.addLine("");
-        telemetry.addLine("Press Y/△ to stop the routine.");
-        telemetry.update();
-
+        odometry.lower();
         waitForStart();
-
         if (isStopRequested()) return;
 
         telemetry.clearAll();
@@ -91,12 +87,11 @@ public class TrackingWheelLateralDistanceTuner extends LinearOpMode {
         double headingAccumulator = 0;
         double lastHeading = 0;
 
-        boolean tuningFinished = false, almostDone = false;
+        boolean almostDone = false;
 
-        while (!isStopRequested() && !tuningFinished) {
+        while (!isStopRequested()) {
             Pose2d vel = new Pose2d(0, 0, -gamepad1.right_stick_x);
             drive.setDrivePower(vel);
-
             drive.update();
 
             double heading = drive.getPoseEstimate().getHeading();
@@ -105,29 +100,26 @@ public class TrackingWheelLateralDistanceTuner extends LinearOpMode {
             headingAccumulator += Angle.normDelta(deltaHeading);
             lastHeading = heading;
 
-            if (!almostDone && Math.toDegrees(headingAccumulator) > 324 * NUM_TURNS) {
-                gamepad1.rumble(.75, .75, 250);
+            if (!almostDone && headingAccumulator > 1.8 * Math.PI * NUM_TURNS) {
+                gamepad1.rumble(1, 1, 250);
                 almostDone = true;
             }
 
             telemetry.clearAll();
-            telemetry.addLine("Total Heading (deg): " + Math.toDegrees(headingAccumulator));
-            telemetry.addLine("Raw Heading (deg): " + Math.toDegrees(heading));
-            telemetry.addLine();
+            telemetry.addData("Total Heading (deg)", Math.toDegrees(headingAccumulator));
             telemetry.addLine("Press Y/△ to conclude routine");
             telemetry.update();
 
             if (gamepad1.y)
-                tuningFinished = true;
+                break;
         }
 
         telemetry.clearAll();
-        telemetry.addLine("Localizer's total heading: " + Math.toDegrees(headingAccumulator) + "°");
+        telemetry.addLine("Localizer heading: " + Math.toDegrees(headingAccumulator) + "°");
         telemetry.addLine("Effective LATERAL_DISTANCE: " +
                 (headingAccumulator / (NUM_TURNS * Math.PI * 2)) * StandardGyroLocalizer.LATERAL_DISTANCE);
 
         telemetry.update();
-
         while (!isStopRequested()) idle();
     }
 }

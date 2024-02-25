@@ -22,7 +22,8 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.Mugurel;
+import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
+import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 
 import java.util.Objects;
@@ -68,19 +69,14 @@ public class ManualFeedforwardTuner extends LinearOpMode {
         }
 
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, dashboard.getTelemetry());
-        Mugurel robot = new Mugurel(hardwareMap, Mugurel.OpModeType.TUNING);
+        OdometrySubsystem odometry = new OdometrySubsystem(this);
+        CollectorSubsystem intake = new CollectorSubsystem(hardwareMap);
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         final VoltageSensor voltageSensor = hardwareMap.voltageSensor.iterator().next();
 
         Mode mode = Mode.TUNING_MODE;
-
         NanoClock clock = NanoClock.system();
-
-        telemetry.addLine("Ready!");
-        telemetry.update();
-        telemetry.clearAll();
-
         waitForStart();
 
         if (isStopRequested()) return;
@@ -89,15 +85,13 @@ public class ManualFeedforwardTuner extends LinearOpMode {
         MotionProfile activeProfile = generateProfile(true);
         double profileStart = clock.seconds();
 
-
         while (!isStopRequested()) {
             telemetry.addData("mode", mode);
 
             switch (mode) {
                 case TUNING_MODE:
-                    if (gamepad1.y) {
+                    if (gamepad1.y)
                         mode = Mode.DRIVER_MODE;
-                    }
 
                     // calculate and set the motor power
                     double profileTime = clock.seconds() - profileStart;

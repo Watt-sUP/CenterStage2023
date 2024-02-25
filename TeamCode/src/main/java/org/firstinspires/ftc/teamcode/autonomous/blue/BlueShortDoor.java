@@ -15,7 +15,6 @@ import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
-import org.firstinspires.ftc.teamcode.Mugurel;
 import org.firstinspires.ftc.teamcode.autonomous.PathGenerator;
 import org.firstinspires.ftc.teamcode.autonomous.assets.AllianceColor;
 import org.firstinspires.ftc.teamcode.autonomous.assets.BackstageRoute;
@@ -25,6 +24,7 @@ import org.firstinspires.ftc.teamcode.autonomous.assets.StartingPosition;
 import org.firstinspires.ftc.teamcode.commands.RunByCaseCommand;
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
+import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.TensorflowSubsystem;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
@@ -46,11 +46,11 @@ public class BlueShortDoor extends CommandOpMode {
         telemetry.update();
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        Mugurel robot = new Mugurel(hardwareMap, Mugurel.OpModeType.AUTO);
         PathGenerator generator = new PathGenerator(drive);
 
-        CollectorSubsystem intake = robot.getSubsystem(CollectorSubsystem.class);
-        DepositSubsystem outtake = robot.getSubsystem(DepositSubsystem.class);
+        OdometrySubsystem odometry = new OdometrySubsystem(this);
+        CollectorSubsystem intake = new CollectorSubsystem(hardwareMap);
+        DepositSubsystem outtake = new DepositSubsystem(hardwareMap);
 
         generator.setStartingLocation(AllianceColor.BLUE, StartingPosition.BACKDROP);
         tensorflow.setMinConfidence(0.8);
