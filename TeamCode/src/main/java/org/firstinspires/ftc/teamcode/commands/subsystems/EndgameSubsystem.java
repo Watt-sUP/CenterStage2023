@@ -1,104 +1,83 @@
 package org.firstinspires.ftc.teamcode.commands.subsystems;
 
+import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.arcrobotics.ftclib.hardware.motors.MotorGroup;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+@Config
+public class EndgameSubsystem extends SubsystemBase {
 
-public class EndgameSubsystem {
-
-    private final double TICKS_PER_REV = 384.5, GEAR_RATIO = 28.0;
-    private final DcMotor leftPull, rightPull;
+    public static double kP = 0.25;
+    private final MotorGroup elevator;
     private final ServoEx launcher;
 
-    private ClimbState climbState = ClimbState.DOWN;
+    private ElevatorState elevatorState = ElevatorState.DOWN;
 
     public EndgameSubsystem(final HardwareMap hardwareMap) {
         this(
-                hardwareMap.dcMotor.get("pullup_left"),
-                hardwareMap.dcMotor.get("pullup_right"),
+                new Motor(hardwareMap, "pullup_left", 384.5, 435),
+                new Motor(hardwareMap, "pullup_right", 384.5, 435),
                 new SimpleServo(hardwareMap, "drone", -900, 900)
         );
     }
 
-    private EndgameSubsystem(DcMotor leftPull, DcMotor rightPull, ServoEx launcher) {
-        this.leftPull = leftPull;
-        this.rightPull = rightPull;
+    private EndgameSubsystem(Motor leftArm, Motor rightArm, ServoEx launcher) {
+        elevator = new MotorGroup(leftArm, rightArm);
         this.launcher = launcher;
 
-        this.leftPull.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        this.rightPull.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        elevator.stopAndResetEncoder();
+        elevator.setDistancePerPulse(getDegreesPerTick());
+        elevator.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+
+        elevator.setPositionCoefficient(kP);
+        elevator.setPositionTolerance(1.0);
+        elevator.setRunMode(Motor.RunMode.PositionControl);
 
         this.launcher.setInverted(true);
         this.launcher.turnToAngle(50);
     }
 
-    private int angleToTicks(double angle, AngleUnit unit) {
-        return (int) (angle * TICKS_PER_REV * GEAR_RATIO / (unit.equals(AngleUnit.DEGREES) ? 360.0 : 2 * Math.PI));
+    @Override
+    public void periodic() {
+        if (elevator.atTargetPosition()) {
+            elevator.stopMotor();
+            return;
+        }
+
+        elevator.set(1.0);
     }
 
-    private double ticksToAngle(int ticks, AngleUnit unit) {
-        return ticks / (TICKS_PER_REV * GEAR_RATIO) * (unit.equals(AngleUnit.DEGREES) ? 360.0 : 2 * Math.PI);
+    private double getDegreesPerTick() {
+        final double GEAR_RATIO = 28.0;
+        return 360.0 / (elevator.getCPR() * GEAR_RATIO);
     }
 
-    public void toggleClimb() {
-        switch (climbState) {
+    public void toggleElevator() {
+        switch (elevatorState) {
             case DOWN:
-                setClimbState(ClimbState.DRONE);
+                setElevatorState(ElevatorState.DRONE);
                 break;
             case DRONE:
-                setClimbState(ClimbState.HOOKING);
+                setElevatorState(ElevatorState.HOOKING);
                 break;
             case HOOKING:
-                setClimbState(ClimbState.HANGING);
+                setElevatorState(ElevatorState.HANGING);
                 break;
             case HANGING:
-                setClimbState(ClimbState.DOWN);
+                setElevatorState(ElevatorState.DOWN);
                 break;
         }
-    }
-
-    public void setClimbState(ClimbState state) {
-        climbState = state;
-        setClimbToAngle(climbState.getAngle());
-    }
-
-    private void setClimbToTicks(int ticks) {
-        leftPull.setTargetPosition(ticks);
-        leftPull.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftPull.setPower(1);
-
-        rightPull.setTargetPosition(ticks);
-        rightPull.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightPull.setPower(1);
-    }
-
-    /**
-     * Sets the ascension mechanism to the given angle.
-     *
-     * @param angle The angle to move to
-     * @param unit  The unit the angle is in
-     */
-    public void setClimbToAngle(double angle, AngleUnit unit) {
-        setClimbToTicks(angleToTicks(angle, unit));
-    }
-
-    /**
-     * Sets the ascension mechanism to the given angle. Defaults to degrees.
-     *
-     * @param angle The angle to move to
-     */
-    public void setClimbToAngle(double angle) {
-        setClimbToAngle(angle, AngleUnit.DEGREES);
     }
 
     /**
      * Toggles the servomotor of the drone launcher. Only works if in position.
      */
     public void launchPlane() {
-        if (climbState != ClimbState.DRONE)
+        if (elevatorState != ElevatorState.DRONE)
             return;
 
         if (Math.round(launcher.getAngle()) == 50)
@@ -106,31 +85,39 @@ public class EndgameSubsystem {
         else launcher.turnToAngle(50);
     }
 
-    public boolean isBusy() {
-        return leftPull.isBusy() || rightPull.isBusy();
+    public String getElevatorState() {
+        return elevatorState.toString();
     }
 
-    public String getClimbState() {
-        return climbState.toString();
+    public void setElevatorState(ElevatorState state) {
+        elevatorState = state;
+        setElevatorAngle(elevatorState.getAngle());
     }
 
     /**
-     * Gets the current angle of the ascension system.
+     * Gets the current angle of the elevator.
      *
-     * @param unit The unit the output should be in
-     * @return The angle of the system in the desired unit
+     * @return The angle of the system
      */
-    public double getClimbAngle(AngleUnit unit) {
-        int avg = (leftPull.getCurrentPosition() + rightPull.getCurrentPosition()) / 2;
-        return ticksToAngle(avg, unit);
+    public double getElevatorAngle() {
+        return elevator.getDistance();
     }
 
-    public enum ClimbState {
+    /**
+     * Sets the elevator mechanism to the given angle.
+     *
+     * @param angle The angle to move to
+     */
+    public void setElevatorAngle(double angle) {
+        elevator.setTargetDistance(angle);
+    }
+
+    public enum ElevatorState {
         HOOKING(105), DRONE(60), HANGING(45), DOWN(0);
 
         private final double angle;
 
-        ClimbState(double angle) {
+        ElevatorState(double angle) {
             this.angle = angle;
         }
 

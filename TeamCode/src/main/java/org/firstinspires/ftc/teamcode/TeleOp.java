@@ -39,6 +39,8 @@ public class TeleOp extends CommandOpMode {
         outtake.setSafeguard(() -> intake.location != CollectorSubsystem.LiftState.RAISED);
         Trigger rightTrigger = new Trigger(() -> gamepad2.right_trigger > .3 && outtake.spikeState == DepositSubsystem.Spike.RAISED);
 
+        register(chassis, intake, outtake, endgame);
+
         // Brakes
         driver1.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
                 .whileHeld(() -> chassis.setPowerLimit(0.5))
@@ -49,7 +51,7 @@ public class TeleOp extends CommandOpMode {
 
         // Endgame specific controls
         driver1.getGamepadButton(GamepadKeys.Button.B)
-                .whenPressed(endgame::toggleClimb);
+                .whenPressed(endgame::toggleElevator);
         driver1.getGamepadButton(GamepadKeys.Button.Y)
                 .whenPressed(endgame::launchPlane);
 
@@ -91,7 +93,8 @@ public class TeleOp extends CommandOpMode {
 
         schedule(new RunCommand(() -> {
             telemetry.addData("Blocker State", outtake.getBlockerState());
-            telemetry.addData("Climb Position", endgame.getClimbState());
+            telemetry.addData("Elevator Position", endgame.getElevatorState());
+            telemetry.addData("Elevator Angle", endgame.getElevatorAngle());
             telemetry.update();
         }));
     }
