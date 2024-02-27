@@ -107,7 +107,7 @@ public class RedShortDoor extends CommandOpMode {
                 new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, true),
                 new InstantCommand(intake::toggleLiftLocation).andThen(
                         new InstantCommand(() -> {
-                            intake.setClampPosition(90);
+                            intake.setClampPosition(25);
                             intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
                             outtake.toggleBlockers();
                             outtake.toggleSpike();
@@ -135,7 +135,7 @@ public class RedShortDoor extends CommandOpMode {
                                         new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
                                         new WaitCommand(300),
                                         new InstantCommand(() -> {
-                                            intake.setClampPosition(90);
+                                            intake.setClampPosition(25);
                                             intake.adjustLiftPosition(0.04);
                                             outtake.toggleBlockers();
                                             outtake.toggleSpike();
@@ -178,7 +178,7 @@ public class RedShortDoor extends CommandOpMode {
                                         new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
                                         new WaitCommand(300),
                                         new InstantCommand(() -> {
-                                            intake.setClampPosition(90);
+                                            intake.setClampPosition(25);
                                             outtake.toggleBlockers();
                                             outtake.toggleSpike();
                                         }),

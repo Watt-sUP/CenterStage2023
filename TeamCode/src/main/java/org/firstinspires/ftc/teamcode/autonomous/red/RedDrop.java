@@ -120,7 +120,7 @@ public class RedDrop extends CommandOpMode {
                 new InstantCommand(collectorSystem::toggleLiftLocation).andThen(
                         new WaitCommand(300),
                         new InstantCommand(() -> {
-                            collectorSystem.setClampPosition(90);
+                            collectorSystem.setClampPosition(25);
                             collectorSystem.setLiftLocation(CollectorSubsystem.LiftState.STACK);
                             depositSystem.toggleBlockers();
                             depositSystem.toggleSpike();

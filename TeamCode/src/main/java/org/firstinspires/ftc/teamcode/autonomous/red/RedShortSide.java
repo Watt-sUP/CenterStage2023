@@ -95,7 +95,7 @@ public class RedShortSide extends CommandOpMode {
                 new RunByCaseCommand(location, purpleCases, drive, true),
                 new InstantCommand(intake::toggleLiftLocation).andThen(
                         new InstantCommand(() -> {
-                            intake.setClampPosition(90);
+                            intake.setClampPosition(25);
                             intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
                             outtake.toggleBlockers();
                             outtake.toggleSpike();

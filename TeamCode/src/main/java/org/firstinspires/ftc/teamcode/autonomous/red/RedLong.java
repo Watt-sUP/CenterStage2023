@@ -74,8 +74,7 @@ public class RedLong extends CommandOpMode {
         TrajectorySequence whiteRight = drive.trajectorySequenceBuilder(rightPurple.end(), 40)
                 .setTangent(Math.toRadians(180))
                 .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
-                .addTemporalMarker(() ->
-                {
+                .addTemporalMarker(() -> {
                     intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
                     intake.adjustLiftPosition(-0.02);
                 })
@@ -96,8 +95,7 @@ public class RedLong extends CommandOpMode {
         TrajectorySequence whiteMiddle = drive.trajectorySequenceBuilder(middlePurple.end(), 40)
                 .setTangent(Math.toRadians(180))
                 .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
-                .addTemporalMarker(() ->
-                {
+                .addTemporalMarker(() -> {
                     intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
                     intake.adjustLiftPosition(-0.02);
                 })
@@ -189,7 +187,7 @@ public class RedLong extends CommandOpMode {
                                         new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
                                         new WaitCommand(300),
                                         new InstantCommand(() -> {
-                                            intake.setClampPosition(90);
+                                            intake.setClampPosition(25);
                                             intake.adjustLiftPosition(0.02);
                                             outtake.toggleBlockers();
                                             outtake.toggleSpike();

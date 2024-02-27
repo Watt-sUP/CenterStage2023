@@ -90,11 +90,11 @@ public class OdometrySubsystem {
         }
 
         /**
-         * Sets the position of the wheel's servomotor based on its interpolated function
+         * Sets the position of the wheel's servomotor based on its interpolated function.
          *
          * @param position The position to set the wheel to
          * @throws RuntimeException         If the servo wasn't set or positions weren't generated
-         * @throws IllegalArgumentException If the wheel is out of the generated range
+         * @throws IllegalArgumentException If the desired position is out of the generated range
          */
         public void setToPosition(double position) throws RuntimeException {
             if (servo == null)
