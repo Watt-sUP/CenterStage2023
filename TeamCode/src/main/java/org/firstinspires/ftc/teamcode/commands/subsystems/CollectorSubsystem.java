@@ -21,6 +21,7 @@ public class CollectorSubsystem extends SubsystemBase {
     public static Double LOWER_LIFT = 0.74, RAISE_LIFT = 0.075, STACK_LIFT = 0.665;
     private final ServoEx claw;
     private final LiftServo left, right;
+
     /*
      Timer responsible for periodic check:
      - Starts/resets once the claw is closed (something is collected)

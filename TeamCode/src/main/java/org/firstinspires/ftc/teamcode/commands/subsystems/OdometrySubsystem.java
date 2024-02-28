@@ -42,9 +42,7 @@ public class OdometrySubsystem {
 
         Wheels.LEFT.createSpline(new Pair<>(0.0, 110.0), new Pair<>(1.0, 128.0));
         Wheels.RIGHT.createSpline(new Pair<>(0.0, 99.0), new Pair<>(1.0, 119.0));
-
-        // TODO: Find positions for this wheel
-        Wheels.PERPENDICULAR.createSpline(new Pair<>(0.0, 400.0), new Pair<>(0.5, 270.0), new Pair<>(1.0, 180.0));
+        Wheels.PERPENDICULAR.createSpline(new Pair<>(0.0, 30.0), new Pair<>(1.0, 210.0));
     }
 
     public void raise() {

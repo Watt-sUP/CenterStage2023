@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 @Config
 public class EndgameSubsystem extends SubsystemBase {
 
-    public static double kP = 0.25;
+    public static double kP = 0.3;
     private final MotorGroup elevator;
     private final ServoEx launcher;
 
@@ -33,8 +33,8 @@ public class EndgameSubsystem extends SubsystemBase {
         elevator.setDistancePerPulse(getDegreesPerTick());
         elevator.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
-        elevator.setPositionCoefficient(kP);
         elevator.setPositionTolerance(1.0);
+        elevator.setPositionCoefficient(kP);
         elevator.setRunMode(Motor.RunMode.PositionControl);
 
         this.launcher.setInverted(true);
