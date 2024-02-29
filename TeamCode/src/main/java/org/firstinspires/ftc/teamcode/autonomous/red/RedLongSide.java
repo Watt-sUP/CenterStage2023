@@ -33,8 +33,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-@Autonomous(name = "Red Long", group = "auto")
-public class RedLong extends CommandOpMode {
+@Autonomous(name = "Red Long (Side)", group = "auto")
+public class RedLongSide extends CommandOpMode {
 
     private PropLocations location;
 

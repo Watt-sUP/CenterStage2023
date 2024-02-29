@@ -3,7 +3,6 @@ package com.example.meepmeeptesting;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.noahbres.meepmeep.MeepMeep;
-import com.noahbres.meepmeep.core.colorscheme.scheme.ColorSchemeBlueDark;
 import com.noahbres.meepmeep.core.colorscheme.scheme.ColorSchemeRedDark;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
@@ -31,36 +30,14 @@ public class MeepMeepTesting {
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(startPosition, startHeading))
                                 .splineTo(
-                                        new Vector2d(-46, -39),
+                                        new Vector2d(-39, -38),
                                         Math.toRadians(90.00)
                                 )
                                 .setTangent(Math.toRadians(180))
                                 .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
                                 .setReversed(true)
-                                .splineTo(new Vector2d(-24, -59), Math.toRadians(0))
-                                .splineTo(new Vector2d(2.12, -59.00), Math.toRadians(0.00))
-                                .splineTo(new Vector2d(50.50, -35.50), Math.toRadians(0.00))
-                                .build()
-                );
-
-        RoadRunnerBotEntity newBot = new DefaultBotBuilder(meepMeep)
-                .setDimensions(13, 15.19)
-                .setColorScheme(new ColorSchemeBlueDark())
-                .setConstraints(53, 53, Math.toRadians(270), Math.toRadians(270), 11.5)
-                .followTrajectorySequence(drive ->
-                        drive.trajectorySequenceBuilder(mirrorPose(new Pose2d(startPosition, startHeading)))
-                                .splineTo(mirrorVector(new Vector2d(-39.00, -38.00)), Math.toRadians(-90.00))
-                                .setTangent(Math.toRadians(180))
-                                .splineToLinearHeading(mirrorPose(new Pose2d(-52.50, -35.75, Math.toRadians(180.00))), Math.toRadians(180))
-                                .addTemporalMarker(() -> {
-                                })
-                                .waitSeconds(0.3)
-                                .addTemporalMarker(() -> {
-                                })
-                                .lineToLinearHeading(mirrorPose(new Pose2d(-56.50, -35.75, Math.toRadians(180.00))))
-                                .addTemporalMarker(() -> {
-                                })
-                                .waitSeconds(0.5)
+                                .splineTo(new Vector2d(24.00, -35.50), Math.toRadians(0.00))
+                                .splineTo(new Vector2d(50.50, -29.50), Math.toRadians(0.00))
                                 .build()
                 );
 
@@ -68,7 +45,6 @@ public class MeepMeepTesting {
                 .setDarkMode(true)
                 .setBackgroundAlpha(0.95f)
                 .addEntity(currentBot)
-//                .addEntity(newBot)
                 .start();
     }
 }

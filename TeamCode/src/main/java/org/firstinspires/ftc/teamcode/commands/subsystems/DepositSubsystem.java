@@ -51,6 +51,7 @@ public class DepositSubsystem extends SubsystemBase {
     private DepositSubsystem(ServoEx leftLift, ServoEx rightLift, ServoEx stopperTop, ServoEx stopperBottom, DcMotor slides) {
         this.leftLift = leftLift;
         this.rightLift = rightLift;
+
         this.stopperTop = stopperTop;
         this.stopperBottom = stopperBottom;
         this.slides = slides;
@@ -59,7 +60,7 @@ public class DepositSubsystem extends SubsystemBase {
 
         this.stopperTop.turnToAngle(90);
         this.stopperBottom.turnToAngle(60);
-        this.toggleSpike();
+        toggleSpike();
 
         this.slides.setDirection(DcMotorSimple.Direction.FORWARD);
         this.slides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -73,10 +74,10 @@ public class DepositSubsystem extends SubsystemBase {
     public void periodic() {
         if (slides.getCurrentPosition() > 100 && raisingSlides) {
             while (blockerState != Blocker.TWO_PIXELS)
-                this.toggleBlockers();
+                toggleBlockers();
 
             if (spikeState == Spike.LOWERED)
-                this.toggleSpike();
+                toggleSpike();
 
             raisingSlides = false;
         }
@@ -99,25 +100,25 @@ public class DepositSubsystem extends SubsystemBase {
 
     public void setSlidesPosition(int position) {
         position = MathUtils.clamp(position, 0, 4);
-        this.setSlidesTicks(slidesPositions[position]);
+        setSlidesTicks(slidesPositions[position]);
     }
 
     public void raiseSlidesPosition() {
         int ticks = slides.getTargetPosition();
         int current_pos = Arrays.binarySearch(slidesPositions, ticks);
 
-        this.setSlidesPosition(current_pos < 0 ? -(current_pos + 1) : (current_pos + 1));
+        setSlidesPosition(current_pos < 0 ? -(current_pos + 1) : (current_pos + 1));
     }
 
     public void lowerSlidesPosition() {
         int ticks = slides.getTargetPosition();
         int current_pos = Arrays.binarySearch(slidesPositions, ticks);
 
-        this.setSlidesPosition(current_pos < 0 ? -(current_pos + 1) - 1 : (current_pos - 1));
+        setSlidesPosition(current_pos < 0 ? -(current_pos + 1) - 1 : (current_pos - 1));
     }
 
     public void adjustSlidesTicks(int ticks) {
-        this.setSlidesTicks(this.slides.getTargetPosition() + ticks);
+        setSlidesTicks(slides.getTargetPosition() + ticks);
     }
 
     public enum Spike {
