@@ -61,11 +61,9 @@ public class RedLongDoor extends CommandOpMode {
         TrajectorySequence leftPurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
                 .splineTo(new Vector2d(-46, -39), Math.toRadians(90.00))
                 .build();
-
         TrajectorySequence middlePurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
                 .splineTo(new Vector2d(-39.00, -38.00), Math.toRadians(90.00))
                 .build();
-
         TrajectorySequence rightPurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
                 .splineTo(new Vector2d(-24.5, -33)
                         .minus(Vector2d.polar(11, Math.toRadians(30))), Math.toRadians(30.00))
@@ -91,12 +89,40 @@ public class RedLongDoor extends CommandOpMode {
                 .addTemporalMarker(intake::toggleClamp)
                 .waitSeconds(0.5)
                 .build();
+        TrajectorySequence whiteRight = drive.trajectorySequenceBuilder(rightPurple.end(), 40)
+                .setTangent(Math.toRadians(180))
+                .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
+                .addTemporalMarker(() -> {
+                    intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
+                    intake.adjustLiftPosition(-0.02);
+                })
+                .waitSeconds(0.3)
+                .addTemporalMarker(() -> {
+                    if (intake.clamping != CollectorSubsystem.ClampState.OPENED)
+                        intake.toggleClamp();
+                })
+                .setConstraints(
+                        SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(30)
+                )
+                .lineToLinearHeading(new Pose2d(-56.50, -35.75, Math.toRadians(180.00)))
+                .addTemporalMarker(intake::toggleClamp)
+                .waitSeconds(0.5)
+                .build();
 
         Map<PropLocations, TrajectorySequence> backdropsWhite = new HashMap<PropLocations, TrajectorySequence>() {{
             put(PropLocations.MIDDLE,
                     drive.trajectorySequenceBuilder(whiteMiddle.end())
                             .splineTo(new Vector2d(24.00, -35.50), Math.toRadians(0.00))
                             .splineTo(new Vector2d(50.50, -29.50), Math.toRadians(0.00))
+                            .build()
+            );
+            put(PropLocations.RIGHT,
+                    drive.trajectorySequenceBuilder(whiteRight.end())
+                            .setReversed(true)
+                            .splineTo(new Vector2d(-24, -11), Math.toRadians(0.00))
+                            .splineTo(new Vector2d(24, -11), Math.toRadians(0.00))
+                            .splineTo(new Vector2d(50.50, -35.50), Math.toRadians(0.00))
                             .build()
             );
         }};
@@ -143,7 +169,7 @@ public class RedLongDoor extends CommandOpMode {
                         new WaitCommand(300),
                         new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
                 ),
-                new RunByCaseCommand(location.toString(), drive, null, whiteMiddle, null, true),
+                new RunByCaseCommand(location.toString(), drive, null, whiteMiddle, whiteRight, true),
                 new InstantCommand(() -> drive.followTrajectorySequenceAsync(backdropsWhite.get(location))),
                 new ParallelCommandGroup(
                         new RunCommand(drive::update).interruptOn(() -> !drive.isBusy()),
@@ -154,9 +180,11 @@ public class RedLongDoor extends CommandOpMode {
                                         new WaitCommand(300),
                                         new InstantCommand(() -> {
                                             intake.setClampPosition(25);
-                                            intake.adjustLiftPosition(0.02);
                                             outtake.toggleBlockers();
                                             outtake.toggleSpike();
+
+                                            if (location == PropLocations.LEFT)
+                                                intake.adjustLiftPosition(0.02);
                                         })
                                 )
                 ),

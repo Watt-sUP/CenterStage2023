@@ -51,8 +51,8 @@ public class CollectorSubsystem extends SubsystemBase {
         left.setInverted(false);
         right.setInverted(true);
 
-        left.generatePositions(new Pair<>(0.0, 15.0), new Pair<>(0.5, 112.5), new Pair<>(1.0, 210.0));
-        right.generatePositions(new Pair<>(0.0, 6.5), new Pair<>(0.5, 101.0), new Pair<>(1.0, 199.0));
+        left.generatePositions(new Pair<>(0.0, 15.0), new Pair<>(90.0, 112.5), new Pair<>(180.0, 210.0));
+        right.generatePositions(new Pair<>(0.0, 6.5), new Pair<>(90.0, 101.0), new Pair<>(180.0, 199.0));
 
         claw = clamp;
         claw.setInverted(true);

@@ -56,7 +56,7 @@ public class InterpolatedServo {
 
         if (!interpolation.isValidPoint(position)) {
             double[] knots = interpolation.getKnots();
-            throw new IllegalArgumentException(String.format("Unable to access position %2f. " +
+            throw new IllegalArgumentException(String.format("Unable to access position %.2f. " +
                     "Spline positions range from [%.2f, %.2f]", position, knots[0], knots[knots.length - 1]));
         }
         servo.turnToAngle(interpolation.value(position));
