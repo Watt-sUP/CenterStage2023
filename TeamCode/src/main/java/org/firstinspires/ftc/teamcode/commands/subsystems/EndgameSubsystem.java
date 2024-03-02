@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 @Config
 public class EndgameSubsystem extends SubsystemBase {
 
-    public static double kP = 0.3;
+    public static double kP = 0.5;
     private final MotorGroup elevator;
     private final ServoEx launcher;
 
@@ -53,7 +53,7 @@ public class EndgameSubsystem extends SubsystemBase {
 
     private double getDegreesPerTick() {
         final double GEAR_RATIO = 28.0;
-        return 360.0 / (elevator.getCPR() * GEAR_RATIO);
+        return 360.0 / (elevator.iterator().next().getCPR() * GEAR_RATIO);
     }
 
     public void toggleElevator() {
@@ -99,8 +99,8 @@ public class EndgameSubsystem extends SubsystemBase {
      *
      * @return The angle of the system
      */
-    public double getElevatorAngle() {
-        return elevator.getDistance();
+    public String getElevatorAngle() {
+        return elevator.getPositions().toString();
     }
 
     /**
