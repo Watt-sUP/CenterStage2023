@@ -37,7 +37,7 @@ public class OdometrySubsystem {
 
         this.left.generatePositions(new Pair<>(0.0, 90.0), new Pair<>(1.0, 128.0));
         this.right.generatePositions(new Pair<>(0.0, 82.0), new Pair<>(1.0, 119.0));
-        perpendicular.generatePositions(new Pair<>(0.0, 30.0), new Pair<>(1.0, 210.0));
+        perpendicular.generatePositions(new Pair<>(0.0, 25.0), new Pair<>(1.0, 125.0));
     }
 
     public void raise() {

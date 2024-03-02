@@ -59,7 +59,10 @@ public class RedLongDoor extends CommandOpMode {
         DepositSubsystem outtake = new DepositSubsystem(hardwareMap);
 
         TrajectorySequence leftPurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
-                .splineTo(new Vector2d(-46, -39), Math.toRadians(90.00))
+                .splineToSplineHeading(new Pose2d(
+                        new Vector2d(-47.5, -31).minus(Vector2d.polar(13, Math.toRadians(180))),
+                        Math.toRadians(180)
+                ), Math.toRadians(90.00))
                 .build();
         TrajectorySequence middlePurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
                 .splineTo(new Vector2d(-39.00, -38.00), Math.toRadians(90.00))
@@ -69,6 +72,23 @@ public class RedLongDoor extends CommandOpMode {
                         .minus(Vector2d.polar(11, Math.toRadians(30))), Math.toRadians(30.00))
                 .build();
 
+        TrajectorySequence whiteLeft = drive.trajectorySequenceBuilder(leftPurple.end(), 40)
+                .setTangent(Math.toRadians(90.00))
+                .splineToSplineHeading(new Pose2d(-52.50, -12, Math.toRadians(180)), Math.toRadians(180))
+                .addTemporalMarker(() -> {
+                    intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
+                    intake.adjustLiftPosition(-0.02);
+                })
+                .waitSeconds(0.3)
+                .addTemporalMarker(intake::toggleClamp)
+                .setConstraints(
+                        SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(30)
+                )
+                .lineToLinearHeading(new Pose2d(-56.50, -12, Math.toRadians(180.00)))
+                .addTemporalMarker(intake::toggleClamp)
+                .waitSeconds(0.5)
+                .build();
         TrajectorySequence whiteMiddle = drive.trajectorySequenceBuilder(middlePurple.end(), 40)
                 .setTangent(Math.toRadians(180))
                 .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
@@ -77,10 +97,7 @@ public class RedLongDoor extends CommandOpMode {
                     intake.adjustLiftPosition(-0.02);
                 })
                 .waitSeconds(0.3)
-                .addTemporalMarker(() -> {
-                    if (intake.clamping != CollectorSubsystem.ClampState.OPENED)
-                        intake.toggleClamp();
-                })
+                .addTemporalMarker(intake::toggleClamp)
                 .setConstraints(
                         SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(30)
@@ -97,10 +114,7 @@ public class RedLongDoor extends CommandOpMode {
                     intake.adjustLiftPosition(-0.02);
                 })
                 .waitSeconds(0.3)
-                .addTemporalMarker(() -> {
-                    if (intake.clamping != CollectorSubsystem.ClampState.OPENED)
-                        intake.toggleClamp();
-                })
+                .addTemporalMarker(intake::toggleClamp)
                 .setConstraints(
                         SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(30)
@@ -111,6 +125,7 @@ public class RedLongDoor extends CommandOpMode {
                 .build();
 
         Map<PropLocations, TrajectorySequence> backdropsWhite = new HashMap<PropLocations, TrajectorySequence>() {{
+            put(PropLocations.LEFT, generator.generateBackstagePath(whiteLeft.end(), BackstageRoute.CENTER));
             put(PropLocations.MIDDLE,
                     drive.trajectorySequenceBuilder(whiteMiddle.end())
                             .splineTo(new Vector2d(24.00, -35.50), Math.toRadians(0.00))
@@ -169,7 +184,7 @@ public class RedLongDoor extends CommandOpMode {
                         new WaitCommand(300),
                         new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
                 ),
-                new RunByCaseCommand(location.toString(), drive, null, whiteMiddle, whiteRight, true),
+                new RunByCaseCommand(location.toString(), drive, whiteLeft, whiteMiddle, whiteRight, true),
                 new InstantCommand(() -> drive.followTrajectorySequenceAsync(backdropsWhite.get(location))),
                 new ParallelCommandGroup(
                         new RunCommand(drive::update).interruptOn(() -> !drive.isBusy()),

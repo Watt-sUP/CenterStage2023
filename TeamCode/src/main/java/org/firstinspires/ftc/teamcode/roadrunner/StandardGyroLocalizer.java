@@ -23,7 +23,7 @@ public class StandardGyroLocalizer extends GyroTrackingWheelLocalizer {
 
     public static double LATERAL_DISTANCE = 9.91425457057; // in; distance between the left and right wheels
     public static double FORWARD_OFFSET = -5.5; // in; offset of the lateral wheel
-    public static boolean ENABLE_IMU = true, ENABLE_MULTITHREAD = false;
+    public static boolean ENABLE_IMU = true;
     public static double GYRO_TRUST = .75;
 
     private final Encoder leftEncoder, rightEncoder, frontEncoder;
