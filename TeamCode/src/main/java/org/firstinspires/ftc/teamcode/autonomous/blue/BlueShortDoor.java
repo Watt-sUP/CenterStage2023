@@ -137,7 +137,7 @@ public class BlueShortDoor extends CommandOpMode {
                                         new WaitCommand(300),
                                         new InstantCommand(() -> {
                                             intake.setClampPosition(25);
-                                            intake.adjustLiftPosition(0.04);
+                                            intake.adjustLiftPosition(10.0);
                                             outtake.toggleBlockers();
                                             outtake.toggleSpike();
                                         }),

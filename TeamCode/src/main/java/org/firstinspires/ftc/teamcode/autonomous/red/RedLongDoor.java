@@ -77,7 +77,7 @@ public class RedLongDoor extends CommandOpMode {
                 .splineToSplineHeading(new Pose2d(-52.50, -12, Math.toRadians(180)), Math.toRadians(180))
                 .addTemporalMarker(() -> {
                     intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
-                    intake.adjustLiftPosition(-0.02);
+                    intake.adjustLiftPosition(-5.0);
                 })
                 .waitSeconds(0.3)
                 .addTemporalMarker(intake::toggleClamp)
@@ -94,7 +94,7 @@ public class RedLongDoor extends CommandOpMode {
                 .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
                 .addTemporalMarker(() -> {
                     intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
-                    intake.adjustLiftPosition(-0.02);
+                    intake.adjustLiftPosition(-5.0);
                 })
                 .waitSeconds(0.3)
                 .addTemporalMarker(intake::toggleClamp)
@@ -111,7 +111,7 @@ public class RedLongDoor extends CommandOpMode {
                 .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
                 .addTemporalMarker(() -> {
                     intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
-                    intake.adjustLiftPosition(-0.02);
+                    intake.adjustLiftPosition(-5.0);
                 })
                 .waitSeconds(0.3)
                 .addTemporalMarker(intake::toggleClamp)
@@ -199,7 +199,7 @@ public class RedLongDoor extends CommandOpMode {
                                             outtake.toggleSpike();
 
                                             if (location == PropLocations.LEFT)
-                                                intake.adjustLiftPosition(0.02);
+                                                intake.adjustLiftPosition(5.0);
                                         })
                                 )
                 ),

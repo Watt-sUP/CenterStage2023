@@ -76,7 +76,7 @@ public class RedLongSide extends CommandOpMode {
                 .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
                 .addTemporalMarker(() -> {
                     intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
-                    intake.adjustLiftPosition(-0.02);
+                    intake.adjustLiftPosition(-5.0);
                 })
                 .waitSeconds(0.3)
                 .addTemporalMarker(() -> {
@@ -97,7 +97,7 @@ public class RedLongSide extends CommandOpMode {
                 .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
                 .addTemporalMarker(() -> {
                     intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
-                    intake.adjustLiftPosition(-0.02);
+                    intake.adjustLiftPosition(-5.0);
                 })
                 .waitSeconds(0.3)
                 .addTemporalMarker(() -> {
@@ -118,7 +118,7 @@ public class RedLongSide extends CommandOpMode {
                 .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
                 .addTemporalMarker(() -> {
                     intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
-                    intake.adjustLiftPosition(-0.02);
+                    intake.adjustLiftPosition(-5.0);
                 })
                 .waitSeconds(0.3)
                 .addTemporalMarker(() -> {
@@ -188,7 +188,7 @@ public class RedLongSide extends CommandOpMode {
                                         new WaitCommand(300),
                                         new InstantCommand(() -> {
                                             intake.setClampPosition(25);
-                                            intake.adjustLiftPosition(0.02);
+                                            intake.adjustLiftPosition(5.0);
                                             outtake.toggleBlockers();
                                             outtake.toggleSpike();
                                         })

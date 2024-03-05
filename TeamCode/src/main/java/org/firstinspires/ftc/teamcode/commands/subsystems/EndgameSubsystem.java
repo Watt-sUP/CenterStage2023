@@ -5,14 +5,18 @@ import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
-import com.arcrobotics.ftclib.hardware.motors.MotorGroup;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.teamcode.util.IndependentMotorGroup;
+
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 @Config
 public class EndgameSubsystem extends SubsystemBase {
 
     public static double kP = 0.5;
-    private final MotorGroup elevator;
+    private final IndependentMotorGroup elevator;
     private final ServoEx launcher;
 
     private ElevatorState elevatorState = ElevatorState.DOWN;
@@ -26,8 +30,9 @@ public class EndgameSubsystem extends SubsystemBase {
     }
 
     private EndgameSubsystem(Motor leftArm, Motor rightArm, ServoEx launcher) {
-        elevator = new MotorGroup(leftArm, rightArm);
+        elevator = new IndependentMotorGroup(leftArm, rightArm);
         this.launcher = launcher;
+        elevator.setInverted(false);
 
         elevator.stopAndResetEncoder();
         elevator.setDistancePerPulse(getDegreesPerTick());
@@ -44,7 +49,7 @@ public class EndgameSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         if (elevator.atTargetPosition()) {
-            elevator.stopMotor();
+            elevator.stopMotors();
             return;
         }
 
@@ -52,8 +57,10 @@ public class EndgameSubsystem extends SubsystemBase {
     }
 
     private double getDegreesPerTick() {
+        assert Double.isFinite(elevator.getCPR()) : "The CPR of the elevator is undefined";
+
         final double GEAR_RATIO = 28.0;
-        return 360.0 / (elevator.iterator().next().getCPR() * GEAR_RATIO);
+        return 360.0 / (elevator.getCPR() * GEAR_RATIO);
     }
 
     public void toggleElevator() {
@@ -100,7 +107,9 @@ public class EndgameSubsystem extends SubsystemBase {
      * @return The angle of the system
      */
     public String getElevatorAngle() {
-        return elevator.getPositions().toString();
+        return elevator.getDistances().stream()
+                .map(distance -> String.format(Locale.ROOT, "%.2f", distance))
+                .collect(Collectors.joining(", "));
     }
 
     /**

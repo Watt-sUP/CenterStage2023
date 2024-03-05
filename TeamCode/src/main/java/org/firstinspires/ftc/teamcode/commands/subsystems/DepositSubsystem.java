@@ -15,10 +15,10 @@ import java.util.function.BooleanSupplier;
 @Config
 public class DepositSubsystem extends SubsystemBase {
     private final DcMotor slides;
-    public static Double LOW_LEFT = 0.05, LOW_RIGHT = 0.1;
+    public static Double LOW_LEFT = 0., LOW_RIGHT = 0.05;
     private final int[] slidesPositions = {0, 400, 700, 1000, 1250};
     private final ServoEx leftLift, rightLift;
-    public static Double HIGH_LEFT = .825, HIGH_RIGHT = .875;
+    public static Double HIGH_LEFT = .75, HIGH_RIGHT = .8;
     private final ServoEx stopperTop, stopperBottom;
     private BooleanSupplier safeToMove = () -> true;
 
@@ -57,6 +57,7 @@ public class DepositSubsystem extends SubsystemBase {
         this.slides = slides;
 
         this.stopperBottom.setInverted(true);
+        this.rightLift.setInverted(true);
 
         this.stopperTop.turnToAngle(90);
         this.stopperBottom.turnToAngle(60);

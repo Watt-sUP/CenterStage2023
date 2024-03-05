@@ -73,9 +73,9 @@ public class TeleOp extends CommandOpMode {
 
         // Intake commands
         driver2.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON)
-                .whenPressed(() -> intake.adjustLiftPosition(0.02));
+                .whenPressed(() -> intake.adjustLiftPosition(5.0));
         driver2.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)
-                .whenPressed(() -> intake.adjustLiftPosition(-0.02));
+                .whenPressed(() -> intake.adjustLiftPosition(-5.0));
         driver2.getGamepadButton(GamepadKeys.Button.X)
                 .whenPressed(intake::toggleLiftLocation);
         driver2.getGamepadButton(GamepadKeys.Button.A)
@@ -87,7 +87,7 @@ public class TeleOp extends CommandOpMode {
         driver2.getGamepadButton(GamepadKeys.Button.B)
                 .whenPressed(outtake::toggleBlockers);
         rightTrigger.toggleWhenActive(
-                () -> outtake.setSpikePosition(.975),
+                () -> outtake.setSpikePosition(.925),
                 () -> outtake.setSpikePosition(DepositSubsystem.HIGH_RIGHT)
         );
 
