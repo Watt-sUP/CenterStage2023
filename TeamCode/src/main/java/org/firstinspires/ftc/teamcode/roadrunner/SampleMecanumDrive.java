@@ -47,10 +47,10 @@ import java.util.stream.Collectors;
 public class SampleMecanumDrive extends MecanumDrive {
 
     private final TrajectorySequenceRunner trajectorySequenceRunner;
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(15, 0, 0);
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(15, 0, 0.2);
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(0, 0, 0);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(0, 0, 0);
 
-    public static double LATERAL_MULTIPLIER = 1.6464780776820855705607043230744;
+    public static double LATERAL_MULTIPLIER = 1;
 
     public static double VX_WEIGHT = 1;
     public static double VY_WEIGHT = 1;

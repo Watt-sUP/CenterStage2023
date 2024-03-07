@@ -10,6 +10,7 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.kinematics.Kinematics;
 import com.acmerobotics.roadrunner.localization.Localizer;
 import com.acmerobotics.roadrunner.util.Angle;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
@@ -43,6 +44,12 @@ abstract class GyroTrackingWheelLocalizer implements Localizer {
         gyroscope = imu;
 
         if (gyroscope != null) {
+            gyroscope.initialize(new IMU.Parameters(
+                    new RevHubOrientationOnRobot(
+                            DriveConstants.LOGO_FACING_DIR,
+                            DriveConstants.USB_FACING_DIR
+                    )
+            ));
             gyroscope.resetYaw();
             filter.setIsAngle(true);
             filter.setAlpha(gyroConfidence);

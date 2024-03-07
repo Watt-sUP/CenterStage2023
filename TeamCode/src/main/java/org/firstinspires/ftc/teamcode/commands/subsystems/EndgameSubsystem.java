@@ -23,8 +23,8 @@ public class EndgameSubsystem extends SubsystemBase {
 
     public EndgameSubsystem(final HardwareMap hardwareMap) {
         this(
-                new Motor(hardwareMap, "pullup_left", 384.5, 435),
-                new Motor(hardwareMap, "pullup_right", 384.5, 435),
+                new Motor(hardwareMap, "pullup_left"),
+                new Motor(hardwareMap, "pullup_right"),
                 new SimpleServo(hardwareMap, "drone", -900, 900)
         );
     }
@@ -32,6 +32,8 @@ public class EndgameSubsystem extends SubsystemBase {
     private EndgameSubsystem(Motor leftArm, Motor rightArm, ServoEx launcher) {
         elevator = new IndependentMotorGroup(leftArm, rightArm);
         this.launcher = launcher;
+
+        elevator.setGroupType(384.5, 435);
         elevator.setInverted(false);
 
         elevator.stopAndResetEncoder();

@@ -16,14 +16,14 @@ import java.util.List;
 @Config
 public class StandardGyroLocalizer extends GyroTrackingWheelLocalizer {
     public static double TICKS_PER_REV = 8192;
-    public static double WHEEL_RADIUS = 0.6692913386; // in
+    public static double WHEEL_RADIUS = 0.68897637795275590551181102362205; // in
     public static double GEAR_RATIO = 1.0; // output (wheel) speed / input (encoder) speed
 
-    public static double X_MULTIPLIER = 1.0340865568747606281118349422, Y_MULTIPLIER = 1.0315268421183927645849016458871;
+    public static double X_MULTIPLIER = 1, Y_MULTIPLIER = 1;
 
-    public static double LATERAL_DISTANCE = 9.91425457057; // in; distance between the left and right wheels
-    public static double FORWARD_OFFSET = -5.5; // in; offset of the lateral wheel
-    public static boolean ENABLE_IMU = true;
+    public static double LATERAL_DISTANCE = 9.7477123417891869; // in; distance between the left and right wheels
+    public static double FORWARD_OFFSET = -5.1181102362204724409448818897638; // in; offset of the lateral wheel
+    public static boolean ENABLE_IMU = false;
     public static double GYRO_TRUST = .75;
 
     private final Encoder leftEncoder, rightEncoder, frontEncoder;
