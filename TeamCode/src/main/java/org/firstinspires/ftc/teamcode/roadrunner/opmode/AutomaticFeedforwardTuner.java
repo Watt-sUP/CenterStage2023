@@ -52,19 +52,6 @@ public class AutomaticFeedforwardTuner extends LinearOpMode {
         if (isStopRequested()) return;
 
         telemetry.clearAll();
-        telemetry.addLine(Misc.formatInvariant(
-                "Place your robot on the field with at least %.2f in of room in front", DISTANCE));
-        telemetry.addLine("Press (Y/Δ) to begin");
-        telemetry.update();
-
-        while (!isStopRequested() && !gamepad1.y) {
-            idle();
-        }
-        while (!isStopRequested() && gamepad1.y) {
-            idle();
-        }
-
-        telemetry.clearAll();
         telemetry.addLine("Running...");
         telemetry.update();
 
@@ -104,6 +91,7 @@ public class AutomaticFeedforwardTuner extends LinearOpMode {
         telemetry.addLine("Quasi-static ramp up test complete");
         telemetry.addLine(Misc.formatInvariant("kV = %.5f, kStatic = %.5f (R^2 = %.2f)",
                 rampResult.kV, rampResult.kStatic, rampResult.rSquare));
+        telemetry.update();
 
         while (!isStopRequested()) {
             idle();

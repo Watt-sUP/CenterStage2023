@@ -47,10 +47,10 @@ import java.util.stream.Collectors;
 public class SampleMecanumDrive extends MecanumDrive {
 
     private final TrajectorySequenceRunner trajectorySequenceRunner;
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(0, 0, 0);
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(0, 0, 0);
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(10, 0, 0);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(15, 0, 0);
 
-    public static double LATERAL_MULTIPLIER = 1;
+    public static double LATERAL_MULTIPLIER = 1.566591041201739;
 
     public static double VX_WEIGHT = 1;
     public static double VY_WEIGHT = 1;
@@ -113,8 +113,8 @@ public class SampleMecanumDrive extends MecanumDrive {
     public TrajectorySequenceBuilder trajectorySequenceBuilder(Pose2d startPose, double speedLimit) {
         return new TrajectorySequenceBuilder(
                 startPose,
-                getVelocityConstraint(speedLimit, MAX_ANG_VEL, TRACK_WIDTH),
-                getAccelerationConstraint(speedLimit),
+                getVelocityConstraint(Double.min(speedLimit, MAX_VEL), MAX_ANG_VEL, TRACK_WIDTH),
+                getAccelerationConstraint(Double.min(speedLimit, MAX_ACCEL)),
                 MAX_ANG_VEL, MAX_ANG_ACCEL
         );
     }
