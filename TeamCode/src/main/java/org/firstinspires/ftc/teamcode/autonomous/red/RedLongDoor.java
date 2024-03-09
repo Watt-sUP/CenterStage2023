@@ -128,6 +128,7 @@ public class RedLongDoor extends CommandOpMode {
             put(PropLocations.LEFT, generator.generateBackstagePath(whiteLeft.end(), BackstageRoute.CENTER));
             put(PropLocations.MIDDLE,
                     drive.trajectorySequenceBuilder(whiteMiddle.end())
+                            .setReversed(true)
                             .splineTo(new Vector2d(24.00, -35.50), Math.toRadians(0.00))
                             .splineTo(new Vector2d(50.50, -29.50), Math.toRadians(0.00))
                             .build()
@@ -154,7 +155,7 @@ public class RedLongDoor extends CommandOpMode {
 
         Map<PropLocations, TrajectorySequence> backdropsCycle = new HashMap<PropLocations, TrajectorySequence>() {{
             put(PropLocations.LEFT, generator.generateBackstagePath(stackLeft.end(), BackstageRoute.CENTER));
-            put(PropLocations.MIDDLE, generator.generateBackstagePath(stackMiddle.end(), new Vector2d(50.50, -29.50), BackstageRoute.CENTER));
+            put(PropLocations.MIDDLE, generator.generateBackstagePath(stackMiddle.end(), new Vector2d(51.25, -29.50), BackstageRoute.CENTER));
             put(PropLocations.RIGHT, generator.generateBackstagePath(stackRight.end(), BackstageRoute.CENTER));
         }};
 

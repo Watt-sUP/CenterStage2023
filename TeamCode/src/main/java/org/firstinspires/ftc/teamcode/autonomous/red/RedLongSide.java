@@ -29,9 +29,11 @@ import org.firstinspires.ftc.teamcode.roadrunner.DriveConstants;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Autonomous(name = "Red Long (Side)", group = "auto")
 public class RedLongSide extends CommandOpMode {
@@ -71,78 +73,45 @@ public class RedLongSide extends CommandOpMode {
                         .minus(Vector2d.polar(11, Math.toRadians(30))), Math.toRadians(30.00))
                 .build();
 
-        TrajectorySequence whiteRight = drive.trajectorySequenceBuilder(rightPurple.end(), 40)
-                .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
-                .addTemporalMarker(() -> {
-                    intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
-                    intake.adjustLiftPosition(-5.0);
-                })
-                .waitSeconds(0.3)
-                .addTemporalMarker(() -> {
-                    if (intake.clamping != CollectorSubsystem.ClampState.OPENED)
-                        intake.toggleClamp();
-                })
-                .setConstraints(
-                        SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(30)
-                )
-                .lineToLinearHeading(new Pose2d(-56.50, -35.75, Math.toRadians(180.00)))
-                .addTemporalMarker(intake::toggleClamp)
-                .waitSeconds(0.5)
-                .build();
+        Map<PropLocations, TrajectorySequence> whites = Arrays.stream(PropLocations.values())
+                .collect(Collectors.toMap(
+                        location -> location,
+                        location -> {
+                            Map<PropLocations, Pose2d> endPoses = new HashMap<PropLocations, Pose2d>() {{
+                                put(PropLocations.LEFT, leftPurple.end());
+                                put(PropLocations.MIDDLE, middlePurple.end());
+                                put(PropLocations.RIGHT, rightPurple.end());
+                            }};
 
-        TrajectorySequence whiteMiddle = drive.trajectorySequenceBuilder(middlePurple.end(), 40)
-                .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
-                .addTemporalMarker(() -> {
-                    intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
-                    intake.adjustLiftPosition(-5.0);
-                })
-                .waitSeconds(0.3)
-                .addTemporalMarker(() -> {
-                    if (intake.clamping != CollectorSubsystem.ClampState.OPENED)
-                        intake.toggleClamp();
-                })
-                .setConstraints(
-                        SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(30)
-                )
-                .lineToLinearHeading(new Pose2d(-56.50, -35.75, Math.toRadians(180.00)))
-                .addTemporalMarker(intake::toggleClamp)
-                .waitSeconds(0.5)
-                .build();
-
-        TrajectorySequence whiteLeft = drive.trajectorySequenceBuilder(leftPurple.end(), 40)
-                .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
-                .addTemporalMarker(() -> {
-                    intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
-                    intake.adjustLiftPosition(-5.0);
-                })
-                .waitSeconds(0.3)
-                .addTemporalMarker(() -> {
-                    if (intake.clamping != CollectorSubsystem.ClampState.OPENED)
-                        intake.toggleClamp();
-                })
-                .setConstraints(
-                        SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(30)
-                )
-                .lineToLinearHeading(new Pose2d(-56.50, -35.75, Math.toRadians(180.00)))
-                .addTemporalMarker(intake::toggleClamp)
-                .waitSeconds(0.5)
-                .build();
+                            return drive.trajectorySequenceBuilder(endPoses.get(location), 40)
+                                    .setTangent(Math.toRadians(180))
+                                    .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
+                                    .addTemporalMarker(() -> {
+                                        intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
+                                        intake.adjustLiftPosition(-5.0);
+                                    })
+                                    .waitSeconds(0.3)
+                                    .addTemporalMarker(intake::toggleClamp)
+                                    .setConstraints(
+                                            SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                                            SampleMecanumDrive.getAccelerationConstraint(30)
+                                    )
+                                    .lineToLinearHeading(new Pose2d(-56.50, -35.75, Math.toRadians(180.00)))
+                                    .addTemporalMarker(intake::toggleClamp)
+                                    .waitSeconds(0.5)
+                                    .build();
+                        }
+                ));
 
         Map<PropLocations, TrajectorySequence> backdrops = new HashMap<PropLocations, TrajectorySequence>() {{
-            put(PropLocations.LEFT, generator.generateBackstagePath(whiteLeft.end(), BackstageRoute.SIDE));
-            put(PropLocations.MIDDLE, generator.generateBackstagePath(whiteMiddle.end(), new Vector2d(50.50, -42.50), BackstageRoute.SIDE));
-            put(PropLocations.RIGHT, generator.generateBackstagePath(whiteRight.end(), BackstageRoute.SIDE));
+            put(PropLocations.LEFT, generator.generateBackstagePath(whites.get(PropLocations.LEFT).end(), BackstageRoute.SIDE));
+            put(PropLocations.MIDDLE, generator.generateBackstagePath(whites.get(PropLocations.MIDDLE).end(), new Vector2d(50.50, -42.50), BackstageRoute.SIDE));
+            put(PropLocations.RIGHT, generator.generateBackstagePath(whites.get(PropLocations.RIGHT).end(), BackstageRoute.SIDE));
         }};
         Map<PropLocations, Vector2d> yellowLocation = new HashMap<PropLocations, Vector2d>() {{
-            put(PropLocations.LEFT, new Vector2d(50.50, -29.50));
-            put(PropLocations.MIDDLE, new Vector2d(50.50, -37.00));
-            put(PropLocations.RIGHT, new Vector2d(50.50, -44.00));
+            put(PropLocations.LEFT, new Vector2d(51.25, -29.50));
+            put(PropLocations.MIDDLE, new Vector2d(51.25, -35.50));
+            put(PropLocations.RIGHT, new Vector2d(51.25, -43.00));
         }};
         TrajectorySequence stackLeft = generator.generateStackPath(new Pose2d(yellowLocation.get(PropLocations.LEFT), Math.toRadians(180)), Stack.CLOSE);
         TrajectorySequence stackRight = generator.generateStackPath(new Pose2d(yellowLocation.get(PropLocations.RIGHT), Math.toRadians(180.00)), Stack.CLOSE);
@@ -177,7 +146,7 @@ public class RedLongSide extends CommandOpMode {
                         new WaitCommand(300),
                         new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
                 ),
-                new RunByCaseCommand(location.toString(), drive, whiteLeft, whiteMiddle, whiteRight, true),
+                new InstantCommand(() -> drive.followTrajectorySequence(whites.get(location))),
                 new InstantCommand(() -> drive.followTrajectorySequenceAsync(backdrops.get(location))),
                 new ParallelCommandGroup(
                         new RunCommand(drive::update).interruptOn(() -> !drive.isBusy()),
@@ -195,7 +164,7 @@ public class RedLongSide extends CommandOpMode {
                                 )
                 ),
                 new InstantCommand(outtake::toggleBlockers).andThen(
-                        new WaitCommand(500),
+                        new WaitCommand(300),
                         new InstantCommand(outtake::toggleSpike),
                         new WaitCommand(300),
                         new InstantCommand(outtake::toggleSpike)
@@ -203,7 +172,7 @@ public class RedLongSide extends CommandOpMode {
                 new InstantCommand(() -> drive.lineToPose(new Pose2d(yellowLocation.get(location), Math.toRadians(180.00))))
                         .andThen(
                                 new InstantCommand(outtake::toggleBlockers),
-                                new WaitCommand(500),
+                                new WaitCommand(300),
                                 new InstantCommand(outtake::toggleSpike),
                                 new WaitCommand(300),
                                 new InstantCommand(() -> outtake.setSlidesPosition(0))
@@ -230,7 +199,7 @@ public class RedLongSide extends CommandOpMode {
                 ),
                 new InstantCommand(outtake::toggleBlockers)
                         .andThen(
-                                new WaitCommand(500),
+                                new WaitCommand(300),
                                 new InstantCommand(outtake::toggleSpike),
                                 new WaitCommand(300),
                                 new InstantCommand(outtake::toggleSpike),
@@ -238,11 +207,10 @@ public class RedLongSide extends CommandOpMode {
                         ),
                 new InstantCommand(outtake::toggleBlockers)
                         .andThen(
-                                new WaitCommand(500),
-                                new InstantCommand(outtake::toggleSpike)
+                                new WaitCommand(300),
+                                new InstantCommand(outtake::toggleSpike),
+                                new InstantCommand(() -> outtake.setSlidesPosition(0))
                         ),
-                new WaitCommand(500)
-                        .andThen(new InstantCommand(() -> outtake.setSlidesPosition(0))),
 
                 new InstantCommand(() -> drive.adjustPose(new Pose2d(-5, 0, 0))),
                 new InstantCommand(() -> drive.lineToPose(new Pose2d(48, -60, Math.toRadians(180))))
