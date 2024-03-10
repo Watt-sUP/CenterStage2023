@@ -8,11 +8,11 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.lynx.LynxModule;
 
-import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
-import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
-import org.firstinspires.ftc.teamcode.commands.subsystems.DriveSubsystem;
-import org.firstinspires.ftc.teamcode.commands.subsystems.EndgameSubsystem;
-import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.CollectorSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.DepositSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.EndgameSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.OdometrySubsystem;
 
 import java.util.List;
 
