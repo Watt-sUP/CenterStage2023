@@ -18,7 +18,7 @@ public class DepositSubsystem extends SubsystemBase {
     public static Double LOW_LEFT = 0.04, LOW_RIGHT = 0.09;
     private final int[] slidesPositions = {0, 400, 700, 1000, 1250};
     private final ServoEx leftLift, rightLift;
-    public static Double HIGH_LEFT = .75, HIGH_RIGHT = .8;
+    public static Double HIGH_LEFT = .77, HIGH_RIGHT = .82;
     private final ServoEx stopperTop, stopperBottom;
     private BooleanSupplier safeToMove = () -> true;
 

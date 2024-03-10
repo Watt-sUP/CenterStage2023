@@ -130,7 +130,7 @@ public class RedLongDoor extends CommandOpMode {
                     drive.trajectorySequenceBuilder(whiteMiddle.end())
                             .setReversed(true)
                             .splineTo(new Vector2d(24.00, -35.50), Math.toRadians(0.00))
-                            .splineTo(new Vector2d(50.50, -29.50), Math.toRadians(0.00))
+                            .splineTo(new Vector2d(51.25, -29.50), Math.toRadians(0.00))
                             .build()
             );
             put(PropLocations.RIGHT,
@@ -138,15 +138,15 @@ public class RedLongDoor extends CommandOpMode {
                             .setReversed(true)
                             .splineTo(new Vector2d(-24, -11), Math.toRadians(0.00))
                             .splineTo(new Vector2d(24, -11), Math.toRadians(0.00))
-                            .splineTo(new Vector2d(50.50, -35.50), Math.toRadians(0.00))
+                            .splineTo(new Vector2d(51.25, -35.50), Math.toRadians(0.00))
                             .build()
             );
         }};
 
         Map<PropLocations, Vector2d> yellowLocation = new HashMap<PropLocations, Vector2d>() {{
-            put(PropLocations.LEFT, new Vector2d(50.50, -29.50));
-            put(PropLocations.MIDDLE, new Vector2d(50.50, -37.00));
-            put(PropLocations.RIGHT, new Vector2d(50.50, -44.00));
+            put(PropLocations.LEFT, new Vector2d(51.25, -29.50));
+            put(PropLocations.MIDDLE, new Vector2d(51.25, -37.00));
+            put(PropLocations.RIGHT, new Vector2d(51.25, -44.00));
         }};
 
         TrajectorySequence stackLeft = generator.generateStackPath(new Pose2d(yellowLocation.get(PropLocations.LEFT), Math.toRadians(180)), Stack.FAR);
@@ -182,7 +182,8 @@ public class RedLongDoor extends CommandOpMode {
                 new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
                 new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, true),
                 new InstantCommand(intake::toggleLiftLocation).andThen(
-                        new WaitCommand(300),
+                        new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
+                        new WaitCommand(200),
                         new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
                 ),
                 new RunByCaseCommand(location.toString(), drive, whiteLeft, whiteMiddle, whiteRight, true),

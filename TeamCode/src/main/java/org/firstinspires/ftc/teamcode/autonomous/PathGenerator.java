@@ -69,7 +69,7 @@ public class PathGenerator {
                             SampleMecanumDrive.getVelocityConstraint(45, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                             SampleMecanumDrive.getAccelerationConstraint(35)
                     )
-                    .setTangent(Math.toRadians(90))
+                    .setTangent(Math.toRadians(90 * allianceColor.getMultiplier()))
                     .splineToLinearHeading(allianceColor.convertPose(new Pose2d(-50.00, -35.75, Math.toRadians(180))), Math.toRadians(180.00))
                     .lineToLinearHeading(allianceColor.convertPose(new Pose2d(-56.75, -35.75, Math.toRadians(180))))
                     .build();
@@ -102,7 +102,7 @@ public class PathGenerator {
                     .setReversed(true)
                     .splineTo(allianceColor.convertVector(new Vector2d(-24.00, -58.50)), Math.toRadians(0.00))
                     .splineTo(allianceColor.convertVector(new Vector2d(4.00, -58.50)), Math.toRadians(0.00))
-                    .splineTo(allianceColor.convertVector(endPosition), Math.toRadians(0.00))
+                    .splineTo(endPosition, Math.toRadians(0.00))
                     .build();
         else
             throw new IllegalArgumentException("An unexpected error occurred generating a backdrop trajectory");

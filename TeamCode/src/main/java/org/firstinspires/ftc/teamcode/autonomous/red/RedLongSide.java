@@ -143,7 +143,8 @@ public class RedLongSide extends CommandOpMode {
                 new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
                 new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, true),
                 new InstantCommand(intake::toggleLiftLocation).andThen(
-                        new WaitCommand(300),
+                        new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
+                        new WaitCommand(200),
                         new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
                 ),
                 new InstantCommand(() -> drive.followTrajectorySequence(whites.get(location))),
