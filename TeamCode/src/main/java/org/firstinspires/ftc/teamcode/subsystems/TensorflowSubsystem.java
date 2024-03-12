@@ -12,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -62,5 +63,14 @@ public class TensorflowSubsystem extends SubsystemBase {
                 .filter(detection -> detection.getWidth() < (detection.getImageWidth() / 2.0))
                 .max(Comparator.comparingDouble(Recognition::getConfidence))
                 .orElse(null);
+    }
+
+    public boolean isActive() {
+        return Arrays.asList(
+                VisionPortal.CameraState.OPENING_CAMERA_DEVICE,
+                VisionPortal.CameraState.CAMERA_DEVICE_READY,
+                VisionPortal.CameraState.STARTING_STREAM,
+                VisionPortal.CameraState.STREAMING
+        ).contains(portal.getCameraState());
     }
 }
