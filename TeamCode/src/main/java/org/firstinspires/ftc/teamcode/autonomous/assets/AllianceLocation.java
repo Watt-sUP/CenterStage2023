@@ -32,6 +32,9 @@ public enum AllianceLocation {
         return Math.signum(color * side) == 1 ? PropLocations.LEFT : PropLocations.RIGHT;
     }
 
+    /**
+     * @return A pose containing the starting coordinates of the robot
+     */
     public Pose2d getStartingPosition() {
         double x, y = -62.75, theta = 90.0;
         x = side == 1 ? 16.75 : -40.25;

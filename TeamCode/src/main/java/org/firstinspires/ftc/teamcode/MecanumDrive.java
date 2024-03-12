@@ -180,7 +180,7 @@ public final class MecanumDrive {
                     if (robotLocation.color == 1)
                         return new Pose2dDual<>(pose.position, pose.heading);
                     else
-                        return new Pose2dDual<>(pose.position.x, pose.position.x.unaryMinus(), pose.heading.inverse());
+                        return new Pose2dDual<>(pose.position.x, pose.position.y.unaryMinus(), pose.heading.inverse());
                 }
         );
     }

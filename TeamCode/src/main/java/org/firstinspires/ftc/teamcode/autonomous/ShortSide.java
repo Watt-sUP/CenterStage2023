@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.autonomous;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Pose2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
@@ -16,17 +17,19 @@ import org.firstinspires.ftc.teamcode.autonomous.commands.TensorflowDetectComman
 import org.firstinspires.ftc.teamcode.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DepositSubsystem;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Config
-@Autonomous(name = "Short Auto (Side)")
+@Autonomous(name = "Short Auto (Side)", group = "short")
 public class ShortSide extends CommandOpMode {
     public static AllianceLocation location = AllianceLocation.RED_SHORT;
 
     @Override
     public void initialize() {
 
-        assert !location.name().contains("LONG") : "Unable to run autonomous: " +
+        assert location.name().contains("SHORT") : "Unable to run autonomous: " +
                 "The robot must be at the backdrop position on either side";
 
         TensorflowDetectCommand propDetection = new TensorflowDetectCommand(hardwareMap, location);
@@ -40,6 +43,15 @@ public class ShortSide extends CommandOpMode {
 
         Map<PropLocations, Action> purpleCases = pathGenerator.generatePurplePaths();
         Map<PropLocations, Action> yellowCases = pathGenerator.generateYellowPaths();
+
+        Map<PropLocations, Action> firstStack = Arrays.stream(PropLocations.values())
+                .collect(Collectors.toMap(
+                        location -> location,
+                        location -> pathGenerator.generateStackPath(
+                                new Pose2d(pathGenerator.yellowLocations.get(location), Math.PI),
+                                PathGenerator.Stack.CLOSE
+                        )
+                ));
 
         schedule(propDetection.andThen(
                 new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.STACK)),

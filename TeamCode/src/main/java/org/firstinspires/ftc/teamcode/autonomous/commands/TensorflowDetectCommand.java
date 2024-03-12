@@ -53,6 +53,7 @@ public class TensorflowDetectCommand extends CommandBase {
         Recognition bestDetection = detector.getBestDetection();
         detectedLocation = robotLocation.getHiddenCase();
         TelemetryPacket packet = new TelemetryPacket();
+        FtcDashboard.getInstance().clearTelemetry();
 
         if (bestDetection != null) {
             double x = (bestDetection.getLeft() + bestDetection.getRight()) / 2.0;
@@ -61,8 +62,9 @@ public class TensorflowDetectCommand extends CommandBase {
             else detectedLocation = robotLocation.getVisibleCases().second;
 
             packet.put("Detection X", x);
-            packet.put("Detection case", detectedLocation);
-        } else packet.addLine("Team Prop not found");
+        }
+
+        packet.put("Detection Case", detectedLocation);
         FtcDashboard.getInstance().sendTelemetryPacket(packet);
     }
 
@@ -73,7 +75,6 @@ public class TensorflowDetectCommand extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        if (detector.isActive())
-            detector.shutdown();
+        detector.shutdown();
     }
 }

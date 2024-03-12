@@ -15,8 +15,7 @@ public class ActionToCommand extends CommandBase {
 
     @Override
     public void execute() {
-        TelemetryPacket packet = new TelemetryPacket(true);
-        assert packet.fieldOverlay() != null : "Packet is null";
+        TelemetryPacket packet = new TelemetryPacket();
         action.preview(packet.field());
         finished = !action.run(packet);
         FtcDashboard.getInstance().sendTelemetryPacket(packet);
