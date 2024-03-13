@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Disabled
+@Deprecated
 @Autonomous(name = "Blue Long", group = "auto")
 public class BlueLong extends CommandOpMode {
 

@@ -72,7 +72,7 @@ public class TrajectorySequenceBuilder {
         this.currentTurnConstraintMaxAngVel = baseTurnConstraintMaxAngVel;
         this.currentTurnConstraintMaxAngAccel = baseTurnConstraintMaxAngAccel;
 
-        lastPose = convertPose(startPose);
+        lastPose = startPose;
     }
 
     public TrajectorySequenceBuilder(
@@ -162,7 +162,7 @@ public class TrajectorySequenceBuilder {
 
     public TrajectorySequenceBuilder setTangent(double tangent) {
         setAbsoluteTangent = true;
-        absoluteTangent = tangent;
+        absoluteTangent = tangent * startLocation.color;
 
         pushPath();
 

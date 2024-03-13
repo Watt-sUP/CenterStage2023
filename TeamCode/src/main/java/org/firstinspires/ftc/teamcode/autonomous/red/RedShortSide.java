@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.autonomous.red;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
@@ -16,15 +14,13 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.teamcode.autonomous.PathGenerator;
-import org.firstinspires.ftc.teamcode.autonomous.assets.AllianceColor;
+import org.firstinspires.ftc.teamcode.autonomous.assets.AllianceLocation;
 import org.firstinspires.ftc.teamcode.autonomous.assets.BackstageRoute;
 import org.firstinspires.ftc.teamcode.autonomous.assets.PropLocations;
 import org.firstinspires.ftc.teamcode.autonomous.assets.Stack;
-import org.firstinspires.ftc.teamcode.autonomous.assets.StartingPosition;
 import org.firstinspires.ftc.teamcode.commands.RunByCaseCommand;
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
-import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.TensorflowSubsystem;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
@@ -37,28 +33,22 @@ import java.util.stream.Collectors;
 
 @Autonomous(name = "Red Short (Side)")
 public class RedShortSide extends CommandOpMode {
-    private PropLocations location = PropLocations.LEFT;
+    private final AllianceLocation robotLocation = AllianceLocation.RED_SHORT;
+    private PropLocations propLocation;
 
     @Override
     public void initialize() {
-        TensorflowSubsystem tensorflow = new TensorflowSubsystem(hardwareMap, "Webcam 1",
-                "red_prop.tflite", "Red Prop");
+        TensorflowSubsystem tensorflow = new TensorflowSubsystem(hardwareMap, robotLocation);
 
-        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        telemetry.addLine("Loading trajectories...");
-        telemetry.update();
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap, robotLocation);
+        PathGenerator pathGenerator = new PathGenerator(drive);
 
-        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        PathGenerator generator = new PathGenerator(drive);
-
-        OdometrySubsystem odometry = new OdometrySubsystem(this);
         CollectorSubsystem intake = new CollectorSubsystem(hardwareMap);
         DepositSubsystem outtake = new DepositSubsystem(hardwareMap);
 
-        generator.setStartingLocation(AllianceColor.RED, StartingPosition.BACKDROP);
         tensorflow.setMinConfidence(0.8);
 
-        Map<PropLocations, TrajectorySequence> purpleCases = generator.generatePurpleCases();
+        Map<PropLocations, TrajectorySequence> purpleCases = pathGenerator.generatePurpleCases();
         Trajectory rightYellow = drive.trajectoryBuilder(purpleCases.get(PropLocations.RIGHT).end(), Math.toRadians(0))
                 .splineToSplineHeading(new Pose2d(51.25, -43.00, Math.toRadians(180.00)), Math.toRadians(0))
                 .build();
@@ -69,36 +59,39 @@ public class RedShortSide extends CommandOpMode {
                 .splineToSplineHeading(new Pose2d(51.25, -35.50, Math.toRadians(180.00)), Math.toRadians(0))
                 .build();
 
-        TrajectorySequence stackMid = generator.generateStackPath(middleYellow.end(), Stack.CLOSE);
-        TrajectorySequence stackRight = generator.generateStackPath(rightYellow.end(), Stack.CLOSE);
-        TrajectorySequence stackLeft = generator.generateStackPath(leftYellow.end(), Stack.CLOSE);
+        TrajectorySequence stackMid = pathGenerator.generateStackPath(middleYellow.end(), Stack.CLOSE);
+        TrajectorySequence stackRight = pathGenerator.generateStackPath(rightYellow.end(), Stack.CLOSE);
+        TrajectorySequence stackLeft = pathGenerator.generateStackPath(leftYellow.end(), Stack.CLOSE);
 
         Map<PropLocations, TrajectorySequence> backdrops = new HashMap<PropLocations, TrajectorySequence>() {{
-            put(PropLocations.LEFT, generator.generateBackstagePath(stackLeft.end(), BackstageRoute.SIDE));
-            put(PropLocations.MIDDLE, generator.generateBackstagePath(stackMid.end(),
+            put(PropLocations.LEFT, pathGenerator.generateBackstagePath(stackLeft.end(), BackstageRoute.SIDE));
+            put(PropLocations.MIDDLE, pathGenerator.generateBackstagePath(stackMid.end(),
                     new Vector2d(51.25, -43.00), BackstageRoute.SIDE));
-            put(PropLocations.RIGHT, generator.generateBackstagePath(stackRight.end(), BackstageRoute.SIDE));
+            put(PropLocations.RIGHT, pathGenerator.generateBackstagePath(stackRight.end(), BackstageRoute.SIDE));
         }};
         Map<PropLocations, TrajectorySequence> stackTwo = Arrays.stream(PropLocations.values())
                 .collect(Collectors.toMap(
                         location -> location,
-                        location -> generator.generateStackPath(backdrops.get(location).end(), Stack.CLOSE)
+                        location -> pathGenerator.generateStackPath(backdrops.get(location).end(), Stack.CLOSE)
                 ));
 
         while (!isStarted()) {
             if (isStopRequested())
                 return;
 
+            propLocation = robotLocation.getHiddenCase();
             Recognition bestDetection = tensorflow.getBestDetection();
-            location = PropLocations.LEFT;
 
             if (bestDetection != null) {
                 double x = (bestDetection.getLeft() + bestDetection.getRight()) / 2.0;
-                location = x < (bestDetection.getImageWidth() / 2.0) ? PropLocations.MIDDLE : PropLocations.RIGHT;
+
+                if (x < bestDetection.getImageWidth() / 2.0)
+                    propLocation = robotLocation.getVisibleCases().first;
+                else propLocation = robotLocation.getVisibleCases().second;
             }
 
             telemetry.addData("FPS", tensorflow.portal.getFps());
-            telemetry.addData("Current Location", location.toString());
+            telemetry.addData("Current Location", propLocation.toString());
             telemetry.addData("Confidence", String.format(Locale.US, "%.2f%%", bestDetection != null ? bestDetection.getConfidence() * 100 : 0));
             telemetry.update();
         }
@@ -106,7 +99,7 @@ public class RedShortSide extends CommandOpMode {
         tensorflow.shutdown();
         schedule(new SequentialCommandGroup(
                 new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
-                new RunByCaseCommand(location, purpleCases, drive, true),
+                new RunByCaseCommand(propLocation, purpleCases, drive, true),
                 new InstantCommand(intake::toggleLiftLocation).andThen(
                         new InstantCommand(() -> {
                             intake.setClampPosition(25);
@@ -115,19 +108,19 @@ public class RedShortSide extends CommandOpMode {
                             outtake.toggleSpike();
                         })
                 ),
-                new RunByCaseCommand(location.toString(), drive, leftYellow, middleYellow, rightYellow, true),
+                new RunByCaseCommand(propLocation.toString(), drive, leftYellow, middleYellow, rightYellow, true),
                 new InstantCommand(outtake::toggleBlockers).andThen(
                         new WaitCommand(300),
                         new InstantCommand(outtake::toggleBlockers),
                         new WaitCommand(500),
                         new InstantCommand(outtake::toggleSpike)
                 ),
-                new RunByCaseCommand(location.toString(), drive, stackLeft, stackMid, stackRight, true)
+                new RunByCaseCommand(propLocation.toString(), drive, stackLeft, stackMid, stackRight, true)
                         .andThen(
                                 new InstantCommand(intake::toggleClamp),
                                 new WaitCommand(500)
                         ),
-                new InstantCommand(() -> drive.followTrajectorySequenceAsync(backdrops.get(location))),
+                new InstantCommand(() -> drive.followTrajectorySequenceAsync(backdrops.get(propLocation))),
                 new ParallelCommandGroup(
                         new RunCommand(drive::update).interruptOn(() -> !drive.isBusy()),
                         new WaitCommand(700)
@@ -160,12 +153,12 @@ public class RedShortSide extends CommandOpMode {
                                 new InstantCommand(outtake::toggleSpike),
                                 new InstantCommand(() -> outtake.setSlidesPosition(0))
                         ),
-                new InstantCommand(() -> drive.followTrajectorySequence(stackTwo.get(location)))
+                new InstantCommand(() -> drive.followTrajectorySequence(stackTwo.get(propLocation)))
                         .andThen(
                                 new InstantCommand(intake::toggleClamp),
                                 new WaitCommand(500)
                         ),
-                new InstantCommand(() -> drive.followTrajectorySequenceAsync(backdrops.get(location))),
+                new InstantCommand(() -> drive.followTrajectorySequenceAsync(backdrops.get(propLocation))),
                 new ParallelCommandGroup(
                         new RunCommand(drive::update).interruptOn(() -> !drive.isBusy()),
                         new WaitCommand(700)

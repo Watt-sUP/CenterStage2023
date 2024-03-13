@@ -35,6 +35,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.autonomous.assets.AllianceLocation;
+import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuilder;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceRunner;
@@ -58,16 +60,19 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     private final DcMotorEx leftFront, leftRear, rightRear, rightFront;
     private final List<DcMotorEx> motors;
+    private final AllianceLocation robotLocation;
 
     private static final TrajectoryVelocityConstraint VEL_CONSTRAINT = getVelocityConstraint(MAX_VEL, MAX_ANG_VEL, TRACK_WIDTH);
     private static final TrajectoryAccelerationConstraint ACCEL_CONSTRAINT = getAccelerationConstraint(MAX_ACCEL);
 
-    public SampleMecanumDrive(HardwareMap hardwareMap) {
+    public SampleMecanumDrive(HardwareMap hardwareMap, AllianceLocation location) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
+        robotLocation = location;
 
         TrajectoryFollower follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
                 new Pose2d(.5, .5, Math.toRadians(1.0)), 0.75);
 
+        new OdometrySubsystem(hardwareMap).lower();
         VoltageSensor batteryVoltageSensor = hardwareMap.voltageSensor.iterator().next();
         hardwareMap.getAll(LynxModule.class).forEach(module -> module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO));
 
@@ -84,6 +89,13 @@ public class SampleMecanumDrive extends MecanumDrive {
 
         setLocalizer(new StandardGyroLocalizer(hardwareMap));
         trajectorySequenceRunner = new TrajectorySequenceRunner(follower, HEADING_PID, batteryVoltageSensor);
+
+        if (robotLocation != null)
+            setPoseEstimate(robotLocation.getStartingPosition());
+    }
+
+    public SampleMecanumDrive(HardwareMap hardwareMap) {
+        this(hardwareMap, null);
     }
 
     public void setMode(DcMotor.RunMode runMode) {
@@ -104,7 +116,7 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     public TrajectorySequenceBuilder trajectorySequenceBuilder(Pose2d startPose) {
         return new TrajectorySequenceBuilder(
-                startPose,
+                startPose, robotLocation,
                 VEL_CONSTRAINT, ACCEL_CONSTRAINT,
                 MAX_ANG_VEL, MAX_ANG_ACCEL
         );
@@ -112,7 +124,7 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     public TrajectorySequenceBuilder trajectorySequenceBuilder(Pose2d startPose, double speedLimit) {
         return new TrajectorySequenceBuilder(
-                startPose,
+                startPose, robotLocation,
                 getVelocityConstraint(Double.min(speedLimit, MAX_VEL), MAX_ANG_VEL, TRACK_WIDTH),
                 getAccelerationConstraint(Double.min(speedLimit, MAX_ACCEL)),
                 MAX_ANG_VEL, MAX_ANG_ACCEL
@@ -165,14 +177,10 @@ public class SampleMecanumDrive extends MecanumDrive {
      * Synchronous shortcut for turning.
      *
      * @param angle Angle to turn (counter-clockwise)
-     * @param unit  The angle of the unit. Options include degrees and radians
+     * @param unit  The unit of the angle. See {@link AngleUnit} for options
      */
     public void turn(double angle, AngleUnit unit) {
-        if (unit == AngleUnit.RADIANS)
-            turnAsync(angle);
-        else if (unit == AngleUnit.DEGREES)
-            turnAsync(Math.toRadians(angle));
-
+        turnAsync(unit.toRadians(angle));
         waitForIdle();
     }
 
@@ -180,6 +188,7 @@ public class SampleMecanumDrive extends MecanumDrive {
      * Shortcut for turning. Angle measurement defaults to degrees.
      *
      * @param angle Angle to turn (counter-clockwise)
+     * @see SampleMecanumDrive#turn(double, AngleUnit)
      */
     public void turn(double angle) {
         turn(angle, AngleUnit.DEGREES);
@@ -312,5 +321,16 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     public void breakFollowing() {
         trajectorySequenceRunner.breakFollowing();
+    }
+
+    public AllianceLocation getRobotLocation() {
+        return robotLocation;
+    }
+
+    public Pose2d getStartingPosition() {
+        if (robotLocation == null)
+            return new Pose2d();
+
+        return robotLocation.getStartingPosition();
     }
 }

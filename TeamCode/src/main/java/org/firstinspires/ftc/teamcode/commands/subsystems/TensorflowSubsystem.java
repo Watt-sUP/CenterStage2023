@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.teamcode.autonomous.assets.AllianceLocation;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 
@@ -19,11 +20,6 @@ public class TensorflowSubsystem extends SubsystemBase {
 
     private final TfodProcessor tensorflowProcessor;
     public VisionPortal portal;
-
-    public TensorflowSubsystem(VisionPortal portal, TfodProcessor processor) {
-        tensorflowProcessor = processor;
-        this.portal = portal;
-    }
 
     public TensorflowSubsystem(HardwareMap hardwareMap, String cameraName, String modelName, String... labels) {
         tensorflowProcessor = new TfodProcessor.Builder()
@@ -41,6 +37,12 @@ public class TensorflowSubsystem extends SubsystemBase {
                 .build();
     }
 
+    public TensorflowSubsystem(HardwareMap hardwareMap, AllianceLocation location) {
+        this(hardwareMap, "Webcam 1",
+                (location.color == 1 ? "red" : "blue") + "_prop.tflite",
+                (location.color == 1 ? "Red" : "Blue") + "Prop");
+    }
+
     public void shutdown() {
         tensorflowProcessor.shutdown();
         portal.close();
@@ -48,10 +50,6 @@ public class TensorflowSubsystem extends SubsystemBase {
 
     public void setMinConfidence(double confidence) {
         tensorflowProcessor.setMinResultConfidence((float) confidence);
-    }
-
-    public List<Recognition> getDetections() {
-        return tensorflowProcessor.getRecognitions();
     }
 
     @Nullable

@@ -13,6 +13,7 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.teamcode.autonomous.PathGenerator;
@@ -35,6 +36,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Disabled
+@Deprecated
 @Autonomous(name = "Blue Short (Side)")
 public class BlueShortSide extends CommandOpMode {
 
