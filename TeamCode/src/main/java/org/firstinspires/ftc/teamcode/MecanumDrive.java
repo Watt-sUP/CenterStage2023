@@ -217,12 +217,12 @@ public final class MecanumDrive {
 
         // path controller gains
         public double axialGain = 5.0;
-        public double lateralGain = 6.0;
-        public double headingGain = 6.0; // shared with turn
+        public double lateralGain = 10.0;
+        public double headingGain = 12.0; // shared with turn
 
-        public double axialVelGain = 4.0;
-        public double lateralVelGain = 0.0;
-        public double headingVelGain = 0.0; // shared with turn
+        public double axialVelGain = 3.0;
+        public double lateralVelGain = 1.25;
+        public double headingVelGain = 1.75; // shared with turn
     }
 
     public class DriveLocalizer implements Localizer {
@@ -343,8 +343,8 @@ public final class MecanumDrive {
             Pose2d error = txWorldTarget.value().minusExp(pose);
 
             if ((t >= timeTrajectory.duration &&
-                    error.position.norm() < 2.5 && robotVelRobot.linearVel.norm() < 5.0 &&
-                    error.heading.toDouble() < 2.5 && robotVelRobot.angVel < 5.0
+                    error.position.norm() < 2.0 && robotVelRobot.linearVel.norm() < 7.5 &&
+                    error.heading.toDouble() < 3.0 && robotVelRobot.angVel < 7.5
             ) || t >= timeTrajectory.duration + 1) {
                 leftFront.setPower(0);
                 leftBack.setPower(0);

@@ -3,10 +3,12 @@ package org.firstinspires.ftc.teamcode.autonomous;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
@@ -52,6 +54,45 @@ public class ShortSide extends CommandOpMode {
                                 PathGenerator.Stack.CLOSE
                         )
                 ));
+        Map<PropLocations, Action> secondStack = Arrays.stream(PropLocations.values())
+                .collect(Collectors.toMap(
+                        location -> location,
+                        location -> {
+                            Vector2d startPosition = (location == PropLocations.RIGHT) ?
+                                    pathGenerator.yellowLocations.get(PropLocations.MIDDLE) :
+                                    pathGenerator.yellowLocations.get(PropLocations.RIGHT);
+
+                            return pathGenerator.generateStackPath(new Pose2d(startPosition, Math.PI), PathGenerator.Stack.CLOSE);
+                        }
+                ));
+        Map<PropLocations, Action> backdrops = Arrays.stream(PropLocations.values())
+                .collect(Collectors.toMap(
+                        location -> location,
+                        location -> {
+                            Vector2d endPosition = (location == PropLocations.RIGHT) ?
+                                    pathGenerator.yellowLocations.get(PropLocations.MIDDLE) :
+                                    pathGenerator.yellowLocations.get(PropLocations.RIGHT);
+
+                            return pathGenerator.generateBackdropPath(
+                                    new Pose2d(-56, -36, Math.PI),
+                                    endPosition, PathGenerator.BackstageRoute.SIDE_ENTRANCE
+                            );
+                        }
+                ));
+        Map<PropLocations, Action> backdrops2 = Arrays.stream(PropLocations.values())
+                .collect(Collectors.toMap(
+                        location -> location,
+                        location -> {
+                            Vector2d endPosition = (location == PropLocations.RIGHT) ?
+                                    pathGenerator.yellowLocations.get(PropLocations.MIDDLE) :
+                                    pathGenerator.yellowLocations.get(PropLocations.RIGHT);
+
+                            return pathGenerator.generateBackdropPath(
+                                    new Pose2d(-56, -36, Math.PI),
+                                    endPosition, PathGenerator.BackstageRoute.SIDE_ENTRANCE
+                            );
+                        }
+                ));
 
         schedule(propDetection.andThen(
                 new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
@@ -72,8 +113,80 @@ public class ShortSide extends CommandOpMode {
                         new WaitCommand(500),
                         new InstantCommand(outtake::toggleSpike)
                 ),
-                new WaitCommand(500),
-                new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.RAISED))
+                new ActionToCommand(firstStack.get(propDetection.detectedLocation))
+                        .andThen(
+                                new InstantCommand(intake::toggleClamp),
+                                new WaitCommand(500)
+                        ),
+                new ParallelCommandGroup(
+                        new ActionToCommand(backdrops.get(propDetection.detectedLocation)),
+                        new WaitCommand(750).andThen(new InstantCommand(intake::toggleClamp)),
+                        new WaitUntilCommand(() -> drive.pose.position.x > 0)
+                                .andThen(
+                                        new InstantCommand(() -> {
+                                            intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
+                                            intake.adjustLiftPosition(10.0);
+                                            outtake.toggleBlockers();
+                                        }),
+                                        new WaitCommand(300),
+                                        new InstantCommand(() -> {
+                                            intake.setClampPosition(25);
+                                            outtake.setSlidesTicks(200);
+                                            outtake.toggleSpike();
+                                        })
+                                )
+                ),
+                new InstantCommand(outtake::toggleBlockers)
+                        .andThen(
+                                new WaitCommand(300),
+                                new InstantCommand(outtake::toggleSpike),
+                                new WaitCommand(300),
+                                new InstantCommand(outtake::toggleSpike),
+                                new WaitCommand(300)
+                        ),
+                new InstantCommand(outtake::toggleBlockers)
+                        .andThen(
+                                new WaitCommand(300),
+                                new InstantCommand(outtake::toggleSpike),
+                                new InstantCommand(() -> outtake.setSlidesPosition(0))
+                        ),
+                new ActionToCommand(secondStack.get(propDetection.detectedLocation))
+                        .andThen(
+                                new InstantCommand(intake::toggleClamp),
+                                new WaitCommand(500)
+                        ),
+                new ParallelCommandGroup(
+                        new ActionToCommand(backdrops2.get(propDetection.detectedLocation)),
+                        new WaitCommand(750).andThen(new InstantCommand(intake::toggleClamp)),
+                        new WaitUntilCommand(() -> drive.pose.position.x > 0)
+                                .andThen(
+                                        new InstantCommand(() -> {
+                                            intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
+                                            intake.adjustLiftPosition(10.0);
+                                            outtake.toggleBlockers();
+                                        }),
+                                        new WaitCommand(300),
+                                        new InstantCommand(() -> {
+                                            intake.setClampPosition(25);
+                                            outtake.setSlidesTicks(200);
+                                            outtake.toggleSpike();
+                                        })
+                                )
+                ),
+                new InstantCommand(outtake::toggleBlockers)
+                        .andThen(
+                                new WaitCommand(300),
+                                new InstantCommand(outtake::toggleSpike),
+                                new WaitCommand(300),
+                                new InstantCommand(outtake::toggleSpike),
+                                new WaitCommand(300)
+                        ),
+                new InstantCommand(outtake::toggleBlockers)
+                        .andThen(
+                                new WaitCommand(300),
+                                new InstantCommand(outtake::toggleSpike),
+                                new InstantCommand(() -> outtake.setSlidesPosition(0))
+                        )
         ));
     }
 

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.autonomous;
 
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 
@@ -26,9 +27,9 @@ public class PathGenerator {
     }};
 
     public Map<PropLocations, Vector2d> yellowLocations = new HashMap<PropLocations, Vector2d>() {{
-        put(PropLocations.LEFT, new Vector2d(51.25, -29.50));
-        put(PropLocations.MIDDLE, new Vector2d(51.25, -35.50));
-        put(PropLocations.RIGHT, new Vector2d(51.25, -43.00));
+        put(PropLocations.LEFT, new Vector2d(53, -29.50));
+        put(PropLocations.MIDDLE, new Vector2d(53, -35.50));
+        put(PropLocations.RIGHT, new Vector2d(53, -43.00));
     }};
 
     public PathGenerator(MecanumDrive drive, AllianceLocation location) {
@@ -72,18 +73,44 @@ public class PathGenerator {
                     .build();
         else if (stackType == Stack.CLOSE)
             return drive.actionBuilder(beginPose, robotLocation)
-                    .splineTo(new Vector2d(7, -60), Math.PI)
-                    .splineTo(new Vector2d(-37, -60), Math.PI)
+                    .splineTo(new Vector2d(7, -61), Math.PI)
+                    .splineTo(new Vector2d(-37, -61), Math.PI)
                     .setTangent(Math.PI / 2.0)
-                    .splineToConstantHeading(new Vector2d(-50, -36), Math.PI)
+                    .splineToConstantHeading(new Vector2d(-50, -36), Math.PI,
+                            new TranslationalVelConstraint(35),
+                            new ProfileAccelConstraint(-35, 35))
                     .splineTo(new Vector2d(-56.75, -36), Math.PI,
-                            new TranslationalVelConstraint(30))
+                            new TranslationalVelConstraint(30),
+                            new ProfileAccelConstraint(-40, 30))
                     .build();
 
         throw new RuntimeException("An invalid stack type was chosen during generation");
     }
 
+    public Action generateBackdropPath(Pose2d beginPose, Vector2d endPosition, BackstageRoute route) {
+        if (route == BackstageRoute.STAGE_DOOR)
+            return drive.actionBuilder(beginPose, robotLocation)
+                    .setReversed(true)
+                    .splineTo(new Vector2d(24, -9), Math.toRadians(0))
+                    .splineTo(endPosition, Math.toRadians(0))
+                    .build();
+        else if (route == BackstageRoute.SIDE_ENTRANCE)
+            return drive.actionBuilder(beginPose, robotLocation)
+                    .setReversed(true)
+                    .splineTo(new Vector2d(-24, -60), Math.toRadians(0))
+                    .splineTo(new Vector2d(4, -60), Math.toRadians(0))
+                    .splineTo(endPosition, Math.toRadians(0))
+                    .build();
+
+        throw new RuntimeException("An invalid backstage route was chosen");
+    }
+
     public enum Stack {
         CLOSE, FAR
+    }
+
+    public enum BackstageRoute {
+        STAGE_DOOR,
+        SIDE_ENTRANCE
     }
 }

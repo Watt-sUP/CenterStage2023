@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.teamcode.autonomous.assets.AllianceLocation;
@@ -16,18 +17,20 @@ public class TensorflowDetectCommand extends CommandBase {
 
     private final TensorflowSubsystem detector;
     private final AllianceLocation robotLocation;
-    public PropLocations detectedLocation = PropLocations.LEFT;
+    public PropLocations detectedLocation;
     private BooleanSupplier endCondition = () -> false;
 
     public TensorflowDetectCommand(TensorflowSubsystem tensorflow, AllianceLocation location) {
         detector = tensorflow;
         robotLocation = location;
 
+        detectedLocation = robotLocation.getHiddenCase();
         addRequirements(detector);
     }
 
     public TensorflowDetectCommand(HardwareMap hardwareMap, AllianceLocation location) {
         robotLocation = location;
+        detectedLocation = robotLocation.getHiddenCase();
 
         if (location.color == 1)
             detector = new TensorflowSubsystem(hardwareMap, "Webcam 1",
@@ -45,7 +48,6 @@ public class TensorflowDetectCommand extends CommandBase {
     @Override
     public void initialize() {
         detector.setMinConfidence(0.8);
-        detectedLocation = robotLocation.getHiddenCase();
     }
 
     @Override
@@ -53,7 +55,6 @@ public class TensorflowDetectCommand extends CommandBase {
         Recognition bestDetection = detector.getBestDetection();
         detectedLocation = robotLocation.getHiddenCase();
         TelemetryPacket packet = new TelemetryPacket();
-        FtcDashboard.getInstance().clearTelemetry();
 
         if (bestDetection != null) {
             double x = (bestDetection.getLeft() + bestDetection.getRight()) / 2.0;
@@ -64,13 +65,14 @@ public class TensorflowDetectCommand extends CommandBase {
             packet.put("Detection X", x);
         }
 
-        packet.put("Detection Case", detectedLocation);
+        packet.put("Detected Case", detectedLocation);
+        RobotLog.d("Detected Case: " + detectedLocation);
         FtcDashboard.getInstance().sendTelemetryPacket(packet);
     }
 
     @Override
     public boolean isFinished() {
-        return endCondition.getAsBoolean();
+        return Thread.currentThread().isInterrupted() || endCondition.getAsBoolean();
     }
 
     @Override

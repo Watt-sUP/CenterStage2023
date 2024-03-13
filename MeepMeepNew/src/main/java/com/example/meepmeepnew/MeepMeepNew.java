@@ -1,6 +1,7 @@
 package com.example.meepmeepnew;
 
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.noahbres.meepmeep.MeepMeep;
 import com.noahbres.meepmeep.core.colorscheme.scheme.ColorSchemeRedDark;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
@@ -17,10 +18,8 @@ public class MeepMeepNew {
                 .build();
 
         myBot.runAction(
-                myBot.getDrive().actionBuilder(new Pose2d(16.75, -62.75, Math.toRadians(90)))
-//                        .splineTo(new Vector2d(9, -41.5), Math.toRadians(135)) left
-//                        .splineTo(new Vector2d(15, -38), Math.toRadians(90)) middle
-//                        .splineTo(new Vector2d(17, -44.25), Math.toRadians(60)) right
+                myBot.getDrive().actionBuilder(new Pose2d(17.50, -64.40, Math.toRadians(90)))
+                        .splineTo(new Vector2d(15, -38), Math.toRadians(90))
                         .build()
         );
 
