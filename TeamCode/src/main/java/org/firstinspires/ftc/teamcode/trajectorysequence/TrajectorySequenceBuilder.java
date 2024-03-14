@@ -112,12 +112,6 @@ public class TrajectorySequenceBuilder {
         });
     }
 
-    // TODO: Remove this function's usages
-    @Deprecated
-    public TrajectorySequenceBuilder splineTo(Pose2d endPosition) {
-        return addPath(() -> currentTrajectoryBuilder.splineTo(endPosition.vec(), endPosition.getHeading(), currentVelConstraint, currentAccelConstraint));
-    }
-
     public TrajectorySequenceBuilder splineToLinearHeading(Pose2d endPose, double endHeading) {
         return addPath(() -> {
             double multiplier = 1;

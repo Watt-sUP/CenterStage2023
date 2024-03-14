@@ -5,22 +5,45 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 
-import org.firstinspires.ftc.teamcode.autonomous.assets.BackstageRoute;
 import org.firstinspires.ftc.teamcode.autonomous.assets.PropLocations;
-import org.firstinspires.ftc.teamcode.autonomous.assets.Stack;
 import org.firstinspires.ftc.teamcode.roadrunner.DriveConstants;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 public class PathGenerator {
 
     private final SampleMecanumDrive drive;
+    private final Map<PropLocations, Pose2d> purpleLocationsClose = new HashMap<PropLocations, Pose2d>() {{
+        put(PropLocations.LEFT, new Pose2d(
+                new Vector2d(.5, -33).minus(Vector2d.polar(12, 1.5 * Math.PI)),
+                1.5 * Math.PI
+        ));
+        put(PropLocations.MIDDLE, new Pose2d(15, -38, Math.PI / 2));
+        put(PropLocations.RIGHT, new Pose2d(
+                new Vector2d(23.5, -32).minus(Vector2d.polar(13, Math.PI / 3)),
+                Math.PI / 3
+        ));
+    }};
+    private final Map<PropLocations, Pose2d> purpleLocationsFar = new HashMap<PropLocations, Pose2d>() {{
+        put(PropLocations.LEFT, new Pose2d(-46, -39, Math.PI / 2));
+        put(PropLocations.MIDDLE, new Pose2d(-39, -38, Math.PI / 2));
+        put(PropLocations.RIGHT, new Pose2d(
+                new Vector2d(-24.5, -33).minus(Vector2d.polar(11, Math.PI / 6)),
+                Math.PI / 6
+        ));
+    }};
 
     public PathGenerator(SampleMecanumDrive drive) {
         this.drive = drive;
+        assert drive.getRobotLocation() != null :
+                "The robot location wasn't set";
     }
 
     public TrajectorySequence generateStackPath(Pose2d startPose, Stack targetStack) throws IllegalArgumentException {
@@ -73,40 +96,49 @@ public class PathGenerator {
 
     @NonNull
     public Map<PropLocations, TrajectorySequence> generatePurpleCases() {
-        Map<PropLocations, TrajectorySequence> cases = new HashMap<>();
+        return Arrays.stream(PropLocations.values())
+                .collect(Collectors.toMap(
+                        location -> PropLocations.fromId(location.getId() * drive.getRobotLocation().color),
+                        location -> {
+                            Pose2d purpLoc;
 
-        if (drive.getRobotLocation().side == 1)
-            for (PropLocations location : PropLocations.values()) {
-                double heading;
-                Vector2d position;
-                int multiplier = location.getId() * allianceColor.getMultiplier();
+                            if (drive.getRobotLocation().side == 1)
+                                purpLoc = purpleLocationsClose.get(location);
+                            else purpLoc = purpleLocationsFar.get(location);
 
-                switch (multiplier) {
-                    case -1:
-                        heading = Math.toRadians(135);
-                        position = new Vector2d(.5, -33).minus(Vector2d.polar(12, Math.toRadians(135)));
-                        break;
-                    case 0:
-                        heading = Math.toRadians(90);
-                        position = new Vector2d(15, -38);
-                        break;
-                    case 1:
-                        heading = Math.toRadians(60);
-                        position = new Vector2d(23.5, -32).minus(Vector2d.polar(13, Math.toRadians(60)));
-                        break;
-                    default:
-                        throw new IllegalStateException("Unexpected multiplier value: " + multiplier);
-                }
+                            return drive.trajectorySequenceBuilder(drive.getStartingPosition())
+                                    .splineTo(purpLoc.vec(), purpLoc.getHeading())
+                                    .build();
+                        }
+                ));
+    }
 
-                TrajectorySequence sequence = drive.trajectorySequenceBuilder(getStartingPose())
-                        .splineTo(allianceColor.convertPose(new Pose2d(position, heading)))
-                        .build();
+    @Nullable
+    public Map<PropLocations, TrajectorySequence> generateYellowCases() {
+        if (drive.getRobotLocation().side == -1)
+            return null;
 
-                cases.put(location, sequence);
-            }
+        Map<PropLocations, Pose2d> yellowLocations = new HashMap<PropLocations, Pose2d>() {{
+            put(PropLocations.LEFT, new Pose2d(51.25, -29.50, Math.PI));
+            put(PropLocations.MIDDLE, new Pose2d(51.25, -35.50, Math.PI));
+            put(PropLocations.RIGHT, new Pose2d(51.25, -43.00, Math.PI));
+        }};
 
-        assert cases.size() == 3 : "An invalid number of cases was generated." +
-                " Expected: 3, Generated: " + cases.size();
-        return cases;
+        return Arrays.stream(PropLocations.values())
+                .collect(Collectors.toMap(
+                        location -> PropLocations.fromId(location.getId() * drive.getRobotLocation().color),
+                        location -> drive.trajectorySequenceBuilder(purpleLocationsClose.get(location))
+                                .setTangent(0)
+                                .splineToSplineHeading(yellowLocations.get(location), 0)
+                                .build()
+                ));
+    }
+
+    public enum Stack {
+        CLOSE, FAR
+    }
+
+    public enum BackstageRoute {
+        STAGE_DOOR, SIDE_ENTRANCE
     }
 }

@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.autonomous.red;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
@@ -15,9 +14,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.teamcode.autonomous.PathGenerator;
 import org.firstinspires.ftc.teamcode.autonomous.assets.AllianceLocation;
-import org.firstinspires.ftc.teamcode.autonomous.assets.BackstageRoute;
 import org.firstinspires.ftc.teamcode.autonomous.assets.PropLocations;
-import org.firstinspires.ftc.teamcode.autonomous.assets.Stack;
 import org.firstinspires.ftc.teamcode.commands.RunByCaseCommand;
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
@@ -26,7 +23,6 @@ import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -49,6 +45,7 @@ public class RedShortSide extends CommandOpMode {
         tensorflow.setMinConfidence(0.8);
 
         Map<PropLocations, TrajectorySequence> purpleCases = pathGenerator.generatePurpleCases();
+        Map<PropLocations, TrajectorySequence> yellowCases = pathGenerator.generateYellowCases();
         Trajectory rightYellow = drive.trajectoryBuilder(purpleCases.get(PropLocations.RIGHT).end(), Math.toRadians(0))
                 .splineToSplineHeading(new Pose2d(51.25, -43.00, Math.toRadians(180.00)), Math.toRadians(0))
                 .build();
@@ -59,20 +56,23 @@ public class RedShortSide extends CommandOpMode {
                 .splineToSplineHeading(new Pose2d(51.25, -35.50, Math.toRadians(180.00)), Math.toRadians(0))
                 .build();
 
-        TrajectorySequence stackMid = pathGenerator.generateStackPath(middleYellow.end(), Stack.CLOSE);
-        TrajectorySequence stackRight = pathGenerator.generateStackPath(rightYellow.end(), Stack.CLOSE);
-        TrajectorySequence stackLeft = pathGenerator.generateStackPath(leftYellow.end(), Stack.CLOSE);
+        Map<PropLocations, TrajectorySequence> stacks = Arrays.stream(PropLocations.values())
+                .collect(Collectors.toMap(
+                        location -> location,
+                        location -> pathGenerator.generateStackPath(yellowCases.get(location).end(), PathGenerator.Stack.CLOSE)
+                ));
 
-        Map<PropLocations, TrajectorySequence> backdrops = new HashMap<PropLocations, TrajectorySequence>() {{
-            put(PropLocations.LEFT, pathGenerator.generateBackstagePath(stackLeft.end(), BackstageRoute.SIDE));
-            put(PropLocations.MIDDLE, pathGenerator.generateBackstagePath(stackMid.end(),
-                    new Vector2d(51.25, -43.00), BackstageRoute.SIDE));
-            put(PropLocations.RIGHT, pathGenerator.generateBackstagePath(stackRight.end(), BackstageRoute.SIDE));
-        }};
+        Map<PropLocations, TrajectorySequence> backdrops = Arrays.stream(PropLocations.values())
+                .collect(Collectors.toMap(
+                        location -> location,
+                        location -> pathGenerator.generateBackstagePath(stacks.get(location).end(),
+                                yellowCases.get(PropLocations.fromId(robotLocation.color)).end().vec(),
+                                PathGenerator.BackstageRoute.SIDE_ENTRANCE)
+                ));
         Map<PropLocations, TrajectorySequence> stackTwo = Arrays.stream(PropLocations.values())
                 .collect(Collectors.toMap(
                         location -> location,
-                        location -> pathGenerator.generateStackPath(backdrops.get(location).end(), Stack.CLOSE)
+                        location -> pathGenerator.generateStackPath(backdrops.get(location).end(), PathGenerator.Stack.CLOSE)
                 ));
 
         while (!isStarted()) {
