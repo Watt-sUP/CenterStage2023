@@ -35,7 +35,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Autonomous(name = "Red Long (Side)", group = "auto")
+@Autonomous(name = "Red Long (Side)", group = "Auto (Long)")
 public class RedLongSide extends CommandOpMode {
 
     private PropLocations location;
@@ -103,11 +103,11 @@ public class RedLongSide extends CommandOpMode {
                         }
                 ));
 
-        Map<PropLocations, TrajectorySequence> backdrops = new HashMap<PropLocations, TrajectorySequence>() {{
-            put(PropLocations.LEFT, generator.generateBackstagePath(whites.get(PropLocations.LEFT).end(), BackstageRoute.SIDE));
-            put(PropLocations.MIDDLE, generator.generateBackstagePath(whites.get(PropLocations.MIDDLE).end(), new Vector2d(50.50, -42.50), BackstageRoute.SIDE));
-            put(PropLocations.RIGHT, generator.generateBackstagePath(whites.get(PropLocations.RIGHT).end(), BackstageRoute.SIDE));
-        }};
+        Map<PropLocations, TrajectorySequence> backdrops = Arrays.stream(PropLocations.values())
+                .collect(Collectors.toMap(
+                        location -> location,
+                        location -> generator.generateBackstagePath(whites.get(location).end(), BackstageRoute.SIDE)
+                ));
         Map<PropLocations, Vector2d> yellowLocation = new HashMap<PropLocations, Vector2d>() {{
             put(PropLocations.LEFT, new Vector2d(51.25, -29.50));
             put(PropLocations.MIDDLE, new Vector2d(51.25, -35.50));
@@ -140,7 +140,10 @@ public class RedLongSide extends CommandOpMode {
 
         tensorflow.shutdown();
         schedule(new SequentialCommandGroup(
-                new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
+                new InstantCommand(() -> {
+                    intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
+                    intake.adjustLiftPosition(10.0);
+                }),
                 new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, true),
                 new InstantCommand(intake::toggleLiftLocation).andThen(
                         new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.STACK)),

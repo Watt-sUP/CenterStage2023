@@ -56,9 +56,10 @@ public class PathGenerator {
 
         if (targetStack == Stack.FAR)
             return drive.trajectorySequenceBuilder(startPose, 60)
-                    .splineTo(allianceColor.convertVector(new Vector2d(17, -11)), Math.toRadians(180))
+                    .splineTo(allianceColor.convertVector(new Vector2d(17, -12)), Math.toRadians(180))
+                    .waitSeconds(.25)
                     .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(52, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
-                    .lineToLinearHeading(allianceColor.convertPose(new Pose2d(-56.75, -11.50, Math.toRadians(180))))
+                    .lineToLinearHeading(allianceColor.convertPose(new Pose2d(-56.75, -12, Math.toRadians(180))))
                     .build();
 
         else if (targetStack == Stack.CLOSE) {
@@ -70,8 +71,8 @@ public class PathGenerator {
                             SampleMecanumDrive.getAccelerationConstraint(35)
                     )
                     .setTangent(Math.toRadians(90 * allianceColor.getMultiplier()))
-                    .splineToLinearHeading(allianceColor.convertPose(new Pose2d(-50.00, -35.75, Math.toRadians(180))), Math.toRadians(180.00))
-                    .lineToLinearHeading(allianceColor.convertPose(new Pose2d(-56.75, -35.75, Math.toRadians(180))))
+                    .splineToLinearHeading(allianceColor.convertPose(new Pose2d(-50.00, -36, Math.toRadians(180))), Math.toRadians(180.00))
+                    .lineToLinearHeading(allianceColor.convertPose(new Pose2d(-56.75, -36, Math.toRadians(180))))
                     .build();
         } else
             throw new IllegalArgumentException("An unexpected error occurred generating a stack trajectory");

@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.autonomous.blue;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
@@ -76,8 +75,7 @@ public class BlueShortSide extends CommandOpMode {
 
         Map<PropLocations, TrajectorySequence> backdrops = new HashMap<PropLocations, TrajectorySequence>() {{
             put(PropLocations.LEFT, generator.generateBackstagePath(stackLeft.end(), BackstageRoute.SIDE));
-            put(PropLocations.MIDDLE, generator.generateBackstagePath(stackMid.end(),
-                    new Vector2d(51.25, 43.00), BackstageRoute.SIDE));
+            put(PropLocations.MIDDLE, generator.generateBackstagePath(stackMid.end(), BackstageRoute.SIDE));
             put(PropLocations.RIGHT, generator.generateBackstagePath(stackRight.end(), BackstageRoute.SIDE));
         }};
         Map<PropLocations, TrajectorySequence> stackTwo = Arrays.stream(PropLocations.values())
@@ -106,7 +104,10 @@ public class BlueShortSide extends CommandOpMode {
 
         tensorflow.shutdown();
         schedule(new SequentialCommandGroup(
-                new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
+                new InstantCommand(() -> {
+                    intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
+                    intake.adjustLiftPosition(10.0);
+                }),
                 new RunByCaseCommand(location, purpleCases, drive, true),
                 new InstantCommand(intake::toggleLiftLocation).andThen(
                         new InstantCommand(() -> {

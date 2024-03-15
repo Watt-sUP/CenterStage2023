@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.autonomous.red;
+package org.firstinspires.ftc.teamcode.autonomous.blue;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -33,8 +33,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-@Autonomous(name = "Red Long (Stage Door)", group = "Auto (Long)")
-public class RedLongDoor extends CommandOpMode {
+@Autonomous(name = "Blue Long (Stage Door)", group = "Auto (Long)")
+public class BlueLongDoor extends CommandOpMode {
 
     private PropLocations location;
 
@@ -42,13 +42,13 @@ public class RedLongDoor extends CommandOpMode {
     public void initialize() {
 
         TensorflowSubsystem tensorflow = new TensorflowSubsystem(hardwareMap, "Webcam 1",
-                "red_prop.tflite", "Red Prop");
+                "blue_prop.tflite", "Blue Prop");
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         PathGenerator generator = new PathGenerator(drive);
 
-        generator.setStartingLocation(AllianceColor.RED, StartingPosition.AUDIENCE);
+        generator.setStartingLocation(AllianceColor.BLUE, StartingPosition.AUDIENCE);
         tensorflow.setMinConfidence(0.8);
 
         telemetry.addLine("Loading trajectories...");
@@ -58,23 +58,23 @@ public class RedLongDoor extends CommandOpMode {
         CollectorSubsystem intake = new CollectorSubsystem(hardwareMap);
         DepositSubsystem outtake = new DepositSubsystem(hardwareMap);
 
-        TrajectorySequence leftPurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
+        TrajectorySequence rightPurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
                 .splineToSplineHeading(new Pose2d(
-                        new Vector2d(-47.5, -31).minus(Vector2d.polar(13, Math.toRadians(180))),
+                        new Vector2d(-47.5, 31).minus(Vector2d.polar(13, Math.toRadians(180))),
                         Math.toRadians(180)
-                ), Math.toRadians(90.00))
+                ), Math.toRadians(-90.00))
                 .build();
         TrajectorySequence middlePurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
-                .splineTo(new Vector2d(-39.00, -38.00), Math.toRadians(90.00))
+                .splineTo(new Vector2d(-39.00, 38.00), Math.toRadians(-90.00))
                 .build();
-        TrajectorySequence rightPurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
-                .splineTo(new Vector2d(-24.5, -33)
-                        .minus(Vector2d.polar(11, Math.toRadians(30))), Math.toRadians(30.00))
+        TrajectorySequence leftPurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
+                .splineTo(new Vector2d(-24.5, 33)
+                        .minus(Vector2d.polar(11, Math.toRadians(-30))), Math.toRadians(-30.00))
                 .build();
 
         TrajectorySequence whiteLeft = drive.trajectorySequenceBuilder(leftPurple.end(), 40)
-                .setTangent(Math.toRadians(90.00))
-                .splineToSplineHeading(new Pose2d(-52.50, -12, Math.toRadians(180)), Math.toRadians(180))
+                .setTangent(Math.toRadians(-90.00))
+                .splineToSplineHeading(new Pose2d(-52.50, 12, Math.toRadians(180)), Math.toRadians(180))
                 .addTemporalMarker(() -> {
                     intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
                     intake.adjustLiftPosition(-5.0);
@@ -85,13 +85,13 @@ public class RedLongDoor extends CommandOpMode {
                         SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(30)
                 )
-                .lineToLinearHeading(new Pose2d(-56.50, -12, Math.toRadians(180.00)))
+                .lineToLinearHeading(new Pose2d(-56.50, 12, Math.toRadians(180.00)))
                 .addTemporalMarker(intake::toggleClamp)
                 .waitSeconds(0.5)
                 .build();
         TrajectorySequence whiteMiddle = drive.trajectorySequenceBuilder(middlePurple.end(), 40)
                 .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
+                .splineToLinearHeading(new Pose2d(-52.50, 35.75, Math.toRadians(180.00)), Math.toRadians(180))
                 .addTemporalMarker(() -> {
                     intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
                     intake.adjustLiftPosition(-5.0);
@@ -102,13 +102,13 @@ public class RedLongDoor extends CommandOpMode {
                         SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(30)
                 )
-                .lineToLinearHeading(new Pose2d(-56.50, -35.75, Math.toRadians(180.00)))
+                .lineToLinearHeading(new Pose2d(-56.50, 35.75, Math.toRadians(180.00)))
                 .addTemporalMarker(intake::toggleClamp)
                 .waitSeconds(0.5)
                 .build();
         TrajectorySequence whiteRight = drive.trajectorySequenceBuilder(rightPurple.end(), 40)
                 .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
+                .splineToLinearHeading(new Pose2d(-52.50, 35.75, Math.toRadians(180.00)), Math.toRadians(180))
                 .addTemporalMarker(() -> {
                     intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
                     intake.adjustLiftPosition(-5.0);
@@ -119,34 +119,34 @@ public class RedLongDoor extends CommandOpMode {
                         SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(30)
                 )
-                .lineToLinearHeading(new Pose2d(-56.50, -35.75, Math.toRadians(180.00)))
+                .lineToLinearHeading(new Pose2d(-56.50, 35.75, Math.toRadians(180.00)))
                 .addTemporalMarker(intake::toggleClamp)
                 .waitSeconds(0.5)
                 .build();
 
         Map<PropLocations, TrajectorySequence> backdropsWhite = new HashMap<PropLocations, TrajectorySequence>() {{
-            put(PropLocations.LEFT, generator.generateBackstagePath(whiteLeft.end(), BackstageRoute.CENTER));
+            put(PropLocations.RIGHT, generator.generateBackstagePath(whiteRight.end(), BackstageRoute.CENTER));
             put(PropLocations.MIDDLE,
                     drive.trajectorySequenceBuilder(whiteMiddle.end())
                             .setReversed(true)
-                            .splineTo(new Vector2d(24.00, -35.50), Math.toRadians(0.00))
-                            .splineTo(new Vector2d(51.25, -29.50), Math.toRadians(0.00))
+                            .splineTo(new Vector2d(24.00, 35.50), Math.toRadians(0.00))
+                            .splineTo(new Vector2d(51.25, 29.50), Math.toRadians(0.00))
                             .build()
             );
-            put(PropLocations.RIGHT,
-                    drive.trajectorySequenceBuilder(whiteRight.end())
+            put(PropLocations.LEFT,
+                    drive.trajectorySequenceBuilder(whiteLeft.end())
                             .setReversed(true)
-                            .splineTo(new Vector2d(-24, -11), Math.toRadians(0.00))
-                            .splineTo(new Vector2d(24, -11), Math.toRadians(0.00))
-                            .splineTo(new Vector2d(51.25, -35.50), Math.toRadians(0.00))
+                            .splineTo(new Vector2d(-24, 11), Math.toRadians(0.00))
+                            .splineTo(new Vector2d(24, 11), Math.toRadians(0.00))
+                            .splineTo(new Vector2d(51.25, 35.50), Math.toRadians(0.00))
                             .build()
             );
         }};
 
         Map<PropLocations, Vector2d> yellowLocation = new HashMap<PropLocations, Vector2d>() {{
-            put(PropLocations.LEFT, new Vector2d(51.25, -29.50));
-            put(PropLocations.MIDDLE, new Vector2d(51.25, -37.00));
-            put(PropLocations.RIGHT, new Vector2d(51.25, -44.00));
+            put(PropLocations.RIGHT, new Vector2d(51.25, 29.50));
+            put(PropLocations.MIDDLE, new Vector2d(51.25, 37.00));
+            put(PropLocations.LEFT, new Vector2d(51.25, 44.00));
         }};
 
         TrajectorySequence stackLeft = generator.generateStackPath(new Pose2d(yellowLocation.get(PropLocations.LEFT), Math.toRadians(180)), Stack.FAR);
@@ -155,7 +155,7 @@ public class RedLongDoor extends CommandOpMode {
 
         Map<PropLocations, TrajectorySequence> backdropsCycle = new HashMap<PropLocations, TrajectorySequence>() {{
             put(PropLocations.LEFT, generator.generateBackstagePath(stackLeft.end(), BackstageRoute.CENTER));
-            put(PropLocations.MIDDLE, generator.generateBackstagePath(stackMiddle.end(), new Vector2d(51.25, -29.50), BackstageRoute.CENTER));
+            put(PropLocations.MIDDLE, generator.generateBackstagePath(stackMiddle.end(), BackstageRoute.CENTER));
             put(PropLocations.RIGHT, generator.generateBackstagePath(stackRight.end(), BackstageRoute.CENTER));
         }};
 
@@ -164,11 +164,11 @@ public class RedLongDoor extends CommandOpMode {
                 return;
 
             Recognition bestDetection = tensorflow.getBestDetection();
-            location = PropLocations.RIGHT;
+            location = PropLocations.LEFT;
 
             if (bestDetection != null) {
                 double x = (bestDetection.getLeft() + bestDetection.getRight()) / 2.0;
-                location = x < (bestDetection.getImageWidth() / 2.0) ? PropLocations.LEFT : PropLocations.MIDDLE;
+                location = x < (bestDetection.getImageWidth() / 2.0) ? PropLocations.MIDDLE : PropLocations.RIGHT;
             }
 
             telemetry.addData("FPS", tensorflow.portal.getFps());
@@ -259,7 +259,7 @@ public class RedLongDoor extends CommandOpMode {
                         .andThen(new InstantCommand(() -> outtake.setSlidesPosition(0))),
 
                 new InstantCommand(() -> drive.adjustPose(new Pose2d(-5, 0, 0))),
-                new InstantCommand(() -> drive.lineToPose(new Pose2d(48, -12, Math.toRadians(180))))
+                new InstantCommand(() -> drive.lineToPose(new Pose2d(48, 12, Math.toRadians(180))))
                         .andThen(new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.RAISED))),
                 new InstantCommand(() -> drive.adjustPose(new Pose2d(10, 0, 0)))
         ));

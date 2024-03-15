@@ -29,11 +29,14 @@ import org.firstinspires.ftc.teamcode.commands.subsystems.TensorflowSubsystem;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Autonomous(name = "Blue Short (Stage Door)")
 public class BlueShortDoor extends CommandOpMode {
-
     private PropLocations location = PropLocations.LEFT;
 
     @Override
@@ -67,22 +70,30 @@ public class BlueShortDoor extends CommandOpMode {
                         .minus(Vector2d.polar(12, Math.toRadians(-135))), Math.toRadians(-135))
                 .build();
 
-        Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end(), true)
-                .splineTo(new Vector2d(31.05, 53.32), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.50, 43.00), Math.toRadians(0.00))
+        Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end(), 0)
+                .splineToSplineHeading(new Pose2d(51.25, 43.00, Math.toRadians(180.00)), Math.toRadians(0))
                 .build();
-        Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), true)
-                .splineTo(new Vector2d(50.50, 35.50), Math.toRadians(0.00))
+        Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), 0)
+                .splineToSplineHeading(new Pose2d(51.25, 35.50, Math.toRadians(180.00)), Math.toRadians(0))
                 .build();
-        Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), true)
-                .splineTo(new Vector2d(50.50, 29.50), Math.toRadians(0.00))
+        Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), 0)
+                .splineToSplineHeading(new Pose2d(51.25, 29.50, Math.toRadians(180.00)), Math.toRadians(0))
                 .build();
 
         TrajectorySequence stackLeft = generator.generateStackPath(leftYellow.end(), Stack.FAR);
         TrajectorySequence stackMid = generator.generateStackPath(middleYellow.end(), Stack.FAR);
         TrajectorySequence stackRight = generator.generateStackPath(rightYellow.end(), Stack.FAR);
 
-        TrajectorySequence goToBackdrop = generator.generateBackstagePath(stackMid.end(), BackstageRoute.CENTER);
+        Map<PropLocations, TrajectorySequence> backdrops = new HashMap<PropLocations, TrajectorySequence>() {{
+            put(PropLocations.LEFT, generator.generateBackstagePath(stackLeft.end(), BackstageRoute.CENTER));
+            put(PropLocations.MIDDLE, generator.generateBackstagePath(stackMid.end(), BackstageRoute.CENTER));
+            put(PropLocations.RIGHT, generator.generateBackstagePath(stackRight.end(), BackstageRoute.CENTER));
+        }};
+        Map<PropLocations, TrajectorySequence> stackTwo = Arrays.stream(PropLocations.values())
+                .collect(Collectors.toMap(
+                        location -> location,
+                        location -> generator.generateStackPath(backdrops.get(location).end(), Stack.FAR)
+                ));
 
         while (!isStarted()) {
             if (isStopRequested())
@@ -104,7 +115,10 @@ public class BlueShortDoor extends CommandOpMode {
 
         tensorflow.shutdown();
         schedule(new SequentialCommandGroup(
-                new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.STACK)),
+                new InstantCommand(() -> {
+                    intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
+                    intake.adjustLiftPosition(10.0);
+                }),
                 new RunByCaseCommand(location.toString(), drive, leftPurple, middlePurple, rightPurple, true),
                 new InstantCommand(intake::toggleLiftLocation).andThen(
                         new InstantCommand(() -> {
@@ -118,7 +132,7 @@ public class BlueShortDoor extends CommandOpMode {
                 new InstantCommand(outtake::toggleBlockers).andThen(
                         new WaitCommand(300),
                         new InstantCommand(outtake::toggleBlockers),
-                        new WaitCommand(500),
+                        new WaitCommand(300),
                         new InstantCommand(outtake::toggleSpike)
                 ),
                 new RunByCaseCommand(location.toString(), drive, stackLeft, stackMid, stackRight, true)
@@ -126,7 +140,7 @@ public class BlueShortDoor extends CommandOpMode {
                                 new InstantCommand(intake::toggleClamp),
                                 new WaitCommand(500)
                         ),
-                new InstantCommand(() -> drive.followTrajectorySequenceAsync(goToBackdrop)),
+                new InstantCommand(() -> drive.followTrajectorySequenceAsync(backdrops.get(location))),
                 new ParallelCommandGroup(
                         new RunCommand(drive::update).interruptOn(() -> !drive.isBusy()),
                         new WaitCommand(700)
@@ -145,13 +159,9 @@ public class BlueShortDoor extends CommandOpMode {
                                         new InstantCommand(() -> outtake.setSlidesTicks(200))
                                 )
                 ),
-                new InstantCommand(() -> {
-                    if (location == PropLocations.MIDDLE)
-                        drive.adjustPose(new Pose2d(0, -5, 0));
-                }),
                 new InstantCommand(outtake::toggleBlockers)
                         .andThen(
-                                new WaitCommand(500),
+                                new WaitCommand(300),
                                 new InstantCommand(outtake::toggleSpike),
                                 new WaitCommand(300),
                                 new InstantCommand(outtake::toggleSpike),
@@ -159,17 +169,16 @@ public class BlueShortDoor extends CommandOpMode {
                         ),
                 new InstantCommand(outtake::toggleBlockers)
                         .andThen(
-                                new WaitCommand(500),
-                                new InstantCommand(outtake::toggleSpike)
+                                new WaitCommand(300),
+                                new InstantCommand(outtake::toggleSpike),
+                                new InstantCommand(() -> outtake.setSlidesPosition(0))
                         ),
-                new WaitCommand(500)
-                        .andThen(new InstantCommand(() -> outtake.setSlidesPosition(0))),
-                new RunByCaseCommand(location.toString(), drive, stackLeft, stackMid, stackRight, true)
+                new InstantCommand(() -> drive.followTrajectorySequence(stackTwo.get(location)))
                         .andThen(
                                 new InstantCommand(intake::toggleClamp),
                                 new WaitCommand(500)
                         ),
-                new InstantCommand(() -> drive.followTrajectorySequenceAsync(goToBackdrop)),
+                new InstantCommand(() -> drive.followTrajectorySequenceAsync(backdrops.get(location))),
                 new ParallelCommandGroup(
                         new RunCommand(drive::update).interruptOn(() -> !drive.isBusy()),
                         new WaitCommand(700)
@@ -189,7 +198,7 @@ public class BlueShortDoor extends CommandOpMode {
                 ),
                 new InstantCommand(outtake::toggleBlockers)
                         .andThen(
-                                new WaitCommand(500),
+                                new WaitCommand(300),
                                 new InstantCommand(outtake::toggleSpike),
                                 new WaitCommand(300),
                                 new InstantCommand(outtake::toggleSpike),
@@ -197,15 +206,10 @@ public class BlueShortDoor extends CommandOpMode {
                         ),
                 new InstantCommand(outtake::toggleBlockers)
                         .andThen(
-                                new WaitCommand(500),
-                                new InstantCommand(outtake::toggleSpike)
-                        ),
-                new WaitCommand(500)
-                        .andThen(new InstantCommand(() -> outtake.setSlidesPosition(0)))
-
-//                new InstantCommand(() -> drive.adjustPose(new Pose2d(-5, 0, 0))),
-//                new InstantCommand(() -> drive.lineToPose(new Pose2d(48, 12, Math.toRadians(180)))),
-//                new InstantCommand(() -> drive.adjustPose(new Pose2d(10, 0, 0)))
+                                new WaitCommand(300),
+                                new InstantCommand(outtake::toggleSpike),
+                                new InstantCommand(() -> outtake.setSlidesPosition(0))
+                        )
         ));
     }
 }

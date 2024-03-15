@@ -50,10 +50,6 @@ public class TensorflowSubsystem extends SubsystemBase {
         tensorflowProcessor.setMinResultConfidence((float) confidence);
     }
 
-    public List<Recognition> getDetections() {
-        return tensorflowProcessor.getRecognitions();
-    }
-
     @Nullable
     public Recognition getBestDetection() {
         List<Recognition> detections = tensorflowProcessor.getRecognitions();
