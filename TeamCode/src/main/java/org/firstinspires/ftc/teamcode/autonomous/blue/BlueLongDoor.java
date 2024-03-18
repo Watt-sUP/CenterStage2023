@@ -72,7 +72,7 @@ public class BlueLongDoor extends CommandOpMode {
                         .minus(Vector2d.polar(11, Math.toRadians(-30))), Math.toRadians(-30.00))
                 .build();
 
-        TrajectorySequence whiteLeft = drive.trajectorySequenceBuilder(leftPurple.end(), 40)
+        TrajectorySequence whiteRight = drive.trajectorySequenceBuilder(rightPurple.end(), 40)
                 .setTangent(Math.toRadians(-90.00))
                 .splineToSplineHeading(new Pose2d(-52.50, 12, Math.toRadians(180)), Math.toRadians(180))
                 .addTemporalMarker(() -> {
@@ -106,7 +106,7 @@ public class BlueLongDoor extends CommandOpMode {
                 .addTemporalMarker(intake::toggleClamp)
                 .waitSeconds(0.5)
                 .build();
-        TrajectorySequence whiteRight = drive.trajectorySequenceBuilder(rightPurple.end(), 40)
+        TrajectorySequence whiteLeft = drive.trajectorySequenceBuilder(leftPurple.end(), 40)
                 .setTangent(Math.toRadians(180))
                 .splineToLinearHeading(new Pose2d(-52.50, 35.75, Math.toRadians(180.00)), Math.toRadians(180))
                 .addTemporalMarker(() -> {
@@ -125,28 +125,28 @@ public class BlueLongDoor extends CommandOpMode {
                 .build();
 
         Map<PropLocations, TrajectorySequence> backdropsWhite = new HashMap<PropLocations, TrajectorySequence>() {{
-            put(PropLocations.RIGHT, generator.generateBackstagePath(whiteRight.end(), BackstageRoute.CENTER));
+            put(PropLocations.LEFT, generator.generateBackstagePath(whiteLeft.end(), BackstageRoute.CENTER));
             put(PropLocations.MIDDLE,
                     drive.trajectorySequenceBuilder(whiteMiddle.end())
                             .setReversed(true)
                             .splineTo(new Vector2d(24.00, 35.50), Math.toRadians(0.00))
-                            .splineTo(new Vector2d(51.25, 29.50), Math.toRadians(0.00))
+                            .splineTo(new Vector2d(50.50, 29.50), Math.toRadians(0.00))
                             .build()
             );
-            put(PropLocations.LEFT,
-                    drive.trajectorySequenceBuilder(whiteLeft.end())
+            put(PropLocations.RIGHT,
+                    drive.trajectorySequenceBuilder(whiteRight.end())
                             .setReversed(true)
                             .splineTo(new Vector2d(-24, 11), Math.toRadians(0.00))
                             .splineTo(new Vector2d(24, 11), Math.toRadians(0.00))
-                            .splineTo(new Vector2d(51.25, 35.50), Math.toRadians(0.00))
+                            .splineTo(new Vector2d(50.50, 35.50), Math.toRadians(0.00))
                             .build()
             );
         }};
 
         Map<PropLocations, Vector2d> yellowLocation = new HashMap<PropLocations, Vector2d>() {{
-            put(PropLocations.RIGHT, new Vector2d(51.25, 29.50));
-            put(PropLocations.MIDDLE, new Vector2d(51.25, 37.00));
-            put(PropLocations.LEFT, new Vector2d(51.25, 44.00));
+            put(PropLocations.RIGHT, new Vector2d(50.50, 29.50));
+            put(PropLocations.MIDDLE, new Vector2d(50.50, 35.50));
+            put(PropLocations.LEFT, new Vector2d(50.50, 42.00));
         }};
 
         TrajectorySequence stackLeft = generator.generateStackPath(new Pose2d(yellowLocation.get(PropLocations.LEFT), Math.toRadians(180)), Stack.FAR);
@@ -203,7 +203,7 @@ public class BlueLongDoor extends CommandOpMode {
                                             outtake.toggleBlockers();
                                             outtake.toggleSpike();
 
-                                            if (location == PropLocations.LEFT)
+                                            if (location == PropLocations.RIGHT)
                                                 intake.adjustLiftPosition(5.0);
                                         })
                                 )
@@ -260,8 +260,7 @@ public class BlueLongDoor extends CommandOpMode {
 
                 new InstantCommand(() -> drive.adjustPose(new Pose2d(-5, 0, 0))),
                 new InstantCommand(() -> drive.lineToPose(new Pose2d(48, 12, Math.toRadians(180))))
-                        .andThen(new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.RAISED))),
-                new InstantCommand(() -> drive.adjustPose(new Pose2d(10, 0, 0)))
+                        .andThen(new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.RAISED)))
         ));
     }
 }

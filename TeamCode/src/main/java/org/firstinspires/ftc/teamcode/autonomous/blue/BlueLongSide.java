@@ -53,9 +53,6 @@ public class BlueLongSide extends CommandOpMode {
         generator.setStartingLocation(AllianceColor.BLUE, StartingPosition.AUDIENCE);
         tensorflow.setMinConfidence(0.8);
 
-        telemetry.addLine("Loading trajectories...");
-        telemetry.update();
-
         OdometrySubsystem odometry = new OdometrySubsystem(this);
         CollectorSubsystem intake = new CollectorSubsystem(hardwareMap);
         DepositSubsystem outtake = new DepositSubsystem(hardwareMap);
@@ -109,13 +106,13 @@ public class BlueLongSide extends CommandOpMode {
                         location -> generator.generateBackstagePath(whites.get(location).end(), BackstageRoute.SIDE)
                 ));
         Map<PropLocations, Vector2d> yellowLocation = new HashMap<PropLocations, Vector2d>() {{
-            put(PropLocations.RIGHT, new Vector2d(51.25, 29.50));
-            put(PropLocations.MIDDLE, new Vector2d(51.25, 35.50));
-            put(PropLocations.LEFT, new Vector2d(51.25, 43.00));
+            put(PropLocations.RIGHT, new Vector2d(50.50, 29.50));
+            put(PropLocations.MIDDLE, new Vector2d(50.50, 35.50));
+            put(PropLocations.LEFT, new Vector2d(50.50, 42.50));
         }};
-        TrajectorySequence stackLeft = generator.generateStackPath(new Pose2d(yellowLocation.get(PropLocations.LEFT), Math.toRadians(180)), Stack.CLOSE);
-        TrajectorySequence stackRight = generator.generateStackPath(new Pose2d(yellowLocation.get(PropLocations.RIGHT), Math.toRadians(180.00)), Stack.CLOSE);
-        TrajectorySequence stackMiddle = generator.generateStackPath(new Pose2d(yellowLocation.get(PropLocations.MIDDLE), Math.toRadians(180.00)), Stack.CLOSE);
+        TrajectorySequence stackLeft = generator.generateStackPath(new Pose2d(yellowLocation.get(PropLocations.LEFT), Math.toRadians(180)), Stack.CLOSE_SPLINE);
+        TrajectorySequence stackRight = generator.generateStackPath(new Pose2d(yellowLocation.get(PropLocations.RIGHT), Math.toRadians(180.00)), Stack.CLOSE_SPLINE);
+        TrajectorySequence stackMiddle = generator.generateStackPath(new Pose2d(yellowLocation.get(PropLocations.MIDDLE), Math.toRadians(180.00)), Stack.CLOSE_SPLINE);
 
         telemetry.addLine("Ready!");
         telemetry.update();
@@ -218,8 +215,7 @@ public class BlueLongSide extends CommandOpMode {
 
                 new InstantCommand(() -> drive.adjustPose(new Pose2d(-5, 0, 0))),
                 new InstantCommand(() -> drive.lineToPose(new Pose2d(48, 60, Math.toRadians(180))))
-                        .andThen(new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.RAISED))),
-                new InstantCommand(() -> drive.adjustPose(new Pose2d(10, 0, 0)))
+                        .andThen(new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.RAISED)))
         ));
     }
 }

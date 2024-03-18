@@ -113,9 +113,11 @@ public class SampleMecanumDrive extends MecanumDrive {
     public TrajectorySequenceBuilder trajectorySequenceBuilder(Pose2d startPose, double speedLimit) {
         return new TrajectorySequenceBuilder(
                 startPose,
-                getVelocityConstraint(Double.min(speedLimit, MAX_VEL), MAX_ANG_VEL, TRACK_WIDTH),
-                getAccelerationConstraint(Double.min(speedLimit, MAX_ACCEL)),
+                VEL_CONSTRAINT, ACCEL_CONSTRAINT,
                 MAX_ANG_VEL, MAX_ANG_ACCEL
+        ).setConstraints(
+                getVelocityConstraint(Double.min(speedLimit, MAX_VEL), MAX_ANG_VEL, TRACK_WIDTH),
+                getAccelerationConstraint(Double.min(speedLimit, MAX_ACCEL))
         );
     }
 

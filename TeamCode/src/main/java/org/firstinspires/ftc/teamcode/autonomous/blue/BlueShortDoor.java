@@ -8,7 +8,6 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
-import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
@@ -17,27 +16,22 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.teamcode.autonomous.PathGenerator;
 import org.firstinspires.ftc.teamcode.autonomous.assets.AllianceColor;
-import org.firstinspires.ftc.teamcode.autonomous.assets.BackstageRoute;
 import org.firstinspires.ftc.teamcode.autonomous.assets.PropLocations;
-import org.firstinspires.ftc.teamcode.autonomous.assets.Stack;
 import org.firstinspires.ftc.teamcode.autonomous.assets.StartingPosition;
 import org.firstinspires.ftc.teamcode.commands.RunByCaseCommand;
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.TensorflowSubsystem;
+import org.firstinspires.ftc.teamcode.roadrunner.DriveConstants;
 import org.firstinspires.ftc.teamcode.roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Autonomous(name = "Blue Short (Stage Door)")
 public class BlueShortDoor extends CommandOpMode {
-    private PropLocations location = PropLocations.LEFT;
+    private PropLocations location = PropLocations.RIGHT;
 
     @Override
     public void initialize() {
@@ -58,42 +52,78 @@ public class BlueShortDoor extends CommandOpMode {
         generator.setStartingLocation(AllianceColor.BLUE, StartingPosition.BACKDROP);
         tensorflow.setMinConfidence(0.8);
 
-        Trajectory leftPurple = drive.trajectoryBuilder(generator.getStartingPose())
-                .splineTo(new Vector2d(23.5, 32)
-                        .minus(Vector2d.polar(13, Math.toRadians(-60))), Math.toRadians(-60))
-                .build();
         Trajectory middlePurple = drive.trajectoryBuilder(generator.getStartingPose())
-                .splineTo(new Vector2d(15.00, 38.00), Math.toRadians(-90.00))
+                .splineTo(new Vector2d(15, 38), Math.toRadians(-90.00))
                 .build();
         Trajectory rightPurple = drive.trajectoryBuilder(generator.getStartingPose())
                 .splineTo(new Vector2d(.5, 33)
-                        .minus(Vector2d.polar(12, Math.toRadians(-135))), Math.toRadians(-135))
+                        .minus(Vector2d.polar(12, Math.toRadians(-135))), Math.toRadians(-135.00))
+                .build();
+        Trajectory leftPurple = drive.trajectoryBuilder(generator.getStartingPose())
+                .splineTo(new Vector2d(23.5, 32)
+                        .minus(Vector2d.polar(13, Math.toRadians(-60))), Math.toRadians(-60.00))
                 .build();
 
-        Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end(), 0)
-                .splineToSplineHeading(new Pose2d(51.25, 43.00, Math.toRadians(180.00)), Math.toRadians(0))
+        Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end(), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(50.50, 42.50, Math.toRadians(180.00)), Math.toRadians(0))
                 .build();
-        Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), 0)
-                .splineToSplineHeading(new Pose2d(51.25, 35.50, Math.toRadians(180.00)), Math.toRadians(0))
+        Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(50.50, 29.50, Math.toRadians(180.00)), Math.toRadians(0))
                 .build();
-        Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), 0)
-                .splineToSplineHeading(new Pose2d(51.25, 29.50, Math.toRadians(180.00)), Math.toRadians(0))
+        Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(50.50, 35.50, Math.toRadians(180.00)), Math.toRadians(0))
                 .build();
 
-        TrajectorySequence stackLeft = generator.generateStackPath(leftYellow.end(), Stack.FAR);
-        TrajectorySequence stackMid = generator.generateStackPath(middleYellow.end(), Stack.FAR);
-        TrajectorySequence stackRight = generator.generateStackPath(rightYellow.end(), Stack.FAR);
+        TrajectorySequence stackRight = drive.trajectorySequenceBuilder(rightYellow.end(), 50)
+                .splineTo(new Vector2d(18, 12), Math.toRadians(180))
+                .waitSeconds(.25)
+                .lineToLinearHeading(new Pose2d(-58.50, 12, Math.toRadians(180)))
+                .build();
+        TrajectorySequence stackMid = drive.trajectorySequenceBuilder(middleYellow.end(), 50)
+                .splineTo(new Vector2d(18, 12), Math.toRadians(180))
+                .waitSeconds(.25)
+                .lineToLinearHeading(new Pose2d(-58.50, 12, Math.toRadians(180)))
+                .build();
+        TrajectorySequence stackLeft = drive.trajectorySequenceBuilder(leftYellow.end(), 50)
+                .splineTo(new Vector2d(18, 12), Math.toRadians(180))
+                .waitSeconds(.25)
+                .lineToLinearHeading(new Pose2d(-58.50, 12, Math.toRadians(180)))
+                .build();
 
-        Map<PropLocations, TrajectorySequence> backdrops = new HashMap<PropLocations, TrajectorySequence>() {{
-            put(PropLocations.LEFT, generator.generateBackstagePath(stackLeft.end(), BackstageRoute.CENTER));
-            put(PropLocations.MIDDLE, generator.generateBackstagePath(stackMid.end(), BackstageRoute.CENTER));
-            put(PropLocations.RIGHT, generator.generateBackstagePath(stackRight.end(), BackstageRoute.CENTER));
-        }};
-        Map<PropLocations, TrajectorySequence> stackTwo = Arrays.stream(PropLocations.values())
-                .collect(Collectors.toMap(
-                        location -> location,
-                        location -> generator.generateStackPath(backdrops.get(location).end(), Stack.FAR)
-                ));
+        TrajectorySequence backdropRight = drive.trajectorySequenceBuilder(stackRight.end())
+                .setReversed(true)
+                .splineTo(new Pose2d(24, 9, Math.toRadians(0.00)))
+                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(50, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
+                .splineTo(new Vector2d(50.50, 29.50), Math.toRadians(0.00))
+                .build();
+        TrajectorySequence backdropMiddle = drive.trajectorySequenceBuilder(stackMid.end())
+                .setReversed(true)
+                .splineTo(new Pose2d(24, 9, Math.toRadians(0.00)))
+                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(50, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
+                .splineTo(new Vector2d(50.50, 29.50), Math.toRadians(0.00))
+                .build();
+        TrajectorySequence backdropLeft = drive.trajectorySequenceBuilder(stackLeft.end())
+                .setReversed(true)
+                .splineTo(new Pose2d(24, 9, Math.toRadians(0.00)))
+                .setVelConstraint(SampleMecanumDrive.getVelocityConstraint(50, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
+                .splineTo(new Vector2d(50.50, 29.50), Math.toRadians(0.00))
+                .build();
+
+        TrajectorySequence stackTwoRight = drive.trajectorySequenceBuilder(backdropRight.end())
+                .splineTo(new Vector2d(18, 12), Math.toRadians(180))
+                .waitSeconds(.25)
+                .lineToLinearHeading(new Pose2d(-58.50, 12, Math.toRadians(180)))
+                .build();
+        TrajectorySequence stackTwoMid = drive.trajectorySequenceBuilder(backdropMiddle.end())
+                .splineTo(new Vector2d(18, 12), Math.toRadians(180))
+                .waitSeconds(.25)
+                .lineToLinearHeading(new Pose2d(-58.50, 12, Math.toRadians(180)))
+                .build();
+        TrajectorySequence stackTwoLeft = drive.trajectorySequenceBuilder(backdropLeft.end())
+                .splineTo(new Vector2d(18, 12), Math.toRadians(180))
+                .waitSeconds(.25)
+                .lineToLinearHeading(new Pose2d(-58.50, 12, Math.toRadians(180)))
+                .build();
 
         while (!isStarted()) {
             if (isStopRequested())
@@ -140,9 +170,8 @@ public class BlueShortDoor extends CommandOpMode {
                                 new InstantCommand(intake::toggleClamp),
                                 new WaitCommand(500)
                         ),
-                new InstantCommand(() -> drive.followTrajectorySequenceAsync(backdrops.get(location))),
                 new ParallelCommandGroup(
-                        new RunCommand(drive::update).interruptOn(() -> !drive.isBusy()),
+                        new RunByCaseCommand(location.toString(), drive, backdropLeft, backdropMiddle, backdropRight, false),
                         new WaitCommand(700)
                                 .andThen(new InstantCommand(intake::toggleClamp)),
                         new WaitUntilCommand(() -> drive.getPoseEstimate().getX() > 0)
@@ -173,14 +202,13 @@ public class BlueShortDoor extends CommandOpMode {
                                 new InstantCommand(outtake::toggleSpike),
                                 new InstantCommand(() -> outtake.setSlidesPosition(0))
                         ),
-                new InstantCommand(() -> drive.followTrajectorySequence(stackTwo.get(location)))
+                new RunByCaseCommand(location.toString(), drive, stackTwoLeft, stackTwoMid, stackTwoRight, true)
                         .andThen(
                                 new InstantCommand(intake::toggleClamp),
                                 new WaitCommand(500)
                         ),
-                new InstantCommand(() -> drive.followTrajectorySequenceAsync(backdrops.get(location))),
                 new ParallelCommandGroup(
-                        new RunCommand(drive::update).interruptOn(() -> !drive.isBusy()),
+                        new RunByCaseCommand(location.toString(), drive, backdropLeft, backdropMiddle, backdropRight, false),
                         new WaitCommand(700)
                                 .andThen(new InstantCommand(intake::toggleClamp)),
                         new WaitUntilCommand(() -> drive.getPoseEstimate().getX() > 0)

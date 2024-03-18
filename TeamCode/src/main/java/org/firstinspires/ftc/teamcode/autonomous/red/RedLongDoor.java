@@ -18,7 +18,6 @@ import org.firstinspires.ftc.teamcode.autonomous.PathGenerator;
 import org.firstinspires.ftc.teamcode.autonomous.assets.AllianceColor;
 import org.firstinspires.ftc.teamcode.autonomous.assets.BackstageRoute;
 import org.firstinspires.ftc.teamcode.autonomous.assets.PropLocations;
-import org.firstinspires.ftc.teamcode.autonomous.assets.Stack;
 import org.firstinspires.ftc.teamcode.autonomous.assets.StartingPosition;
 import org.firstinspires.ftc.teamcode.commands.RunByCaseCommand;
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
@@ -125,12 +124,18 @@ public class RedLongDoor extends CommandOpMode {
                 .build();
 
         Map<PropLocations, TrajectorySequence> backdropsWhite = new HashMap<PropLocations, TrajectorySequence>() {{
-            put(PropLocations.LEFT, generator.generateBackstagePath(whiteLeft.end(), BackstageRoute.CENTER));
+            put(PropLocations.LEFT, drive.trajectorySequenceBuilder(whiteLeft.end(), 50)
+                    .setReversed(true)
+                    .splineTo(new Pose2d(-24, -11, Math.toRadians(0.00)))
+                    .splineTo(new Pose2d(24, -11, Math.toRadians(0.00)))
+                    .splineTo(new Vector2d(50.50, -35.50), Math.toRadians(0.00))
+                    .build()
+            );
             put(PropLocations.MIDDLE,
                     drive.trajectorySequenceBuilder(whiteMiddle.end())
                             .setReversed(true)
                             .splineTo(new Vector2d(24.00, -35.50), Math.toRadians(0.00))
-                            .splineTo(new Vector2d(51.25, -29.50), Math.toRadians(0.00))
+                            .splineTo(new Vector2d(50.50, -29.50), Math.toRadians(0.00))
                             .build()
             );
             put(PropLocations.RIGHT,
@@ -138,20 +143,32 @@ public class RedLongDoor extends CommandOpMode {
                             .setReversed(true)
                             .splineTo(new Vector2d(-24, -11), Math.toRadians(0.00))
                             .splineTo(new Vector2d(24, -11), Math.toRadians(0.00))
-                            .splineTo(new Vector2d(51.25, -35.50), Math.toRadians(0.00))
+                            .splineTo(new Vector2d(50.50, -29.50), Math.toRadians(0.00))
                             .build()
             );
         }};
 
         Map<PropLocations, Vector2d> yellowLocation = new HashMap<PropLocations, Vector2d>() {{
-            put(PropLocations.LEFT, new Vector2d(51.25, -29.50));
-            put(PropLocations.MIDDLE, new Vector2d(51.25, -37.00));
-            put(PropLocations.RIGHT, new Vector2d(51.25, -44.00));
+            put(PropLocations.LEFT, new Vector2d(50.50, -29.50));
+            put(PropLocations.MIDDLE, new Vector2d(50.50, -35.50));
+            put(PropLocations.RIGHT, new Vector2d(50.50, -42.50));
         }};
 
-        TrajectorySequence stackLeft = generator.generateStackPath(new Pose2d(yellowLocation.get(PropLocations.LEFT), Math.toRadians(180)), Stack.FAR);
-        TrajectorySequence stackRight = generator.generateStackPath(new Pose2d(yellowLocation.get(PropLocations.RIGHT), Math.toRadians(180.00)), Stack.FAR);
-        TrajectorySequence stackMiddle = generator.generateStackPath(new Pose2d(yellowLocation.get(PropLocations.MIDDLE), Math.toRadians(180.00)), Stack.FAR);
+        TrajectorySequence stackLeft = drive.trajectorySequenceBuilder(new Pose2d(yellowLocation.get(PropLocations.LEFT), Math.PI))
+                .splineTo(new Vector2d(18, -12), Math.toRadians(180))
+                .waitSeconds(.25)
+                .lineToLinearHeading(new Pose2d(-58.50, -12, Math.toRadians(180)))
+                .build();
+        TrajectorySequence stackRight = drive.trajectorySequenceBuilder(new Pose2d(yellowLocation.get(PropLocations.RIGHT), Math.PI))
+                .splineTo(new Vector2d(18, -12), Math.toRadians(180))
+                .waitSeconds(.25)
+                .lineToLinearHeading(new Pose2d(-58.50, -12, Math.toRadians(180)))
+                .build();
+        TrajectorySequence stackMiddle = drive.trajectorySequenceBuilder(new Pose2d(yellowLocation.get(PropLocations.MIDDLE), Math.PI))
+                .splineTo(new Vector2d(18, -12), Math.toRadians(180))
+                .waitSeconds(.25)
+                .lineToLinearHeading(new Pose2d(-58.50, -12, Math.toRadians(180)))
+                .build();
 
         Map<PropLocations, TrajectorySequence> backdropsCycle = new HashMap<PropLocations, TrajectorySequence>() {{
             put(PropLocations.LEFT, generator.generateBackstagePath(stackLeft.end(), BackstageRoute.CENTER));
@@ -260,8 +277,7 @@ public class RedLongDoor extends CommandOpMode {
 
                 new InstantCommand(() -> drive.adjustPose(new Pose2d(-5, 0, 0))),
                 new InstantCommand(() -> drive.lineToPose(new Pose2d(48, -12, Math.toRadians(180))))
-                        .andThen(new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.RAISED))),
-                new InstantCommand(() -> drive.adjustPose(new Pose2d(10, 0, 0)))
+                        .andThen(new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.RAISED)))
         ));
     }
 }
