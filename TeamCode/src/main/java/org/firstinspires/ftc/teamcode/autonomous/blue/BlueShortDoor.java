@@ -64,30 +64,30 @@ public class BlueShortDoor extends CommandOpMode {
                         .minus(Vector2d.polar(13, Math.toRadians(-60))), Math.toRadians(-60.00))
                 .build();
 
-        Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end(), Math.toRadians(0))
-                .splineToSplineHeading(new Pose2d(50.50, 42.50, Math.toRadians(180.00)), Math.toRadians(0))
+        Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end())
+                .lineToLinearHeading(new Pose2d(50.50, 29.50, Math.toRadians(180.00)))
                 .build();
-        Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end(), Math.toRadians(0))
-                .splineToSplineHeading(new Pose2d(50.50, 29.50, Math.toRadians(180.00)), Math.toRadians(0))
+        Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end())
+                .lineToLinearHeading(new Pose2d(50.50, 35.50, Math.toRadians(180.00)))
                 .build();
-        Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end(), Math.toRadians(0))
-                .splineToSplineHeading(new Pose2d(50.50, 35.50, Math.toRadians(180.00)), Math.toRadians(0))
+        Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end())
+                .lineToLinearHeading(new Pose2d(50.50, 42.50, Math.toRadians(180.00)))
                 .build();
 
         TrajectorySequence stackRight = drive.trajectorySequenceBuilder(rightYellow.end(), 50)
-                .splineTo(new Vector2d(18, 12), Math.toRadians(180))
+                .splineTo(new Vector2d(18, 15), Math.toRadians(180))
                 .waitSeconds(.25)
-                .lineToLinearHeading(new Pose2d(-58.50, 12, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-58.50, 15, Math.toRadians(180)))
                 .build();
         TrajectorySequence stackMid = drive.trajectorySequenceBuilder(middleYellow.end(), 50)
-                .splineTo(new Vector2d(18, 12), Math.toRadians(180))
+                .splineTo(new Vector2d(18, 15), Math.toRadians(180))
                 .waitSeconds(.25)
-                .lineToLinearHeading(new Pose2d(-58.50, 12, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-58.50, 15, Math.toRadians(180)))
                 .build();
         TrajectorySequence stackLeft = drive.trajectorySequenceBuilder(leftYellow.end(), 50)
-                .splineTo(new Vector2d(18, 12), Math.toRadians(180))
+                .splineTo(new Vector2d(18, 15), Math.toRadians(180))
                 .waitSeconds(.25)
-                .lineToLinearHeading(new Pose2d(-58.50, 12, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-58.50, 15, Math.toRadians(180)))
                 .build();
 
         TrajectorySequence backdropRight = drive.trajectorySequenceBuilder(stackRight.end())
@@ -110,19 +110,19 @@ public class BlueShortDoor extends CommandOpMode {
                 .build();
 
         TrajectorySequence stackTwoRight = drive.trajectorySequenceBuilder(backdropRight.end())
-                .splineTo(new Vector2d(18, 12), Math.toRadians(180))
+                .splineTo(new Vector2d(18, 15), Math.toRadians(180))
                 .waitSeconds(.25)
-                .lineToLinearHeading(new Pose2d(-58.50, 12, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-58.50, 15, Math.toRadians(180)))
                 .build();
         TrajectorySequence stackTwoMid = drive.trajectorySequenceBuilder(backdropMiddle.end())
-                .splineTo(new Vector2d(18, 12), Math.toRadians(180))
+                .splineTo(new Vector2d(18, 15), Math.toRadians(180))
                 .waitSeconds(.25)
-                .lineToLinearHeading(new Pose2d(-58.50, 12, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-58.50, 15, Math.toRadians(180)))
                 .build();
         TrajectorySequence stackTwoLeft = drive.trajectorySequenceBuilder(backdropLeft.end())
-                .splineTo(new Vector2d(18, 12), Math.toRadians(180))
+                .splineTo(new Vector2d(18, 15), Math.toRadians(180))
                 .waitSeconds(.25)
-                .lineToLinearHeading(new Pose2d(-58.50, 12, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-58.50, 15, Math.toRadians(180)))
                 .build();
 
         while (!isStarted()) {

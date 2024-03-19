@@ -43,9 +43,10 @@ public class PathGenerator {
      *
      * @param startPose   The starting position of the trajectory
      * @param targetStack The stack to travel to. Distance is driver-relative (closer and farther from the drivers, respectively)
-     * @return TrajectorySequence object containing the route to the stack
+     * @return {@link TrajectorySequence} object containing the route to the stack
      * @throws IllegalArgumentException If the stack argument isn't defined properly
      */
+    @Deprecated
     public TrajectorySequence generateStackPath(Pose2d startPose, Stack targetStack) throws IllegalArgumentException {
         switch (targetStack) {
             case FAR:
@@ -89,6 +90,7 @@ public class PathGenerator {
      * @return TrajectorySequence object containing the route
      * @throws IllegalArgumentException If the route argument isn't defined properly
      */
+    @Deprecated
     public TrajectorySequence generateBackstagePath(Pose2d startPose, BackstageRoute route) throws IllegalArgumentException {
         if (route == BackstageRoute.SIDE)
             return generateBackstagePath(startPose, allianceColor.convertVector(new Vector2d(50.00, -42.50)), route);

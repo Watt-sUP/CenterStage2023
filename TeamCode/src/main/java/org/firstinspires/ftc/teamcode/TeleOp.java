@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.button.Trigger;
@@ -16,7 +15,6 @@ import org.firstinspires.ftc.teamcode.commands.subsystems.OdometrySubsystem;
 
 import java.util.List;
 
-@Config
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp (Tomoiu + Vulpoiu)")
 public class TeleOp extends CommandOpMode {
     private List<LynxModule> hubs;

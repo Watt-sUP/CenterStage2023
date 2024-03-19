@@ -1,11 +1,9 @@
 package org.firstinspires.ftc.teamcode.autonomous.assets;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.util.Angle;
 
-@Config
 public enum AllianceColor {
     RED(1), BLUE(-1);
 

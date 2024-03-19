@@ -16,7 +16,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.teamcode.autonomous.PathGenerator;
 import org.firstinspires.ftc.teamcode.autonomous.assets.AllianceColor;
-import org.firstinspires.ftc.teamcode.autonomous.assets.BackstageRoute;
 import org.firstinspires.ftc.teamcode.autonomous.assets.PropLocations;
 import org.firstinspires.ftc.teamcode.autonomous.assets.StartingPosition;
 import org.firstinspires.ftc.teamcode.commands.RunByCaseCommand;
@@ -73,7 +72,7 @@ public class RedLongDoor extends CommandOpMode {
 
         TrajectorySequence whiteLeft = drive.trajectorySequenceBuilder(leftPurple.end(), 40)
                 .setTangent(Math.toRadians(90.00))
-                .splineToSplineHeading(new Pose2d(-52.50, -12, Math.toRadians(180)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(-51.50, -12, Math.toRadians(180)), Math.toRadians(180))
                 .addTemporalMarker(() -> {
                     intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
                     intake.adjustLiftPosition(-5.0);
@@ -90,7 +89,7 @@ public class RedLongDoor extends CommandOpMode {
                 .build();
         TrajectorySequence whiteMiddle = drive.trajectorySequenceBuilder(middlePurple.end(), 40)
                 .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
+                .splineToLinearHeading(new Pose2d(-51.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
                 .addTemporalMarker(() -> {
                     intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
                     intake.adjustLiftPosition(-5.0);
@@ -107,7 +106,7 @@ public class RedLongDoor extends CommandOpMode {
                 .build();
         TrajectorySequence whiteRight = drive.trajectorySequenceBuilder(rightPurple.end(), 40)
                 .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
+                .splineToLinearHeading(new Pose2d(-51.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
                 .addTemporalMarker(() -> {
                     intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
                     intake.adjustLiftPosition(-5.0);
@@ -132,49 +131,60 @@ public class RedLongDoor extends CommandOpMode {
                     .build()
             );
             put(PropLocations.MIDDLE,
-                    drive.trajectorySequenceBuilder(whiteMiddle.end())
+                    drive.trajectorySequenceBuilder(whiteMiddle.end(), 50)
                             .setReversed(true)
                             .splineTo(new Vector2d(24.00, -35.50), Math.toRadians(0.00))
-                            .splineTo(new Vector2d(50.50, -29.50), Math.toRadians(0.00))
+                            .splineTo(new Vector2d(50.50, -30.50), Math.toRadians(0.00))
                             .build()
             );
             put(PropLocations.RIGHT,
-                    drive.trajectorySequenceBuilder(whiteRight.end())
+                    drive.trajectorySequenceBuilder(whiteRight.end(), 50)
                             .setReversed(true)
                             .splineTo(new Vector2d(-24, -11), Math.toRadians(0.00))
                             .splineTo(new Vector2d(24, -11), Math.toRadians(0.00))
-                            .splineTo(new Vector2d(50.50, -29.50), Math.toRadians(0.00))
+                            .splineTo(new Vector2d(50.50, -30.50), Math.toRadians(0.00))
                             .build()
             );
         }};
 
         Map<PropLocations, Vector2d> yellowLocation = new HashMap<PropLocations, Vector2d>() {{
-            put(PropLocations.LEFT, new Vector2d(50.50, -29.50));
+            put(PropLocations.LEFT, new Vector2d(50.50, -30.50));
             put(PropLocations.MIDDLE, new Vector2d(50.50, -35.50));
             put(PropLocations.RIGHT, new Vector2d(50.50, -42.50));
         }};
 
-        TrajectorySequence stackLeft = drive.trajectorySequenceBuilder(new Pose2d(yellowLocation.get(PropLocations.LEFT), Math.PI))
+        TrajectorySequence stackLeft = drive.trajectorySequenceBuilder(new Pose2d(yellowLocation.get(PropLocations.LEFT), Math.PI), 50)
                 .splineTo(new Vector2d(18, -12), Math.toRadians(180))
                 .waitSeconds(.25)
-                .lineToLinearHeading(new Pose2d(-58.50, -12, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-56.50, -12, Math.toRadians(180)))
                 .build();
-        TrajectorySequence stackRight = drive.trajectorySequenceBuilder(new Pose2d(yellowLocation.get(PropLocations.RIGHT), Math.PI))
+        TrajectorySequence stackRight = drive.trajectorySequenceBuilder(new Pose2d(yellowLocation.get(PropLocations.RIGHT), Math.PI), 50)
                 .splineTo(new Vector2d(18, -12), Math.toRadians(180))
                 .waitSeconds(.25)
-                .lineToLinearHeading(new Pose2d(-58.50, -12, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-56.50, -12, Math.toRadians(180)))
                 .build();
-        TrajectorySequence stackMiddle = drive.trajectorySequenceBuilder(new Pose2d(yellowLocation.get(PropLocations.MIDDLE), Math.PI))
+        TrajectorySequence stackMiddle = drive.trajectorySequenceBuilder(new Pose2d(yellowLocation.get(PropLocations.MIDDLE), Math.PI), 50)
                 .splineTo(new Vector2d(18, -12), Math.toRadians(180))
                 .waitSeconds(.25)
-                .lineToLinearHeading(new Pose2d(-58.50, -12, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-56.50, -12, Math.toRadians(180)))
                 .build();
 
-        Map<PropLocations, TrajectorySequence> backdropsCycle = new HashMap<PropLocations, TrajectorySequence>() {{
-            put(PropLocations.LEFT, generator.generateBackstagePath(stackLeft.end(), BackstageRoute.CENTER));
-            put(PropLocations.MIDDLE, generator.generateBackstagePath(stackMiddle.end(), new Vector2d(51.25, -29.50), BackstageRoute.CENTER));
-            put(PropLocations.RIGHT, generator.generateBackstagePath(stackRight.end(), BackstageRoute.CENTER));
-        }};
+        TrajectorySequence backdropCycleLeft = drive.trajectorySequenceBuilder(stackLeft.end(), 50)
+                .setReversed(true)
+                .splineTo(new Pose2d(24, -11, Math.toRadians(0.00)))
+                .splineTo(new Vector2d(50.50, -30.50), Math.toRadians(0.00))
+                .build();
+        TrajectorySequence backdropCycleMiddle = drive.trajectorySequenceBuilder(stackMiddle.end(), 50)
+                .setReversed(true)
+                .splineTo(new Pose2d(24, -11, Math.toRadians(0.00)))
+                .splineTo(new Vector2d(50.50, -30.50), Math.toRadians(0.00))
+                .build();
+        TrajectorySequence backdropCycleRight = drive.trajectorySequenceBuilder(stackRight.end(), 50)
+                .setReversed(true)
+                .splineTo(new Pose2d(24, -11, Math.toRadians(0.00)))
+                .splineTo(new Vector2d(50.50, -30.50), Math.toRadians(0.00))
+                .build();
+
 
         while (!isStarted()) {
             if (isStopRequested())
@@ -244,9 +254,8 @@ public class RedLongDoor extends CommandOpMode {
                                 new InstantCommand(intake::toggleClamp),
                                 new WaitCommand(500)
                         ),
-                new InstantCommand(() -> drive.followTrajectorySequenceAsync(backdropsCycle.get(location))),
                 new ParallelCommandGroup(
-                        new RunCommand(drive::update).interruptOn(() -> !drive.isBusy()),
+                        new RunByCaseCommand(location.toString(), drive, backdropCycleLeft, backdropCycleMiddle, backdropCycleRight, false),
                         new WaitCommand(700).andThen(new InstantCommand(intake::toggleClamp)),
                         new WaitUntilCommand(() -> drive.getPoseEstimate().getX() > 0)
                                 .andThen(

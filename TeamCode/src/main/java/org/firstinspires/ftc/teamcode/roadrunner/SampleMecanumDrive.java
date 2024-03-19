@@ -170,11 +170,7 @@ public class SampleMecanumDrive extends MecanumDrive {
      * @param unit  The angle of the unit. Options include degrees and radians
      */
     public void turn(double angle, AngleUnit unit) {
-        if (unit == AngleUnit.RADIANS)
-            turnAsync(angle);
-        else if (unit == AngleUnit.DEGREES)
-            turnAsync(Math.toRadians(angle));
-
+        turnAsync(unit.toRadians(angle));
         waitForIdle();
     }
 

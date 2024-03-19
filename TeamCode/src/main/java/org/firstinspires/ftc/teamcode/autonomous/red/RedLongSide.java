@@ -16,9 +16,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.teamcode.autonomous.PathGenerator;
 import org.firstinspires.ftc.teamcode.autonomous.assets.AllianceColor;
-import org.firstinspires.ftc.teamcode.autonomous.assets.BackstageRoute;
 import org.firstinspires.ftc.teamcode.autonomous.assets.PropLocations;
-import org.firstinspires.ftc.teamcode.autonomous.assets.Stack;
 import org.firstinspires.ftc.teamcode.autonomous.assets.StartingPosition;
 import org.firstinspires.ftc.teamcode.commands.RunByCaseCommand;
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
@@ -70,7 +68,7 @@ public class RedLongSide extends CommandOpMode {
 
         TrajectorySequence rightPurple = drive.trajectorySequenceBuilder(generator.getStartingPose())
                 .splineTo(new Vector2d(-24.5, -33)
-                        .minus(Vector2d.polar(11, Math.toRadians(30))), Math.toRadians(30.00))
+                        .minus(Vector2d.polar(12, Math.toRadians(30))), Math.toRadians(30.00))
                 .build();
 
         Map<PropLocations, TrajectorySequence> whites = Arrays.stream(PropLocations.values())
@@ -85,7 +83,7 @@ public class RedLongSide extends CommandOpMode {
 
                             return drive.trajectorySequenceBuilder(endPoses.get(location), 40)
                                     .setTangent(Math.toRadians(180))
-                                    .splineToLinearHeading(new Pose2d(-52.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
+                                    .splineToLinearHeading(new Pose2d(-51.50, -35.75, Math.toRadians(180.00)), Math.toRadians(180))
                                     .addTemporalMarker(() -> {
                                         intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
                                         intake.adjustLiftPosition(-5.0);
@@ -106,16 +104,51 @@ public class RedLongSide extends CommandOpMode {
         Map<PropLocations, TrajectorySequence> backdrops = Arrays.stream(PropLocations.values())
                 .collect(Collectors.toMap(
                         location -> location,
-                        location -> generator.generateBackstagePath(whites.get(location).end(), BackstageRoute.SIDE)
+                        location -> drive.trajectorySequenceBuilder(whites.get(location).end(), 50)
+                                .setReversed(true)
+                                .splineTo(new Vector2d(-24.00, -60.00), Math.toRadians(0.00))
+                                .splineTo(new Vector2d(4.00, -60.00), Math.toRadians(0.00))
+                                .splineTo(new Vector2d(50.50, (location != PropLocations.RIGHT) ? -42.50 : -35.50), Math.toRadians(0.00))
+                                .build()
                 ));
         Map<PropLocations, Vector2d> yellowLocation = new HashMap<PropLocations, Vector2d>() {{
             put(PropLocations.LEFT, new Vector2d(50.50, -29.50));
             put(PropLocations.MIDDLE, new Vector2d(50.50, -35.50));
             put(PropLocations.RIGHT, new Vector2d(50.50, -42.50));
         }};
-        TrajectorySequence stackLeft = generator.generateStackPath(new Pose2d(yellowLocation.get(PropLocations.LEFT), Math.toRadians(180)), Stack.CLOSE_SPLINE);
-        TrajectorySequence stackRight = generator.generateStackPath(new Pose2d(yellowLocation.get(PropLocations.RIGHT), Math.toRadians(180.00)), Stack.CLOSE_SPLINE);
-        TrajectorySequence stackMiddle = generator.generateStackPath(new Pose2d(yellowLocation.get(PropLocations.MIDDLE), Math.toRadians(180.00)), Stack.CLOSE_SPLINE);
+
+        TrajectorySequence stackLeft = drive.trajectorySequenceBuilder(new Pose2d(yellowLocation.get(PropLocations.LEFT), Math.PI), 50)
+                .splineTo(new Vector2d(7.00, -60.00), Math.toRadians(180.00))
+                .splineTo(new Vector2d(-37.00, -60.00), Math.toRadians(180.00))
+                .setConstraints(
+                        SampleMecanumDrive.getVelocityConstraint(45, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(45)
+                )
+                .lineToLinearHeading(new Pose2d(-50.00, -36, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-58.50, -36, Math.toRadians(180)))
+                .build();
+        TrajectorySequence stackMid = drive.trajectorySequenceBuilder(new Pose2d(yellowLocation.get(PropLocations.MIDDLE), Math.PI), 50)
+                .splineTo(new Vector2d(7.00, -60.00), Math.toRadians(180.00))
+                .splineTo(new Vector2d(-37.00, -60.00), Math.toRadians(180.00))
+                .setConstraints(
+                        SampleMecanumDrive.getVelocityConstraint(45, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(35)
+                )
+                .setTangent(Math.toRadians(90))
+                .splineToLinearHeading(new Pose2d(-50.00, -36, Math.toRadians(180)), Math.toRadians(180.00))
+                .lineToLinearHeading(new Pose2d(-56.75, -36, Math.toRadians(180)))
+                .build();
+        TrajectorySequence stackRight = drive.trajectorySequenceBuilder(new Pose2d(yellowLocation.get(PropLocations.RIGHT), Math.PI), 50)
+                .splineTo(new Vector2d(7.00, -60.00), Math.toRadians(180.00))
+                .splineTo(new Vector2d(-37.00, -60.00), Math.toRadians(180.00))
+                .setConstraints(
+                        SampleMecanumDrive.getVelocityConstraint(45, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(35)
+                )
+                .setTangent(Math.toRadians(90))
+                .splineToLinearHeading(new Pose2d(-50.00, -36, Math.toRadians(180)), Math.toRadians(180.00))
+                .lineToLinearHeading(new Pose2d(-56.75, -36, Math.toRadians(180)))
+                .build();
 
         telemetry.addLine("Ready!");
         telemetry.update();
@@ -181,7 +214,7 @@ public class RedLongSide extends CommandOpMode {
                                 new WaitCommand(300),
                                 new InstantCommand(() -> outtake.setSlidesPosition(0))
                         ),
-                new RunByCaseCommand(location.toString(), drive, stackLeft, stackMiddle, stackRight, true)
+                new RunByCaseCommand(location.toString(), drive, stackLeft, stackMid, stackRight, true)
                         .andThen(
                                 new InstantCommand(intake::toggleClamp),
                                 new WaitCommand(500)
