@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 @Config
 public class CollectorSubsystem extends SubsystemBase {
-    public static Double LOWER_LIFT = 165.0, RAISE_LIFT = 10.0, STACK_LIFT = 145.0;
+    public static Double LOWER_LIFT = 175.0, RAISE_LIFT = 20.0, STACK_LIFT = 152.0;
     private final ServoEx claw;
     private final InterpolatedServo left, right;
 

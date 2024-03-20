@@ -124,8 +124,8 @@ public class RedLongSide extends CommandOpMode {
                         SampleMecanumDrive.getVelocityConstraint(45, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(45)
                 )
-                .lineToLinearHeading(new Pose2d(-50.00, -36, Math.toRadians(180)))
-                .lineToLinearHeading(new Pose2d(-58.50, -36, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-52.00, -37.00, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-57.50, -37.00, Math.toRadians(180)))
                 .build();
         TrajectorySequence stackMid = drive.trajectorySequenceBuilder(new Pose2d(yellowLocation.get(PropLocations.MIDDLE), Math.PI), 50)
                 .splineTo(new Vector2d(7.00, -60.00), Math.toRadians(180.00))
@@ -135,8 +135,8 @@ public class RedLongSide extends CommandOpMode {
                         SampleMecanumDrive.getAccelerationConstraint(35)
                 )
                 .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-50.00, -36, Math.toRadians(180)), Math.toRadians(180.00))
-                .lineToLinearHeading(new Pose2d(-56.75, -36, Math.toRadians(180)))
+                .splineToLinearHeading(new Pose2d(-52.00, -37.00, Math.toRadians(180)), Math.toRadians(180.00))
+                .lineToLinearHeading(new Pose2d(-57.50, -37.00, Math.toRadians(180)))
                 .build();
         TrajectorySequence stackRight = drive.trajectorySequenceBuilder(new Pose2d(yellowLocation.get(PropLocations.RIGHT), Math.PI), 50)
                 .splineTo(new Vector2d(7.00, -60.00), Math.toRadians(180.00))
@@ -146,8 +146,8 @@ public class RedLongSide extends CommandOpMode {
                         SampleMecanumDrive.getAccelerationConstraint(35)
                 )
                 .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-50.00, -36, Math.toRadians(180)), Math.toRadians(180.00))
-                .lineToLinearHeading(new Pose2d(-56.75, -36, Math.toRadians(180)))
+                .splineToLinearHeading(new Pose2d(-52.00, -37.00, Math.toRadians(180)), Math.toRadians(180.00))
+                .lineToLinearHeading(new Pose2d(-57.50, -37.00, Math.toRadians(180)))
                 .build();
 
         telemetry.addLine("Ready!");

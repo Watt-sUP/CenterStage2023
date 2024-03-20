@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.commands.subsystems;
 
+import android.util.Pair;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
@@ -17,36 +19,12 @@ public class DepositSubsystem extends SubsystemBase {
     private final DcMotor slides;
     public static Double LOW_LEFT = 0.04, LOW_RIGHT = 0.09;
     private final int[] slidesPositions = {0, 400, 700, 1000, 1250};
+    private Blocker blockerState = Blocker.FREE;
+    private boolean raisingSlides = false;
     private final ServoEx leftLift, rightLift;
     public static Double HIGH_LEFT = .77, HIGH_RIGHT = .82;
     private final ServoEx stopperTop, stopperBottom;
     private BooleanSupplier safeToMove = () -> true;
-
-    private enum Blocker {
-        TWO_PIXELS,
-        ONE_PIXEL,
-        FREE
-    }
-
-    public Spike spikeState = Spike.RAISED;
-
-    public void setSpikePosition(double position) {
-        leftLift.setPosition(MathUtils.clamp(position - 0.05, 0, 1));
-        rightLift.setPosition(MathUtils.clamp(position, 0, 1));
-    }
-
-    private Blocker blockerState = Blocker.FREE;
-    private boolean raisingSlides = false;
-
-    public DepositSubsystem(final HardwareMap hardwareMap) {
-        this(
-                new SimpleServo(hardwareMap, "depo_left", 0, 220),
-                new SimpleServo(hardwareMap, "depo_right", 0, 220),
-                new SimpleServo(hardwareMap, "stopper_top", 0, 300),
-                new SimpleServo(hardwareMap, "stopper_bottom", 0, 300),
-                hardwareMap.dcMotor.get("gli_sus")
-        );
-    }
 
     private DepositSubsystem(ServoEx leftLift, ServoEx rightLift, ServoEx stopperTop, ServoEx stopperBottom, DcMotor slides) {
         this.leftLift = leftLift;
@@ -61,31 +39,44 @@ public class DepositSubsystem extends SubsystemBase {
 
         this.stopperTop.turnToAngle(90);
         this.stopperBottom.turnToAngle(60);
-        toggleSpike();
+        this.toggleSpike();
 
         this.slides.setDirection(DcMotorSimple.Direction.FORWARD);
         this.slides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+
+    public Spike spikeState = Spike.RAISED;
+
+    public DepositSubsystem(final HardwareMap hardwareMap) {
+        this(
+                new SimpleServo(hardwareMap, "depo_left", 0, 220),
+                new SimpleServo(hardwareMap, "depo_right", 0, 220),
+                new SimpleServo(hardwareMap, "stopper_top", 0, 300),
+                new SimpleServo(hardwareMap, "stopper_bottom", 0, 300),
+                hardwareMap.dcMotor.get("gli_sus")
+        );
+    }
+
+    @Override
+    public void periodic() {
+        if (raisingSlides) {
+            raisingSlides = false;
+
+            if (blockerState == Blocker.FREE)
+                setStopperPositions(Blocker.TWO_PIXELS);
+
+            if (spikeState != Spike.RAISED)
+                toggleSpike();
+        }
     }
 
     public void setSafeguard(BooleanSupplier safeToMove) {
         this.safeToMove = safeToMove;
     }
 
-    @Override
-    public void periodic() {
-        if (slides.getCurrentPosition() > 100 && raisingSlides) {
-            while (blockerState != Blocker.TWO_PIXELS)
-                toggleBlockers();
-
-            if (spikeState == Spike.LOWERED)
-                toggleSpike();
-
-            raisingSlides = false;
-        }
-    }
-
-    public Integer getSlidesTicks() {
-        return slides.getCurrentPosition();
+    public void setSpikePosition(double position) {
+        leftLift.setPosition(MathUtils.clamp(position - 0.05, 0, 1));
+        rightLift.setPosition(MathUtils.clamp(position, 0, 1));
     }
 
     public void setSlidesTicks(int ticks) {
@@ -148,18 +139,36 @@ public class DepositSubsystem extends SubsystemBase {
     public void toggleBlockers() {
         switch (blockerState) {
             case FREE:
-                stopperBottom.turnToAngle(108);
-                stopperTop.turnToAngle(135);
-                blockerState = Blocker.TWO_PIXELS;
+                setStopperPositions(Blocker.TWO_PIXELS);
                 break;
             case ONE_PIXEL:
-                stopperBottom.turnToAngle(60);
-                blockerState = Blocker.FREE;
+                setStopperPositions(Blocker.FREE);
                 break;
             case TWO_PIXELS:
-                stopperTop.turnToAngle(90);
-                blockerState = Blocker.ONE_PIXEL;
+                setStopperPositions(Blocker.ONE_PIXEL);
                 break;
+        }
+    }
+
+    private void setStopperPositions(Blocker blockerState) {
+        stopperBottom.turnToAngle(blockerState.getBlockerPositions().first);
+        stopperTop.turnToAngle(blockerState.getBlockerPositions().second);
+
+        this.blockerState = blockerState;
+    }
+
+    private enum Blocker {
+        TWO_PIXELS(108, 135), ONE_PIXEL(108, 90), FREE(60, 90);
+
+        private final double bottomPos, topPos;
+
+        Blocker(double bottom, double top) {
+            bottomPos = bottom;
+            topPos = top;
+        }
+
+        public Pair<Double, Double> getBlockerPositions() {
+            return new Pair<>(bottomPos, topPos);
         }
     }
 

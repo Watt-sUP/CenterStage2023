@@ -18,26 +18,30 @@ import java.util.List;
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp (Tomoiu + Vulpoiu)")
 public class TeleOp extends CommandOpMode {
     private List<LynxModule> hubs;
+    private CollectorSubsystem intake = null;
+    private DepositSubsystem outtake;
 
+    /**
+     * Code to run during the initialization phase of the OpMode.
+     */
     public void initialize() {
 
+        this.reset();
         hubs = hardwareMap.getAll(LynxModule.class);
         hubs.forEach(hub -> hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL));
 
+        outtake = new DepositSubsystem(hardwareMap);
         OdometrySubsystem odometry = new OdometrySubsystem(this);
-        CollectorSubsystem intake = new CollectorSubsystem(hardwareMap);
         DriveSubsystem chassis = new DriveSubsystem(hardwareMap);
-        DepositSubsystem outtake = new DepositSubsystem(hardwareMap);
         EndgameSubsystem endgame = new EndgameSubsystem(hardwareMap);
 
         GamepadEx driver1 = new GamepadEx(gamepad1);
         GamepadEx driver2 = new GamepadEx(gamepad2);
 
         chassis.setAxes(driver1::getLeftY, driver1::getLeftX, driver1::getRightX);
-        outtake.setSafeguard(() -> intake.location != CollectorSubsystem.LiftState.RAISED);
         Trigger rightTrigger = new Trigger(() -> gamepad2.right_trigger > .3 && outtake.spikeState == DepositSubsystem.Spike.RAISED);
 
-        register(chassis, intake, outtake, endgame);
+        register(chassis, outtake, endgame);
 
         // Brakes
         driver1.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
@@ -71,13 +75,17 @@ public class TeleOp extends CommandOpMode {
 
         // Intake commands
         driver2.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON)
-                .whenPressed(() -> intake.adjustLiftPosition(5.0));
+                .and(new Trigger(() -> intake != null))
+                .whenActive(() -> intake.adjustLiftPosition(5.0));
         driver2.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)
-                .whenPressed(() -> intake.adjustLiftPosition(-5.0));
+                .and(new Trigger(() -> intake != null))
+                .whenActive(() -> intake.adjustLiftPosition(-5.0));
         driver2.getGamepadButton(GamepadKeys.Button.X)
-                .whenPressed(intake::toggleLiftLocation);
+                .and(new Trigger(() -> intake != null))
+                .whenActive(() -> intake.toggleLiftLocation());
         driver2.getGamepadButton(GamepadKeys.Button.A)
-                .whenPressed(intake::toggleClamp);
+                .and(new Trigger(() -> intake != null))
+                .whenActive(() -> intake.toggleClamp());
 
         // Spike commands
         driver2.getGamepadButton(GamepadKeys.Button.Y)
@@ -97,9 +105,21 @@ public class TeleOp extends CommandOpMode {
         }));
     }
 
+    /**
+     * Loop that runs for every iteration of the OpMode after start is pressed.
+     */
     @Override
     public void run() {
         super.run();
         hubs.forEach(LynxModule::clearBulkCache);
+
+        // Stop here if already initialized
+        if (intake != null)
+            return;
+
+        // Initialize the intake after the OpMode starts to collision with the outtake
+        intake = new CollectorSubsystem(hardwareMap);
+        outtake.setSafeguard(() -> intake.location != CollectorSubsystem.LiftState.RAISED);
+        register(intake);
     }
 }
