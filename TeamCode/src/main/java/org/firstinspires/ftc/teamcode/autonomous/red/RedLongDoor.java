@@ -127,14 +127,14 @@ public class RedLongDoor extends CommandOpMode {
                     .setReversed(true)
                     .splineTo(new Pose2d(-24, -11, Math.toRadians(0.00)))
                     .splineTo(new Pose2d(24, -11, Math.toRadians(0.00)))
-                    .splineTo(new Vector2d(50.50, -35.50), Math.toRadians(0.00))
+                    .splineTo(new Vector2d(50.00, -35.50), Math.toRadians(0.00))
                     .build()
             );
             put(PropLocations.MIDDLE,
                     drive.trajectorySequenceBuilder(whiteMiddle.end(), 50)
                             .setReversed(true)
                             .splineTo(new Vector2d(24.00, -35.50), Math.toRadians(0.00))
-                            .splineTo(new Vector2d(50.50, -30.50), Math.toRadians(0.00))
+                            .splineTo(new Vector2d(50.00, -30.50), Math.toRadians(0.00))
                             .build()
             );
             put(PropLocations.RIGHT,
@@ -142,47 +142,47 @@ public class RedLongDoor extends CommandOpMode {
                             .setReversed(true)
                             .splineTo(new Vector2d(-24, -11), Math.toRadians(0.00))
                             .splineTo(new Vector2d(24, -11), Math.toRadians(0.00))
-                            .splineTo(new Vector2d(50.50, -30.50), Math.toRadians(0.00))
+                            .splineTo(new Vector2d(50.00, -30.50), Math.toRadians(0.00))
                             .build()
             );
         }};
 
         Map<PropLocations, Vector2d> yellowLocation = new HashMap<PropLocations, Vector2d>() {{
-            put(PropLocations.LEFT, new Vector2d(50.50, -30.50));
-            put(PropLocations.MIDDLE, new Vector2d(50.50, -35.50));
-            put(PropLocations.RIGHT, new Vector2d(50.50, -42.50));
+            put(PropLocations.LEFT, new Vector2d(50.00, -30.50));
+            put(PropLocations.MIDDLE, new Vector2d(50.00, -35.50));
+            put(PropLocations.RIGHT, new Vector2d(50.00, -42.50));
         }};
 
         TrajectorySequence stackLeft = drive.trajectorySequenceBuilder(new Pose2d(yellowLocation.get(PropLocations.LEFT), Math.PI), 50)
                 .splineTo(new Vector2d(18, -12), Math.toRadians(180))
                 .waitSeconds(.25)
-                .lineToLinearHeading(new Pose2d(-57.50, -12, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-58.15, -12, Math.toRadians(180)))
                 .build();
         TrajectorySequence stackRight = drive.trajectorySequenceBuilder(new Pose2d(yellowLocation.get(PropLocations.RIGHT), Math.PI), 50)
                 .splineTo(new Vector2d(18, -12), Math.toRadians(180))
                 .waitSeconds(.25)
-                .lineToLinearHeading(new Pose2d(-57.50, -12, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-58.15, -12, Math.toRadians(180)))
                 .build();
         TrajectorySequence stackMiddle = drive.trajectorySequenceBuilder(new Pose2d(yellowLocation.get(PropLocations.MIDDLE), Math.PI), 50)
                 .splineTo(new Vector2d(18, -12), Math.toRadians(180))
                 .waitSeconds(.25)
-                .lineToLinearHeading(new Pose2d(-57.50, -12, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-58.15, -12, Math.toRadians(180)))
                 .build();
 
         TrajectorySequence backdropCycleLeft = drive.trajectorySequenceBuilder(stackLeft.end(), 50)
                 .setReversed(true)
                 .splineTo(new Pose2d(24, -12, Math.toRadians(0.00)))
-                .splineTo(new Vector2d(50.50, -30.50), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.00, -30.50), Math.toRadians(0.00))
                 .build();
         TrajectorySequence backdropCycleMiddle = drive.trajectorySequenceBuilder(stackMiddle.end(), 50)
                 .setReversed(true)
                 .splineTo(new Pose2d(24, -12, Math.toRadians(0.00)))
-                .splineTo(new Vector2d(50.50, -30.50), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.00, -30.50), Math.toRadians(0.00))
                 .build();
         TrajectorySequence backdropCycleRight = drive.trajectorySequenceBuilder(stackRight.end(), 50)
                 .setReversed(true)
                 .splineTo(new Pose2d(24, -12, Math.toRadians(0.00)))
-                .splineTo(new Vector2d(50.50, -30.50), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.00, -30.50), Math.toRadians(0.00))
                 .build();
 
 

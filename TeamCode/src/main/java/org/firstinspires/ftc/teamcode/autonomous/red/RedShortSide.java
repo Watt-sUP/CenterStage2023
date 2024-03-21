@@ -64,13 +64,13 @@ public class RedShortSide extends CommandOpMode {
                 .build();
 
         Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end())
-                .lineToLinearHeading(new Pose2d(50.50, -29.50, Math.toRadians(180.00)))
+                .lineToLinearHeading(new Pose2d(48.25, -29.50, Math.toRadians(180.00)))
                 .build();
         Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end())
-                .lineToLinearHeading(new Pose2d(50.50, -35.50, Math.toRadians(180.00)))
+                .lineToLinearHeading(new Pose2d(48.25, -35.50, Math.toRadians(180.00)))
                 .build();
         Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end())
-                .lineToLinearHeading(new Pose2d(50.50, -42.50, Math.toRadians(180.00)))
+                .lineToLinearHeading(new Pose2d(48.25, -42.50, Math.toRadians(180.00)))
                 .build();
 
         TrajectorySequence stackLeft = drive.trajectorySequenceBuilder(leftYellow.end(), 50)
@@ -80,8 +80,8 @@ public class RedShortSide extends CommandOpMode {
                         SampleMecanumDrive.getVelocityConstraint(45, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(45)
                 )
-                .lineToLinearHeading(new Pose2d(-52.00, -37.00, Math.toRadians(180)))
-                .lineToLinearHeading(new Pose2d(-57.50, -37.00, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-52.00, -36.75, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-58.15, -36.75, Math.toRadians(180)))
                 .build();
         TrajectorySequence stackMid = drive.trajectorySequenceBuilder(middleYellow.end(), 50)
                 .splineTo(new Vector2d(7.00, -60.00), Math.toRadians(180.00))
@@ -91,8 +91,8 @@ public class RedShortSide extends CommandOpMode {
                         SampleMecanumDrive.getAccelerationConstraint(35)
                 )
                 .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-52.00, -37.00, Math.toRadians(180)), Math.toRadians(180.00))
-                .lineToLinearHeading(new Pose2d(-57.50, -37.00, Math.toRadians(180)))
+                .splineToLinearHeading(new Pose2d(-52.00, -36.75, Math.toRadians(180)), Math.toRadians(180.00))
+                .lineToLinearHeading(new Pose2d(-58.15, -36.75, Math.toRadians(180)))
                 .build();
         TrajectorySequence stackRight = drive.trajectorySequenceBuilder(rightYellow.end(), 50)
                 .splineTo(new Vector2d(7.00, -60.00), Math.toRadians(180.00))
@@ -102,27 +102,27 @@ public class RedShortSide extends CommandOpMode {
                         SampleMecanumDrive.getAccelerationConstraint(35)
                 )
                 .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-52.00, -37.00, Math.toRadians(180)), Math.toRadians(180.00))
-                .lineToLinearHeading(new Pose2d(-57.50, -37.00, Math.toRadians(180)))
+                .splineToLinearHeading(new Pose2d(-52.00, -36.75, Math.toRadians(180)), Math.toRadians(180.00))
+                .lineToLinearHeading(new Pose2d(-58.15, -36.75, Math.toRadians(180)))
                 .build();
 
         TrajectorySequence backdropLeft = drive.trajectorySequenceBuilder(stackLeft.end(), 50)
                 .setReversed(true)
                 .splineTo(new Vector2d(-24.00, -60.00), Math.toRadians(0.00))
                 .splineTo(new Vector2d(4.00, -60.00), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.50, -42.50), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.00, -42.50), Math.toRadians(0.00))
                 .build();
         TrajectorySequence backdropMid = drive.trajectorySequenceBuilder(stackMid.end(), 50)
                 .setReversed(true)
                 .splineTo(new Vector2d(-24.00, -60.00), Math.toRadians(0.00))
                 .splineTo(new Vector2d(4.00, -60.00), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.50, -42.50), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.00, -42.50), Math.toRadians(0.00))
                 .build();
         TrajectorySequence backdropRight = drive.trajectorySequenceBuilder(stackLeft.end(), 50)
                 .setReversed(true)
                 .splineTo(new Vector2d(-24.00, -60.00), Math.toRadians(0.00))
                 .splineTo(new Vector2d(4.00, -60.00), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.50, -42.50), Math.toRadians(0.00))
+                .splineTo(new Vector2d(50.00, -42.50), Math.toRadians(0.00))
                 .build();
 
         TrajectorySequence stackTwoLeft = drive.trajectorySequenceBuilder(backdropLeft.end(), 50)
@@ -132,8 +132,8 @@ public class RedShortSide extends CommandOpMode {
                         SampleMecanumDrive.getVelocityConstraint(45, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(45)
                 )
-                .lineToLinearHeading(new Pose2d(-52.00, -37.00, Math.toRadians(180)))
-                .lineToLinearHeading(new Pose2d(-57.50, -37.00, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-52.00, -36.75, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-58.15, -36.75, Math.toRadians(180)))
                 .build();
         TrajectorySequence stackTwoMid = drive.trajectorySequenceBuilder(backdropMid.end(), 50)
                 .splineTo(new Vector2d(7.00, -60.00), Math.toRadians(180.00))
@@ -143,8 +143,8 @@ public class RedShortSide extends CommandOpMode {
                         SampleMecanumDrive.getAccelerationConstraint(35)
                 )
                 .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-52.00, -37.00, Math.toRadians(180)), Math.toRadians(180.00))
-                .lineToLinearHeading(new Pose2d(-57.50, -37.00, Math.toRadians(180)))
+                .splineToLinearHeading(new Pose2d(-52.00, -36.75, Math.toRadians(180)), Math.toRadians(180.00))
+                .lineToLinearHeading(new Pose2d(-58.15, -36.75, Math.toRadians(180)))
                 .build();
         TrajectorySequence stackTwoRight = drive.trajectorySequenceBuilder(backdropRight.end(), 50)
                 .splineTo(new Vector2d(7.00, -60.00), Math.toRadians(180.00))
@@ -154,8 +154,8 @@ public class RedShortSide extends CommandOpMode {
                         SampleMecanumDrive.getAccelerationConstraint(35)
                 )
                 .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-52.00, -37.00, Math.toRadians(180)), Math.toRadians(180.00))
-                .lineToLinearHeading(new Pose2d(-57.50, -37.00, Math.toRadians(180)))
+                .splineToLinearHeading(new Pose2d(-52.00, -36.75, Math.toRadians(180)), Math.toRadians(180.00))
+                .lineToLinearHeading(new Pose2d(-58.15, -36.75, Math.toRadians(180)))
                 .build();
 
         while (!isStarted()) {
@@ -187,8 +187,9 @@ public class RedShortSide extends CommandOpMode {
                         new InstantCommand(() -> {
                             intake.setClampPosition(25);
                             intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
+
                             outtake.toggleBlockers();
-                            outtake.toggleSpike();
+                            outtake.setSpikePosition(.875);
                         })
                 ),
                 new RunByCaseCommand(location.toString(), drive, leftYellow, middleYellow, rightYellow, true),
@@ -262,7 +263,7 @@ public class RedShortSide extends CommandOpMode {
                                 }),
                                 new InstantCommand(() -> {
                                     if (location != PropLocations.LEFT)
-                                        outtake.setSlidesTicks(200);
+                                        outtake.setSlidesTicks(400);
                                 })
                         )
                 ),

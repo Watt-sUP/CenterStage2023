@@ -64,13 +64,13 @@ public class BlueShortSide extends CommandOpMode {
                 .build();
 
         Trajectory rightYellow = drive.trajectoryBuilder(rightPurple.end())
-                .lineToLinearHeading(new Pose2d(50.50, 29.50, Math.toRadians(180.00)))
+                .lineToLinearHeading(new Pose2d(48.25, 29.50, Math.toRadians(180.00)))
                 .build();
         Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end())
-                .lineToLinearHeading(new Pose2d(50.50, 35.50, Math.toRadians(180.00)))
+                .lineToLinearHeading(new Pose2d(48.25, 35.50, Math.toRadians(180.00)))
                 .build();
         Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end())
-                .lineToLinearHeading(new Pose2d(50.50, 42.50, Math.toRadians(180.00)))
+                .lineToLinearHeading(new Pose2d(48.25, 42.50, Math.toRadians(180.00)))
                 .build();
 
         TrajectorySequence stackRight = drive.trajectorySequenceBuilder(rightYellow.end(), 50)
@@ -110,19 +110,19 @@ public class BlueShortSide extends CommandOpMode {
                 .setReversed(true)
                 .splineTo(new Vector2d(-24.00, 60.00), Math.toRadians(0.00))
                 .splineTo(new Vector2d(4.00, 60.00), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.50, 41.00), Math.toRadians(0.00))
+                .splineToConstantHeading(new Vector2d(50.00, 41.50), Math.toRadians(0.00))
                 .build();
         TrajectorySequence backdropMid = drive.trajectorySequenceBuilder(stackMid.end(), 50)
                 .setReversed(true)
                 .splineTo(new Vector2d(-24.00, 60.00), Math.toRadians(0.00))
                 .splineTo(new Vector2d(4.00, 60.00), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.50, 41.00), Math.toRadians(0.00))
+                .splineToConstantHeading(new Vector2d(50.00, 41.50), Math.toRadians(0.00))
                 .build();
         TrajectorySequence backdropLeft = drive.trajectorySequenceBuilder(stackLeft.end(), 50)
                 .setReversed(true)
                 .splineTo(new Vector2d(-24.00, 60.00), Math.toRadians(0.00))
                 .splineTo(new Vector2d(4.00, 60.00), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.50, 41.00), Math.toRadians(0.00))
+                .splineToConstantHeading(new Vector2d(50.00, 41.50), Math.toRadians(0.00))
                 .build();
 
         TrajectorySequence stackTwoRight = drive.trajectorySequenceBuilder(backdropRight.end(), 50)
@@ -143,7 +143,7 @@ public class BlueShortSide extends CommandOpMode {
                         SampleMecanumDrive.getAccelerationConstraint(35)
                 )
                 .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(new Pose2d(-50.00, 38, Math.toRadians(180)), Math.toRadians(180.00))
+                .splineToLinearHeading(new Pose2d(-52.00, 38, Math.toRadians(180)), Math.toRadians(180.00))
                 .lineToLinearHeading(new Pose2d(-57.65, 38, Math.toRadians(180)))
                 .build();
         TrajectorySequence stackTwoLeft = drive.trajectorySequenceBuilder(backdropLeft.end(), 50)
@@ -154,7 +154,7 @@ public class BlueShortSide extends CommandOpMode {
                         SampleMecanumDrive.getAccelerationConstraint(35)
                 )
                 .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(new Pose2d(-50.00, 38, Math.toRadians(180)), Math.toRadians(180.00))
+                .splineToLinearHeading(new Pose2d(-52.00, 38, Math.toRadians(180)), Math.toRadians(180.00))
                 .lineToLinearHeading(new Pose2d(-57.65, 38, Math.toRadians(180)))
                 .build();
 
@@ -187,8 +187,9 @@ public class BlueShortSide extends CommandOpMode {
                         new InstantCommand(() -> {
                             intake.setClampPosition(25);
                             intake.setLiftLocation(CollectorSubsystem.LiftState.STACK);
+
                             outtake.toggleBlockers();
-                            outtake.toggleSpike();
+                            outtake.setSpikePosition(.875);
                         })
                 ),
                 new RunByCaseCommand(location.toString(), drive, leftYellow, middleYellow, rightYellow, true),
@@ -263,7 +264,7 @@ public class BlueShortSide extends CommandOpMode {
                                         }),
                                         new InstantCommand(() -> {
                                             if (location != PropLocations.RIGHT)
-                                                outtake.setSlidesTicks(200);
+                                                outtake.setSlidesTicks(400);
                                         })
                                 )
                 ),

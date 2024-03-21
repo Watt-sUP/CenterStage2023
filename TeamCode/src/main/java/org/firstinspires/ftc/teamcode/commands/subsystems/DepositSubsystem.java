@@ -77,6 +77,8 @@ public class DepositSubsystem extends SubsystemBase {
     public void setSpikePosition(double position) {
         leftLift.setPosition(MathUtils.clamp(position - 0.05, 0, 1));
         rightLift.setPosition(MathUtils.clamp(position, 0, 1));
+
+        spikeState = (position >= HIGH_RIGHT) ? Spike.RAISED : Spike.LOWERED;
     }
 
     public void setSlidesTicks(int ticks) {
