@@ -33,6 +33,7 @@ import java.util.Locale;
 @Autonomous(name = "Red Short (Side)")
 public class RedShortSide extends CommandOpMode {
     private PropLocations location = PropLocations.LEFT;
+    private SampleMecanumDrive drive;
 
     @Override
     public void initialize() {
@@ -43,7 +44,7 @@ public class RedShortSide extends CommandOpMode {
         telemetry.addLine("Loading trajectories...");
         telemetry.update();
 
-        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+        drive = new SampleMecanumDrive(hardwareMap);
         PathGenerator generator = new PathGenerator(drive);
 
         OdometrySubsystem odometry = new OdometrySubsystem(this);
@@ -110,19 +111,19 @@ public class RedShortSide extends CommandOpMode {
                 .setReversed(true)
                 .splineTo(new Vector2d(-24.00, -60.00), Math.toRadians(0.00))
                 .splineTo(new Vector2d(4.00, -60.00), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.00, -42.50), Math.toRadians(0.00))
+                .splineToConstantHeading(new Vector2d(50.00, -42.50), Math.toRadians(0.00))
                 .build();
         TrajectorySequence backdropMid = drive.trajectorySequenceBuilder(stackMid.end(), 50)
                 .setReversed(true)
                 .splineTo(new Vector2d(-24.00, -60.00), Math.toRadians(0.00))
                 .splineTo(new Vector2d(4.00, -60.00), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.00, -42.50), Math.toRadians(0.00))
+                .splineToConstantHeading(new Vector2d(50.00, -42.50), Math.toRadians(0.00))
                 .build();
         TrajectorySequence backdropRight = drive.trajectorySequenceBuilder(stackLeft.end(), 50)
                 .setReversed(true)
                 .splineTo(new Vector2d(-24.00, -60.00), Math.toRadians(0.00))
                 .splineTo(new Vector2d(4.00, -60.00), Math.toRadians(0.00))
-                .splineTo(new Vector2d(50.00, -42.50), Math.toRadians(0.00))
+                .splineToConstantHeading(new Vector2d(50.00, -42.50), Math.toRadians(0.00))
                 .build();
 
         TrajectorySequence stackTwoLeft = drive.trajectorySequenceBuilder(backdropLeft.end(), 50)
@@ -204,6 +205,12 @@ public class RedShortSide extends CommandOpMode {
                                 new InstantCommand(intake::toggleClamp),
                                 new WaitCommand(500)
                         ),
+                new ConditionalCommand(
+                        new WaitCommand(1500), // TehnoZ wait
+                        new InstantCommand(() -> {
+                        }),
+                        () -> location != PropLocations.LEFT
+                ),
                 new ParallelCommandGroup(
                         new RunByCaseCommand(location.toString(), drive, backdropLeft, backdropMid, backdropRight, false),
                         new WaitCommand(700)
@@ -299,5 +306,13 @@ public class RedShortSide extends CommandOpMode {
                         () -> location == PropLocations.LEFT
                 )
         ));
+    }
+
+    @Override
+    public void run() {
+        super.run();
+
+        if (!drive.isBusy())
+            drive.updatePoseEstimate();
     }
 }

@@ -20,6 +20,7 @@ public class TeleOp extends CommandOpMode {
     private List<LynxModule> hubs;
     private CollectorSubsystem intake = null;
     private DepositSubsystem outtake;
+    private final int ADJUST_TICKS = 130;
 
     /**
      * Code to run during the initialization phase of the OpMode.
@@ -69,9 +70,9 @@ public class TeleOp extends CommandOpMode {
                 .whenPressed(() -> outtake.setSlidesPosition(0));
 
         driver2.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-                .whenPressed(() -> outtake.adjustSlidesTicks(-75));
+                .whenPressed(() -> outtake.adjustSlidesTicks(-ADJUST_TICKS));
         driver2.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
-                .whenPressed(() -> outtake.adjustSlidesTicks(75));
+                .whenPressed(() -> outtake.adjustSlidesTicks(ADJUST_TICKS));
 
         // Intake commands
         driver2.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON)

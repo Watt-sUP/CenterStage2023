@@ -124,7 +124,7 @@ public class EndgameSubsystem extends SubsystemBase {
     }
 
     public enum ElevatorState {
-        HOOKING(105), DRONE(60), HANGING(45), DOWN(0);
+        HOOKING(105), DRONE(70), HANGING(45), DOWN(0);
 
         private final double angle;
 

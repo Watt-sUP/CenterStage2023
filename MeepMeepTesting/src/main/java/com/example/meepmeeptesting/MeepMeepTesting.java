@@ -20,8 +20,8 @@ public class MeepMeepTesting {
 
     public static void main(String[] args) {
         MeepMeep meepMeep = new MeepMeep(640, 144);
-        Vector2d startPosition = new Vector2d(16.5, -63.75);
-        double startHeading = Math.toRadians(90);
+        Vector2d startPosition = new Vector2d(48.25, -29.50);
+        double startHeading = Math.toRadians(180);
 
         RoadRunnerBotEntity redBot = new DefaultBotBuilder(meepMeep)
                 .setDimensions(13, 15.19)
@@ -29,9 +29,10 @@ public class MeepMeepTesting {
                 .setConstraints(60, 60, Math.toRadians(270), Math.toRadians(225), 8.9)
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(startPosition, startHeading))
-                                .splineTo(new Vector2d(23.5, -32).minus(Vector2d.polar(13, Math.toRadians(60))), Math.toRadians(60))
-                                .setTangent(0)
-                                .splineToSplineHeading(new Pose2d(50.50, -42.50, Math.toRadians(180.00)), Math.toRadians(0))
+                                .setTangent(Math.toRadians(-90))
+                                .splineToConstantHeading(new Vector2d(-24, -60), Math.PI)
+                                .splineToConstantHeading(new Vector2d(-48, -45), Math.toRadians(90))
+                                .splineToConstantHeading(new Vector2d(-58.5, -36), Math.toRadians(180))
                                 .build()
                 );
 
@@ -51,7 +52,7 @@ public class MeepMeepTesting {
                 .setDarkMode(true)
                 .setBackgroundAlpha(0.95f)
                 .addEntity(redBot)
-                .addEntity(blueBot)
+//                .addEntity(blueBot)
                 .start();
     }
 }

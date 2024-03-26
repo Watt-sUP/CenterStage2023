@@ -98,6 +98,7 @@ public class PathGenerator {
         return generateBackstagePath(startPose, allianceColor.convertVector(new Vector2d(50.00, -29.50)), route);
     }
 
+    @Deprecated
     public TrajectorySequence generateBackstagePath(Pose2d startPose, Vector2d endPosition, BackstageRoute route) throws IllegalArgumentException {
         if (route == BackstageRoute.CENTER)
             return drive.trajectorySequenceBuilder(startPose)

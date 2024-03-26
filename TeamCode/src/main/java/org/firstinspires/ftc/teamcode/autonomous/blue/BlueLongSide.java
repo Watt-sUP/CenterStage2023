@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 public class BlueLongSide extends CommandOpMode {
 
     private PropLocations location;
+    private SampleMecanumDrive drive;
 
     @Override
     public void initialize() {
@@ -45,7 +46,7 @@ public class BlueLongSide extends CommandOpMode {
                 "blue_prop.tflite", "Blue Prop");
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+        drive = new SampleMecanumDrive(hardwareMap);
         PathGenerator generator = new PathGenerator(drive);
 
         generator.setStartingLocation(AllianceColor.BLUE, StartingPosition.AUDIENCE);
@@ -253,5 +254,13 @@ public class BlueLongSide extends CommandOpMode {
                 new InstantCommand(() -> drive.lineToPose(new Pose2d(48, 60, Math.toRadians(180))))
                         .andThen(new InstantCommand(() -> intake.setLiftLocation(CollectorSubsystem.LiftState.RAISED)))
         ));
+    }
+
+    @Override
+    public void run() {
+        super.run();
+
+        if (!drive.isBusy())
+            drive.updatePoseEstimate();
     }
 }
