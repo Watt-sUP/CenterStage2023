@@ -68,7 +68,7 @@ public class BlueShortSide extends CommandOpMode {
                 .lineToLinearHeading(new Pose2d(48.25, 29.50, Math.toRadians(180.00)))
                 .build();
         Trajectory middleYellow = drive.trajectoryBuilder(middlePurple.end())
-                .lineToLinearHeading(new Pose2d(48.25, 35.50, Math.toRadians(180.00)))
+                .lineToLinearHeading(new Pose2d(48.25, 36.35, Math.toRadians(180.00)))
                 .build();
         Trajectory leftYellow = drive.trajectoryBuilder(leftPurple.end())
                 .lineToLinearHeading(new Pose2d(48.25, 42.50, Math.toRadians(180.00)))
@@ -82,7 +82,7 @@ public class BlueShortSide extends CommandOpMode {
                         SampleMecanumDrive.getAccelerationConstraint(35)
                 )
                 .lineToLinearHeading(new Pose2d(-52.00, 38, Math.toRadians(180)))
-                .lineToLinearHeading(new Pose2d(-58.25, 38, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-57.75, 38, Math.toRadians(180)))
                 .build();
         TrajectorySequence stackMid = drive.trajectorySequenceBuilder(middleYellow.end(), 50)
                 .splineTo(new Vector2d(7.00, 60.50), Math.toRadians(180.00))
@@ -93,7 +93,7 @@ public class BlueShortSide extends CommandOpMode {
                 )
                 .setTangent(Math.toRadians(-90))
                 .splineToLinearHeading(new Pose2d(-50.00, 38, Math.toRadians(180)), Math.toRadians(180.00))
-                .lineToLinearHeading(new Pose2d(-58.25, 38, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-57.75, 38, Math.toRadians(180)))
                 .build();
         TrajectorySequence stackLeft = drive.trajectorySequenceBuilder(leftYellow.end(), 50)
                 .splineTo(new Vector2d(7.00, 60.50), Math.toRadians(180.00))
@@ -104,26 +104,26 @@ public class BlueShortSide extends CommandOpMode {
                 )
                 .setTangent(Math.toRadians(-90))
                 .splineToLinearHeading(new Pose2d(-50.00, 38, Math.toRadians(180)), Math.toRadians(180.00))
-                .lineToLinearHeading(new Pose2d(-58.25, 38, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-57.75, 38, Math.toRadians(180)))
                 .build();
 
         TrajectorySequence backdropRight = drive.trajectorySequenceBuilder(stackRight.end(), 50)
                 .setReversed(true)
                 .splineTo(new Vector2d(-24.00, 60.00), Math.toRadians(0.00))
                 .splineTo(new Vector2d(4.00, 60.00), Math.toRadians(0.00))
-                .splineToConstantHeading(new Vector2d(50.25, 41.75), Math.toRadians(0.00))
+                .splineToConstantHeading(new Vector2d(50.25, 40.75), Math.toRadians(0.00))
                 .build();
         TrajectorySequence backdropMid = drive.trajectorySequenceBuilder(stackMid.end(), 50)
                 .setReversed(true)
                 .splineTo(new Vector2d(-24.00, 60.00), Math.toRadians(0.00))
                 .splineTo(new Vector2d(4.00, 60.00), Math.toRadians(0.00))
-                .splineToConstantHeading(new Vector2d(50.25, 41.75), Math.toRadians(0.00))
+                .splineToConstantHeading(new Vector2d(50.25, 40.75), Math.toRadians(0.00))
                 .build();
         TrajectorySequence backdropLeft = drive.trajectorySequenceBuilder(stackLeft.end(), 50)
                 .setReversed(true)
                 .splineTo(new Vector2d(-24.00, 60.00), Math.toRadians(0.00))
                 .splineTo(new Vector2d(4.00, 60.00), Math.toRadians(0.00))
-                .splineToConstantHeading(new Vector2d(50.25, 41.75), Math.toRadians(0.00))
+                .splineToConstantHeading(new Vector2d(50.25, 40.75), Math.toRadians(0.00))
                 .build();
 
         TrajectorySequence stackTwoRight = drive.trajectorySequenceBuilder(backdropRight.end(), 50)
@@ -134,7 +134,7 @@ public class BlueShortSide extends CommandOpMode {
                         SampleMecanumDrive.getAccelerationConstraint(45)
                 )
                 .lineToLinearHeading(new Pose2d(-52.00, 38, Math.toRadians(180)))
-                .lineToLinearHeading(new Pose2d(-58.25, 38, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-57.75, 38, Math.toRadians(180)))
                 .build();
         TrajectorySequence stackTwoMid = drive.trajectorySequenceBuilder(backdropMid.end(), 50)
                 .splineTo(new Vector2d(7.00, 60.50), Math.toRadians(180.00))
@@ -145,7 +145,7 @@ public class BlueShortSide extends CommandOpMode {
                 )
                 .setTangent(Math.toRadians(-90))
                 .splineToLinearHeading(new Pose2d(-52.00, 38, Math.toRadians(180)), Math.toRadians(180.00))
-                .lineToLinearHeading(new Pose2d(-58.25, 38, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-57.75, 38, Math.toRadians(180)))
                 .build();
         TrajectorySequence stackTwoLeft = drive.trajectorySequenceBuilder(backdropLeft.end(), 50)
                 .splineTo(new Vector2d(7.00, 60.50), Math.toRadians(180.00))
@@ -156,7 +156,7 @@ public class BlueShortSide extends CommandOpMode {
                 )
                 .setTangent(Math.toRadians(-90))
                 .splineToLinearHeading(new Pose2d(-52.00, 38, Math.toRadians(180)), Math.toRadians(180.00))
-                .lineToLinearHeading(new Pose2d(-58.25, 38, Math.toRadians(180)))
+                .lineToLinearHeading(new Pose2d(-57.75, 38, Math.toRadians(180)))
                 .build();
 
         while (!isStarted()) {
@@ -277,7 +277,7 @@ public class BlueShortSide extends CommandOpMode {
                                         }),
                                         new InstantCommand(() -> {
                                             if (location != PropLocations.RIGHT)
-                                                outtake.setSlidesTicks(400);
+                                                outtake.setSlidesTicks(300);
                                         })
                                 )
                 ),

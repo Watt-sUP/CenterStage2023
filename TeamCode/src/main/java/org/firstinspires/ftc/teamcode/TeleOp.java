@@ -1,12 +1,17 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.command.CommandOpMode;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.RunCommand;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.hardware.rev.RevColorSensorV3;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.commands.subsystems.CollectorSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DepositSubsystem;
 import org.firstinspires.ftc.teamcode.commands.subsystems.DriveSubsystem;
@@ -20,6 +25,7 @@ public class TeleOp extends CommandOpMode {
     private List<LynxModule> hubs;
     private CollectorSubsystem intake = null;
     private DepositSubsystem outtake;
+    private Trigger sensorDetection = new Trigger(() -> false);
     private final int ADJUST_TICKS = 130;
 
     /**
@@ -36,11 +42,15 @@ public class TeleOp extends CommandOpMode {
         DriveSubsystem chassis = new DriveSubsystem(hardwareMap);
         EndgameSubsystem endgame = new EndgameSubsystem(hardwareMap);
 
+        RevColorSensorV3 colorSensor = hardwareMap.get(RevColorSensorV3.class, "color_sensor");
+        colorSensor.initialize();
+
         GamepadEx driver1 = new GamepadEx(gamepad1);
         GamepadEx driver2 = new GamepadEx(gamepad2);
 
         chassis.setAxes(driver1::getLeftY, driver1::getLeftX, driver1::getRightX);
         Trigger rightTrigger = new Trigger(() -> gamepad2.right_trigger > .3 && outtake.spikeState == DepositSubsystem.Spike.RAISED);
+        sensorDetection = new Trigger(() -> colorSensor.getDistance(DistanceUnit.CM) < 3.0);
 
         register(chassis, outtake, endgame);
 
@@ -102,6 +112,7 @@ public class TeleOp extends CommandOpMode {
             telemetry.addData("Blocker State", outtake.getBlockerState());
             telemetry.addData("Elevator Position", endgame.getElevatorState());
             telemetry.addData("Elevator Angle", endgame.getElevatorAngle());
+            telemetry.addData("Sensor Distance", colorSensor.getDistance(DistanceUnit.CM));
             telemetry.update();
         }));
     }
@@ -122,5 +133,12 @@ public class TeleOp extends CommandOpMode {
         intake = new CollectorSubsystem(hardwareMap);
         outtake.setSafeguard(() -> intake.location != CollectorSubsystem.LiftState.RAISED);
         register(intake);
+
+        sensorDetection = sensorDetection.and(new Trigger(() -> intake.location != CollectorSubsystem.LiftState.RAISED &&
+                intake.clamping == CollectorSubsystem.ClampState.OPENED));
+        sensorDetection.whenActive(new SequentialCommandGroup(
+                new WaitCommand(50),
+                new InstantCommand(() -> intake.toggleClamp())
+        ));
     }
 }
