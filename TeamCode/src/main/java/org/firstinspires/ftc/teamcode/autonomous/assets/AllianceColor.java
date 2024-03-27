@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.autonomous.assets;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.util.Angle;
 
 public enum AllianceColor {
@@ -22,13 +21,5 @@ public enum AllianceColor {
      */
     public Pose2d convertPose(Pose2d pose) {
         return new Pose2d(Math.abs(multiplier) * pose.getX(), Math.signum(multiplier) * pose.getY(), Angle.norm(Math.signum(multiplier) * pose.getHeading()));
-    }
-
-    public Vector2d convertVector(Vector2d vector) {
-        return new Vector2d(Math.abs(multiplier) * vector.getX(), Math.signum(multiplier) * vector.getY());
-    }
-
-    public int getMultiplier() {
-        return (int) Math.signum(multiplier);
     }
 }
